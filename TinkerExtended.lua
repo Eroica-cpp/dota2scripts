@@ -17,19 +17,15 @@ function TinkerExtended.OnDraw()
 	local missile = NPC.GetAbilityByIndex(myHero, 1)
 	local lens = NPC.GetItem(myHero, "item_aether_lens", true)
 	local laser_cast_range = 650 -- didnt consider tinker's extra 75 cast range talent in level 20
-	-- local missile_cast_range = 2500 -- dont need
+	local missile_cast_range = 2500
+	local magicDamageFactor = 0.75
 
 	if lens then
 		laser_cast_range = laser_cast_range + 220
-		-- missile_cast_range = missile_cast_range + 220 -- dont need
+		missile_cast_range = missile_cast_range + 220
 	end
 
-	-- draw
-	-- local pos = NPC.GetAbsOrigin(myHero)
-	-- local x, y, visible = Renderer.WorldToScreen(pos)
-	-- Renderer.SetDrawColor(255, 255, 0, 255)
-
-	for n, npc in pairs(NPC.GetHeroesInRadius(myHero, laser_cast_range, Enum.TeamType.TEAM_ENEMY)) do
+	for n, npc in pairs(NPC.GetHeroesInRadius(myHero, missile_cast_range, Enum.TeamType.TEAM_ENEMY)) do
 		
 		if Entity.IsHero(npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 		
@@ -39,7 +35,7 @@ function TinkerExtended.OnDraw()
 			local missileLevel = Ability.GetLevel(missile)
 			local missileDmg = 125 + 75 * (missileLevel - 1)
 			if missileLevel == 0 then missileDmg = 0 end
-			missileDmg = missileDmg * NPC.GetMagicalArmorDamageMultiplier(npc)
+			missileDmg = missileDmg * magicDamageFactor
 			
 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, npc) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(npc))
 			
@@ -54,14 +50,18 @@ function TinkerExtended.OnDraw()
 
 			local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
 
-			if (enemyHealthLeft <= 0 and comboManaCost < manaPoint) and (Ability.IsCastable(laser, manaPoint) and Ability.IsCastable(missile, manaPoint)) then
+			if (enemyHealthLeft <= 0 and comboManaCost < manaPoint) and (Ability.IsCastable(laser, manaPoint) and Ability.IsCastable(missile, manaPoint)) and NPC.IsEntityInRange(myHero, npc, laser_cast_range) then
 				Ability.CastNoTarget(missile, false)
 				Ability.CastTarget(laser, npc)
 			end
 
-			if enemyHealth < laserDmg and Ability.IsCastable(laser, manaPoint) then
+			if enemyHealth < laserDmg and Ability.IsCastable(laser, manaPoint) and NPC.IsEntityInRange(myHero, npc, laser_cast_range) then
 				Ability.CastTarget(laser, npc)
 			end
+
+			if enemyHealth < missileDmg and Ability.IsCastable(missile, manaPoint) and NPC.IsEntityInRange(myHero, npc, missile_cast_range) then
+				Ability.CastNoTarget(missile, false)
+			end			
 		
 		end
 
