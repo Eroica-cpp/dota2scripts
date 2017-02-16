@@ -2,9 +2,9 @@ local CooldownDisplay = {}
 
 CooldownDisplay.option = Menu.AddOption({ "Awareness" }, "Cooldown Display", "Displays enemy hero cooldowns in an easy and intuitive way.")
 
-CooldownDisplay.boxSize = 16
+CooldownDisplay.boxSize = 25
 CooldownDisplay.innerBoxSize = CooldownDisplay.boxSize - 2
-CooldownDisplay.levelBoxSize = CooldownDisplay.boxSize - 13
+CooldownDisplay.levelBoxSize = CooldownDisplay.boxSize - 20
 
 CooldownDisplay.font = Renderer.LoadFont("Tahoma", CooldownDisplay.innerBoxSize - 5, Enum.FontWeight.BOLD)
 
@@ -78,7 +78,7 @@ function CooldownDisplay.DrawAbilityLevels(ability, x, y)
     y = ((y + CooldownDisplay.boxSize) - CooldownDisplay.levelBoxSize) - 1
 
     for i = 1, level do
-        Renderer.SetDrawColor(0, 255, 0, 255)
+        Renderer.SetDrawColor(234, 255, 0, 255)
         Renderer.DrawFilledRect(x + ((i - 1) * CooldownDisplay.levelBoxSize), y, CooldownDisplay.levelBoxSize, CooldownDisplay.levelBoxSize)
         
         Renderer.SetDrawColor(0, 0, 0, 255)
