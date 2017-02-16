@@ -45,6 +45,17 @@ function TinkerExtended.ComboWombo()
         MakeDelay(0.01)
     end
 
+    -- item : dagon
+    for i = 0, 5 do
+        local dagon = NPC.GetItem(myHero, "item_dagon_" .. i, true)
+        if i == 0 then dagon = NPC.GetItem(myHero, "item_dagon", true) end
+        if dagon and enemy and Ability.IsCastable(dagon, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
+            Ability.CastTarget(dagon, enemy)
+            MakeDelay(0.01)
+            return
+        end
+    end
+
     -- spell : laser
     if enemy and Ability.IsCastable(laser, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(laser)) then 
         Ability.CastTarget(laser, enemy)
