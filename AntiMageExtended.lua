@@ -32,7 +32,8 @@ function AntiMageExtended.OnDraw()
 			leastHealth = enemyHealth
 		end
 
-		damage = damageManaVoid * maxManaDiff * (1 - NPC.GetMagicalArmorValue(maxManaDiffEnemy))
+		local magicBlockFactor = 0.75 -- (1 - NPC.GetMagicalArmorValue(maxManaDiffEnemy))
+		damage = damageManaVoid * maxManaDiff * magicBlockFactor
 		local hitDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
 		local hitsLeft = math.ceil((enemyHealth - damage) / hitDamage)
 		local pos = NPC.GetAbsOrigin(enemy)
