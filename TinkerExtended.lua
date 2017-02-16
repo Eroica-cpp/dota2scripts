@@ -1,11 +1,55 @@
 local TinkerExtended = {}
 
-TinkerExtended.AutoLaser = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Laser for KS", "")
+TinkerExtended.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Spell for KS", "")
 TinkerExtended.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
+TinkerExtended.optionKey = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Auto Spell Key", Enum.ButtonCode.KEY_D)
+TinkerExtended.threshold = 75
 
+time = 0
+delay = 0
+
+function TinkerExtended.OnUpdate()
+	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
+	if Menu.IsKeyDown(TinkerExtended.optionKey) then
+		TinkerExtended.ComboWombo()
+	end
+end
+
+function TinkerExtended.ComboWombo()
+
+    if (os.clock() - time) < delay then return end
+
+    local myHero = Heroes.GetLocal()
+    if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
+    local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+
+    local enemyPos = Entity.GetAbsOrigin(enemy)
+    local laser = NPC.GetAbilityByIndex(myHero, 0)
+    local missile = NPC.GetAbilityByIndex(myHero, 1)
+
+    local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
+    local hex = NPC.GetItem(myHero, "item_sheepstick", true)
+    local rod = NPC.GetItem(myHero, "item_rod_of_atos", true)
+    local orchid = NPC.GetItem(myHero, "item_orchid", true)
+    local ethereal = NPC.GetItem(myHero, "item_ethereal_blade", true)
+
+    local myMana = NPC.GetMana(myHero)
+    if myMana <= TinkerExtended.threshold then return end
+    local mousePos = Input.GetWorldCursorPos()
+
+    Log.Write("TESTING!!!")
+
+    if hex and enemy and Ability.IsCastable(hex, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then 
+        Ability.CastTarget(hex, enemy)
+        MakeDelay(0.1)
+    end
+
+end
+
+-- Auto Spell for KS
 function TinkerExtended.OnDraw()
 
-	if not Menu.IsEnabled( TinkerExtended.AutoLaser ) then return end
+	if not Menu.IsEnabled( TinkerExtended.optionEnable ) then return end
 	if not GameRules.GetGameState() == 5 then return end
 
 	local myHero = Heroes.GetLocal()
@@ -67,6 +111,11 @@ function TinkerExtended.OnDraw()
 
 	end
 
+end
+
+function MakeDelay(sec)
+    delay = sec
+    time = os.clock()
 end
 
 return TinkerExtended
