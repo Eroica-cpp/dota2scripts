@@ -27,7 +27,6 @@ function TinkerExtended.OnDraw()
 	-- draw
 	local pos = NPC.GetAbsOrigin(myHero)
 	local x, y, visible = Renderer.WorldToScreen(pos)
-	local text = "TEST!!!"
 	Renderer.SetDrawColor(255, 255, 0, 255)
 
 	for n, npc in pairs(NPC.GetHeroesInRadius(myHero, laser_cast_range, Enum.TeamType.TEAM_ENEMY)) do
@@ -39,23 +38,24 @@ function TinkerExtended.OnDraw()
 			
 			local missileLevel = Ability.GetLevel(missile)
 			local missileDmg = 125 + 75 * (missileLevel - 1)
+			if missileLevel == 0 then missileDmg = 0 end
 			missileDmg = missileDmg * NPC.GetMagicalArmorDamageMultiplier(npc)
 			
 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, npc) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(npc))
 			
 			local enemyHealth = Entity.GetHealth(npc)
 			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg
-			local hitLeft = math.ceil(healthLeft / hitDmg)
-			Renderer.DrawTextCentered(TinkerExtended.font, x, y, hitLeft, 1)
+			local hitsLeft = math.ceil(enemyHealthLeft / hitDmg)
+			Renderer.DrawTextCentered(TinkerExtended.font, x, y, hitsLeft, 1)
 
-			-- local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
+			local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
 
-			-- if (enemyHealthLeft <= 0 and comboManaCost < manaPoint) and (Ability.IsCastable(laser, manaPoint) and Ability.IsCastable(missile, manaPoint)) then
-			-- 	Ability.CastNoTarget(missile, false)
-			-- 	Ability.CastTarget(laser, npc)
-			-- end
+			if (enemyHealthLeft <= 0 and comboManaCost < manaPoint) and (Ability.IsCastable(laser, manaPoint) and Ability.IsCastable(missile, manaPoint)) then
+				Ability.CastNoTarget(missile, false)
+				Ability.CastTarget(laser, npc)
+			end
 
-			if enemyHealthLeft < laserDmg and Ability.IsCastable(laser, manaPoint) then
+			if enemyHealth < laserDmg and Ability.IsCastable(laser, manaPoint) then
 				Ability.CastTarget(laser, npc)
 			end
 		
