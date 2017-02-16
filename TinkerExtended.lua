@@ -39,9 +39,22 @@ function TinkerExtended.ComboWombo()
 
     Log.Write("TESTING!!!")
 
-    if hex and enemy and Ability.IsCastable(hex, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then 
+    -- item : hex
+    if hex and enemy and Ability.IsCastable(hex, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(hex)) then 
         Ability.CastTarget(hex, enemy)
-        MakeDelay(0.1)
+        MakeDelay(0.01)
+    end
+
+    -- spell : laser
+    if enemy and Ability.IsCastable(laser, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(laser)) then 
+        Ability.CastTarget(laser, enemy)
+        MakeDelay(0.01)
+    end
+
+    -- spell : missile
+    if enemy and Ability.IsCastable(missile, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
+        Ability.CastNoTarget(missile, false)
+        MakeDelay(0.01)
     end
 
 end
