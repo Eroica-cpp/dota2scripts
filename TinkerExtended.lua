@@ -25,9 +25,9 @@ function TinkerExtended.OnDraw()
 	end
 
 	-- draw
-	local pos = NPC.GetAbsOrigin(myHero)
-	local x, y, visible = Renderer.WorldToScreen(pos)
-	Renderer.SetDrawColor(255, 255, 0, 255)
+	-- local pos = NPC.GetAbsOrigin(myHero)
+	-- local x, y, visible = Renderer.WorldToScreen(pos)
+	-- Renderer.SetDrawColor(255, 255, 0, 255)
 
 	for n, npc in pairs(NPC.GetHeroesInRadius(myHero, laser_cast_range, Enum.TeamType.TEAM_ENEMY)) do
 		
@@ -46,6 +46,10 @@ function TinkerExtended.OnDraw()
 			local enemyHealth = Entity.GetHealth(npc)
 			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg
 			local hitsLeft = math.ceil(enemyHealthLeft / hitDmg)
+
+			local pos = NPC.GetAbsOrigin(npc)
+			local x, y, visible = Renderer.WorldToScreen(pos)
+			Renderer.SetDrawColor(255, 255, 0, 255)
 			Renderer.DrawTextCentered(TinkerExtended.font, x, y, hitsLeft, 1)
 
 			local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
