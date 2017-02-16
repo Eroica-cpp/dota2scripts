@@ -1,12 +1,40 @@
 local CooldownDisplay = {}
 
-CooldownDisplay.option = Menu.AddOption({ "Awareness" }, "Cooldown Display", "Displays enemy hero cooldowns in an easy and intuitive way.")
+CooldownDisplay.option = Menu.AddOption({ "Awareness", "Cooldown Display" }, "Cooldown Display", "Displays enemy hero cooldowns in an easy and intuitive way.")
+CooldownDisplay.boxSizeOption = Menu.AddOption({ "Awareness", "Cooldown Display" }, "Cooldown Display Size", "", 21, 64, 1)
+CooldownDisplay.needsInit = true
 
-CooldownDisplay.boxSize = 25
-CooldownDisplay.innerBoxSize = CooldownDisplay.boxSize - 2
-CooldownDisplay.levelBoxSize = CooldownDisplay.boxSize - 20
+CooldownDisplay.colors = {}
 
-CooldownDisplay.font = Renderer.LoadFont("Tahoma", CooldownDisplay.innerBoxSize - 5, Enum.FontWeight.BOLD)
+function CooldownDisplay.InsertColor(alias, r_, g_, b_)
+    table.insert(CooldownDisplay.colors, { name = alias, r = r_, g = g_, b = b_})
+end
+
+CooldownDisplay.InsertColor("Green", 0, 255, 0)
+CooldownDisplay.InsertColor("Yellow", 234, 255, 0)
+CooldownDisplay.InsertColor("Red", 255, 0, 0)
+CooldownDisplay.InsertColor("Blue", 0, 0, 255)
+
+CooldownDisplay.levelColorOption = Menu.AddOption({ "Awareness", "Cooldown Display" }, "Cooldown Display Level Color", "", 1, #CooldownDisplay.colors, 1)
+
+for i, v in ipairs(CooldownDisplay.colors) do
+    Menu.SetValueName(CooldownDisplay.levelColorOption, i, v.name)
+end
+
+function CooldownDisplay.InitDisplay()
+    CooldownDisplay.boxSize = Menu.GetValue(CooldownDisplay.boxSizeOption)
+    CooldownDisplay.innerBoxSize = CooldownDisplay.boxSize - 2
+    CooldownDisplay.levelBoxSize = math.floor(CooldownDisplay.boxSize * 0.1875)
+
+    CooldownDisplay.font = Renderer.LoadFont("Tahoma", math.floor(CooldownDisplay.innerBoxSize * 0.643), Enum.FontWeight.BOLD)
+end
+
+-- callback
+function CooldownDisplay.OnMenuOptionChange(option, old, new)
+    if option == CooldownDisplay.boxSizeOption then
+        CooldownDisplay.InitDisplay()
+    end
+end
 
 function CooldownDisplay.DrawDisplay(hero)
     local pos = Entity.GetAbsOrigin(hero)
@@ -20,8 +48,8 @@ function CooldownDisplay.DrawDisplay(hero)
 
     for i = 0, 24 do
         local ability = NPC.GetAbilityByIndex(hero, i)
-        
-        if ability ~= nil and Entity.IsAbility(ability) and not Ability.IsHidden(ability) and (not Ability.IsPassive(ability) or Ability.GetManaCost(ability) > 0) then
+
+        if ability ~= nil and Entity.IsAbility(ability) and not Ability.IsHidden(ability) and not Ability.IsAttributes(ability) then
             table.insert(abilities, ability)
         end
     end
@@ -77,8 +105,10 @@ function CooldownDisplay.DrawAbilityLevels(ability, x, y)
     x = x + 1
     y = ((y + CooldownDisplay.boxSize) - CooldownDisplay.levelBoxSize) - 1
 
+    local color = CooldownDisplay.colors[Menu.GetValue(CooldownDisplay.levelColorOption)]
+
     for i = 1, level do
-        Renderer.SetDrawColor(234, 255, 0, 255)
+        Renderer.SetDrawColor(color.r, color.g, color.b, 255)
         Renderer.DrawFilledRect(x + ((i - 1) * CooldownDisplay.levelBoxSize), y, CooldownDisplay.levelBoxSize, CooldownDisplay.levelBoxSize)
         
         Renderer.SetDrawColor(0, 0, 0, 255)
@@ -92,6 +122,11 @@ function CooldownDisplay.OnDraw()
     local myHero = Heroes.GetLocal()
 
     if not myHero then return end
+
+    if CooldownDisplay.needsInit then
+        CooldownDisplay.InitDisplay()
+        CooldownDisplay.needsInit = false
+    end
 
     for i = 1, Heroes.Count() do
         local hero = Heroes.Get(i)
