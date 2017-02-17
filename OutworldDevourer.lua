@@ -1,3 +1,10 @@
+-- ==================================
+-- File Name : OutworldDevourer.lua
+-- Author    : Eroica
+-- Version   : 1.0
+-- Date      : 2017.2.16
+-- ==================================
+
 local OutworldDevourer = {}
 
 OutworldDevourer.optionEnabled = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Killable awareness", "show if can kill an enemy by hits or ultimate")
@@ -17,7 +24,7 @@ function OutworldDevourer.OnDraw()
 	-- 6% 7% 8% 9% of mana pool into orb damaga
 	local orbDamage = orb and myMana * (0.05 + 0.01 * orbLevel) or 0
 
-	local ultimate = NPC.GetAbilityByIndex(myHero, 2)
+	local ultimate = NPC.GetAbilityByIndex(myHero, 3)
 	local ultimateLevel = Ability.GetLevel(ultimate)
 	-- int diff damaga multiplier are : 8 / 9 / 10
 	local intDiffDamageMultiplier = 7 + ultimateLevel
@@ -30,7 +37,6 @@ function OutworldDevourer.OnDraw()
 
 		local enemyHp = Entity.GetHealth(enemy)
 		local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
-		Log.Write("TEST: "..physicalDamage)
 		local oneHitDamage = physicalDamage + orbDamage
 		local hitsLeft = math.ceil( enemyHp / oneHitDamage )
 
