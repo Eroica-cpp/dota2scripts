@@ -14,12 +14,13 @@ function OutworldDevourer.OnDraw()
 	local myMana = NPC.GetMana(myHero)
 	local orb = NPC.GetAbilityByIndex(myHero, 0)
 	local orbLevel = Ability.GetLevel(orb)
-	-- 6% 7% 8% 9% mana to orb damaga
-	local oneHitDamage = NPC.GetTrueDamage(myHero) + myMana * (0.05 + 0.01 * orbLevel)
+	-- 6% 7% 8% 9% of mana pool into orb damaga
+	local orbDamage = orb and myMana * (0.05 + 0.01 * orbLevel) or 0
 
 	local ultimate = NPC.GetAbilityByIndex(myHero, 2)
+	local ultimateLevel = Ability.GetLevel(ultimate)
 	-- int diff damaga multiplier are : 8 / 9 / 10
-	local intDiffDamageMultiplier = 7 + Ability.GetLevel(ultimate)
+	local intDiffDamageMultiplier = 7 + ultimateLevel
 
 	local magicDamageFactor = 0.75
 	local radius = 2000
@@ -28,6 +29,9 @@ function OutworldDevourer.OnDraw()
 	for i, enemy in ipairs(unitsAround) do
 
 		local enemyHp = Entity.GetHealth(enemy)
+		local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
+		Log.Write("TEST: "..physicalDamage)
+		local oneHitDamage = physicalDamage + orbDamage
 		local hitsLeft = math.ceil( enemyHp / oneHitDamage )
 
 		local enemyIntell = Hero.GetIntellectTotal(enemy)
@@ -40,7 +44,7 @@ function OutworldDevourer.OnDraw()
 		local x, y, visible = Renderer.WorldToScreen(pos)
 		Renderer.SetDrawColor(255, 255, 0, 255)
 
-		if ultimate then
+		if ultimateLevel > 0 then
 			Renderer.DrawTextCentered(OutworldDevourer.font, x, y, hitsLeft..", "..enemyHpLeft, 1)
 		else
 			Renderer.DrawTextCentered(OutworldDevourer.font, x, y, hitsLeft, 1)
