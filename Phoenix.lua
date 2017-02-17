@@ -1,3 +1,10 @@
+-- ==================================
+-- File Name : Phoenix.lua
+-- Author    : Eroica
+-- Version   : 1.0
+-- Date      : 2017.2.17
+-- ==================================
+
 local Phoenix = {}
 
 Phoenix.optionEnabled = Menu.AddOption({"Hero Specific","Phoenix"},"Auto Fire Spirit", "auto cast fire spirit when enabled")
