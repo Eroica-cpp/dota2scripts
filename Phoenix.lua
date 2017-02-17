@@ -9,6 +9,8 @@ local Phoenix = {}
 
 Phoenix.optionEnabled = Menu.AddOption({"Hero Specific","Phoenix"},"Auto Fire Spirit", "auto cast fire spirit when enabled")
 
+enemyPosList = {}
+
 function Phoenix.OnUpdate()
 
 	if not Menu.IsEnabled(Phoenix.optionEnabled) then return end
@@ -28,8 +30,9 @@ function Phoenix.OnUpdate()
 
 	for i, enemy in ipairs(unitsAround) do
 		local enemyPos = NPC.GetAbsOrigin(enemy)
-		if Ability.IsCastable(fireSpirit, myMana) then
+		if Ability.IsCastable(fireSpirit, myMana) and not enemyPosList[enemyPos] then
 			Ability.CastPosition(fireSpirit, enemyPos)
+			enemyPosList[enemyPos] = true
 		end
 	end
 
