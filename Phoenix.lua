@@ -13,10 +13,10 @@ function Phoenix.OnUpdate()
 	local dive = NPC.GetAbilityByIndex(myHero, 0)
 	local fireSpirit = NPC.GetAbilityByIndex(myHero, 1)
 	local fireSpiritLevel = Ability.GetLevel(fireSpirit)
+	local radius = 3000
 
 	if fireSpiritLevel <= 0 or (not Ability.IsInAbilityPhase(dive)) then return end
 
-	local radius = Ability.GetCastRange(dive) + Ability.GetCastRange(fireSpirit)
 	local unitsAround = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
 
 	for i, enemy in ipairs(unitsAround) do
