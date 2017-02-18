@@ -45,7 +45,7 @@ function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
 	
 	for i = 1, Heroes.Count() do	
 		local ally = Heroes.Get(i)
-		if (not NPC.IsIllusion(ally)) and Entity.IsSameTeam(myHero, ally) then
+		if (not NPC.IsIllusion(ally)) and Entity.IsSameTeam(myHero, ally) and (Hero.GetPlayerID(myHero) ~= Hero.GetPlayerID(ally)) then
 
 			if NPC.IsStunned(ally) and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(ally, myHero, imprisonRange) then
 				Ability.CastTarget(imprison, ally)
