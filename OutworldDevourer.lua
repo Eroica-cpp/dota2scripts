@@ -8,14 +8,23 @@
 local OutworldDevourer = {}
 
 OutworldDevourer.optionEnabled = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Killable awareness", "show if can kill an enemy by hits or ultimate")
+-- OutworldDevourer.optionEnabled = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Auto Life Steal", "show ")
 OutworldDevourer.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 function OutworldDevourer.OnDraw()
 
-	if not Menu.IsEnabled(OutworldDevourer.optionEnabled) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_obsidian_destroyer" then return end
+	
+	if Menu.IsEnabled(OutworldDevourer.optionEnabled) then 
+		OutworldDevourer.Awareness(myHero)
+	end
+	
+end
+
+function OutworldDevourer.Awareness(myHero)
+
 	local myTeam = Entity.GetTeamNum(myHero)
 	
 	local myIntell = Hero.GetIntellectTotal(myHero)
