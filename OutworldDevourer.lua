@@ -1,8 +1,8 @@
 -- ==================================
 -- File Name : OutworldDevourer.lua
 -- Author    : Eroica
--- Version   : 1.0
--- Date      : 2017.2.16
+-- Version   : 1.1
+-- Date      : 2017.2.17
 -- ==================================
 
 local OutworldDevourer = {}
@@ -38,27 +38,30 @@ function OutworldDevourer.OnDraw()
 		local enemyHp = Entity.GetHealth(enemy)
 		local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
 		local oneHitDamage = physicalDamage + orbDamage
-		local hitsLeft = math.ceil( enemyHp / oneHitDamage )
 
 		local enemyIntell = Hero.GetIntellectTotal(enemy)
 		local intellDiff = (myIntell >= enemyIntell) and (myIntell - enemyIntell) or 0
-		local ultimateDamage = intellDiff * intDiffDamageMultiplier * magicDamageFactor
+
+		local ultimateDamage = 0
+		if ultimateLevel > 0 and Ability.IsCastable(ultimate, myMana) then
+			ultimateDamage = intellDiff * intDiffDamageMultiplier * magicDamageFactor
+			-- this calculation is tricky, each hit creates 2*intDiffDamageMultiplier*orbLevel extra damage into ultimate
+			oneHitDamage = oneHitDamage + 2 * orbLevel * intDiffDamageMultiplier
+		end
+		
 		local enemyHpLeft = math.floor(enemyHp - ultimateDamage)
+		local hitsLeft = math.ceil( enemyHpLeft / oneHitDamage )
 
 		-- draw
 		local pos = NPC.GetAbsOrigin(enemy)
 		local x, y, visible = Renderer.WorldToScreen(pos)
 
 		-- red : can kill; green : cant kill
-		if enemyHpLeft > 0 then
-			Renderer.SetDrawColor(0, 255, 0, 255)
-		else
+		if enemyHpLeft <= 0 and ultimateLevel > 0 then
 			Renderer.SetDrawColor(255, 0, 0, 255)
-		end
-
-		if ultimateLevel > 0 then
-			Renderer.DrawTextCentered(OutworldDevourer.font, x, y, hitsLeft..", "..enemyHpLeft, 1)
+			Renderer.DrawTextCentered(OutworldDevourer.font, x, y, "Kill", 1)
 		else
+			Renderer.SetDrawColor(0, 255, 0, 255)
 			Renderer.DrawTextCentered(OutworldDevourer.font, x, y, hitsLeft, 1)
 		end
 
