@@ -16,6 +16,7 @@ function OutworldDevourer.OnDraw()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_obsidian_destroyer" then return end
+	local myTeam = Entity.GetTeamNum(myHero)
 	
 	local myIntell = Hero.GetIntellectTotal(myHero)
 	local myMana = NPC.GetMana(myHero)
@@ -30,42 +31,48 @@ function OutworldDevourer.OnDraw()
 	local intDiffDamageMultiplier = 7 + ultimateLevel
 
 	local magicDamageFactor = 0.75
-	local radius = 2000
-	local unitsAround = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
 
-	for i, enemy in ipairs(unitsAround) do
+	-- local radius = 2000
+	-- local unitsAround = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
 
-		local enemyHp = Entity.GetHealth(enemy)
-		local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
-		local oneHitDamage = physicalDamage + orbDamage
+	-- for i, enemy in ipairs(unitsAround) do
+	for i = 1, Heroes.Count() do
+		local enemy = Heroes.Get(i)
+		if (not NPC.IsIllusion(enemy)) and not (Entity.GetTeamNum(enemy) == myTeam) then
 
-		local enemyIntell = Hero.GetIntellectTotal(enemy)
-		local intellDiff = (myIntell >= enemyIntell) and (myIntell - enemyIntell) or 0
+			local enemyHp = Entity.GetHealth(enemy)
+			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
+			local oneHitDamage = physicalDamage + orbDamage
 
-		local ultimateDamage = 0
-		if ultimateLevel > 0 and Ability.IsCastable(ultimate, myMana) then
-			ultimateDamage = intellDiff * intDiffDamageMultiplier * magicDamageFactor
-			-- this calculation is tricky, each hit creates 2*intDiffDamageMultiplier*orbLevel extra damage into ultimate
-			oneHitDamage = oneHitDamage + 2 * orbLevel * intDiffDamageMultiplier
-		end
-		
-		local enemyHpLeft = math.floor(enemyHp - ultimateDamage)
-		local hitsLeft = math.ceil( enemyHpLeft / oneHitDamage )
+			local enemyIntell = Hero.GetIntellectTotal(enemy)
+			local intellDiff = (myIntell >= enemyIntell) and (myIntell - enemyIntell) or 0
 
-		-- draw
-		local pos = NPC.GetAbsOrigin(enemy)
-		local x, y, visible = Renderer.WorldToScreen(pos)
+			local ultimateDamage = 0
+			if ultimateLevel > 0 and Ability.IsCastable(ultimate, myMana) then
+				ultimateDamage = intellDiff * intDiffDamageMultiplier * magicDamageFactor
+				-- this calculation is tricky, each hit creates 2*intDiffDamageMultiplier*orbLevel extra damage into ultimate
+				oneHitDamage = oneHitDamage + 2 * orbLevel * intDiffDamageMultiplier
+			end
+			
+			local enemyHpLeft = math.floor(enemyHp - ultimateDamage)
+			local hitsLeft = math.ceil( enemyHpLeft / oneHitDamage )
 
-		-- red : can kill; green : cant kill
-		if enemyHpLeft <= 0 and ultimateLevel > 0 then
-			Renderer.SetDrawColor(255, 0, 0, 255)
-			Renderer.DrawTextCentered(OutworldDevourer.font, x, y, "Kill", 1)
-		else
-			Renderer.SetDrawColor(0, 255, 0, 255)
-			Renderer.DrawTextCentered(OutworldDevourer.font, x, y, hitsLeft, 1)
-		end
+			-- draw
+			local pos = NPC.GetAbsOrigin(enemy)
+			local x, y, visible = Renderer.WorldToScreen(pos)
 
-	end
+			-- red : can kill; green : cant kill
+			if enemyHpLeft <= 0 and ultimateLevel > 0 then
+				Renderer.SetDrawColor(255, 0, 0, 255)
+				Renderer.DrawTextCentered(OutworldDevourer.font, x, y, "Kill", 1)
+			else
+				Renderer.SetDrawColor(0, 255, 0, 255)
+				Renderer.DrawTextCentered(OutworldDevourer.font, x, y, hitsLeft, 1)
+			end
+
+		end -- end big if statement (Lua doesnt have 'continue' for God sake !!)
+
+	end -- end for loop
 
 end
 
