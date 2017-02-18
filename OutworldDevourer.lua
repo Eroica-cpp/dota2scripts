@@ -1,14 +1,15 @@
 -- ==================================
 -- File Name : OutworldDevourer.lua
 -- Author    : Eroica
--- Version   : 1.1
--- Date      : 2017.2.17
+-- Version   : 2.0
+-- Date      : 2017.2.18
 -- ==================================
 
 local OutworldDevourer = {}
 
-OutworldDevourer.killableAwareness = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Killable awareness", "show if can kill an enemy by hits or ultimate")
+OutworldDevourer.killableAwareness = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Killable Awareness", "show if can kill an enemy by hits or ultimate")
 OutworldDevourer.autoLifeSteal = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Auto Life Steal", "use auto attack or imprison to KS. It will turn off in some cases (like teammate LC \r\nis dueling someone or necro casting ultimate) ")
+OutworldDevourer.autoSaveAlly = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Auto Save Ally", "auto imprison a nearby teammate who get stunned")
 OutworldDevourer.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 local magicDamageFactor = 0.75
@@ -32,6 +33,27 @@ function OutworldDevourer.OnDraw()
 		OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 	end
 
+	if Menu.IsEnabled(OutworldDevourer.autoSaveAlly) then 
+		OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
+	end
+
+end
+
+function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
+	local myMana = NPC.GetMana(myHero)
+	local imprisonRange = Ability.GetCastRange(imprison)
+	
+	for i = 1, Heroes.Count() do	
+		local ally = Heroes.Get(i)
+		if (not NPC.IsIllusion(ally)) and Entity.IsSameTeam(myHero, ally) then
+
+			if NPC.IsStunned(ally) and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(ally, myHero, imprisonRange) then
+				Ability.CastTarget(imprison, ally)
+			end
+
+		end
+	end
+
 end
 
 function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
@@ -41,11 +63,11 @@ function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 	-- Ability.GetDamage(imprison) doesnt work
 	local imprisonDamage = (imprisonLevel > 0) and 100+75*(imprisonLevel-1) or 0
 	local imprisonRange = Ability.GetCastRange(imprison)
-	local attackRange = 450 -- no API for attack range
+	local attackRange = NPC.GetAttackRange(myHero) -- doesnt increase if has dragon lance
 
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
-		if (not NPC.IsIllusion(enemy)) and not Entity.IsSameTeam(myHero, enemy) then
+		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) then
 			
 			local enemyHp = Entity.GetHealth(enemy)
 			-- check auto attack before using imprison
@@ -84,7 +106,7 @@ function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
-		if (not NPC.IsIllusion(enemy)) and not Entity.IsSameTeam(myHero, enemy) then
+		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) then
 
 			local enemyHp = Entity.GetHealth(enemy)
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
