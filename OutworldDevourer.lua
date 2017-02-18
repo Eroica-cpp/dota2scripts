@@ -48,7 +48,13 @@ function OutworldDevourer.OnDraw()
 		-- draw
 		local pos = NPC.GetAbsOrigin(enemy)
 		local x, y, visible = Renderer.WorldToScreen(pos)
-		Renderer.SetDrawColor(255, 255, 0, 255)
+
+		-- red : can kill; green : cant kill
+		if enemyHpLeft > 0 then
+			Renderer.SetDrawColor(0, 255, 0, 255)
+		else
+			Renderer.SetDrawColor(255, 0, 0, 255)
+		end
 
 		if ultimateLevel > 0 then
 			Renderer.DrawTextCentered(OutworldDevourer.font, x, y, hitsLeft..", "..enemyHpLeft, 1)
