@@ -1,8 +1,8 @@
 -- ==================================
 -- File Name : Phoenix.lua
 -- Author    : Eroica
--- Version   : 1.1
--- Date      : 2017.2.17
+-- Version   : 1.2
+-- Date      : 2017.2.18
 -- ==================================
 
 local Phoenix = {}
@@ -16,7 +16,6 @@ function Phoenix.OnUpdate()
 	if not myHero then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_phoenix" then return end
 	local myMana = NPC.GetMana(myHero)
-	local myTeam = Entity.GetTeamNum(myHero)
 
 	local dive = NPC.GetAbilityByIndex(myHero, 0)
 	local fireSpirit = NPC.GetAbilityByIndex(myHero, 1)
@@ -28,11 +27,11 @@ function Phoenix.OnUpdate()
 		
 		local npc = Heroes.Get(i)
 		
-		if (not NPC.IsIllusion(npc)) and not (Entity.GetTeamNum(npc) == myTeam) then
+		if (not NPC.IsIllusion(npc)) and (not Entity.IsSameTeam(npc, myHero)) then
 			
 			local enemyPos = NPC.GetAbsOrigin(npc)
 			
-			if Ability.IsCastable(fireSpirit, myMana) then
+			if Ability.IsCastable(fireSpirit, myMana) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(npc, myHero, Ability.GetCastRange(fireSpirit)) then
 				Ability.CastPosition(fireSpirit, enemyPos)
 			end
 
