@@ -7,47 +7,84 @@
 
 local OutworldDevourer = {}
 
-OutworldDevourer.optionEnabled = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Killable awareness", "show if can kill an enemy by hits or ultimate")
--- OutworldDevourer.optionEnabled = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Auto Life Steal", "show ")
+OutworldDevourer.killableAwareness = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Killable awareness", "show if can kill an enemy by hits or ultimate")
+OutworldDevourer.autoLifeSteal = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Auto Life Steal", "use auto attack or imprison to KS. It will turn off in some cases (like teammate LC \r\nis dueling someone or necro casting ultimate) ")
 OutworldDevourer.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
+
+local magicDamageFactor = 0.75
 
 function OutworldDevourer.OnDraw()
 
+	-- initiation
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_obsidian_destroyer" then return end
-	
-	if Menu.IsEnabled(OutworldDevourer.optionEnabled) then 
-		OutworldDevourer.Awareness(myHero)
+
+	local orb = NPC.GetAbilityByIndex(myHero, 0)
+	local imprison = NPC.GetAbilityByIndex(myHero, 1)
+	local ultimate = NPC.GetAbilityByIndex(myHero, 3)
+
+	if Menu.IsEnabled(OutworldDevourer.killableAwareness) then 
+		OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 	end
 	
+	if Menu.IsEnabled(OutworldDevourer.autoLifeSteal) then 
+		OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
+	end
+
 end
 
-function OutworldDevourer.Awareness(myHero)
+function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 
-	local myTeam = Entity.GetTeamNum(myHero)
-	
+	local myMana = NPC.GetMana(myHero)
+	local imprisonLevel = Ability.GetLevel(imprison)
+	-- Ability.GetDamage(imprison) doesnt work
+	local imprisonDamage = (imprisonLevel > 0) and 100+75*(imprisonLevel-1) or 0
+	local imprisonRange = Ability.GetCastRange(imprison)
+	local attackRange = 450 -- no API for attack range
+
+	for i = 1, Heroes.Count() do
+		local enemy = Heroes.Get(i)
+		if (not NPC.IsIllusion(enemy)) and not Entity.IsSameTeam(myHero, enemy) then
+			
+			local enemyHp = Entity.GetHealth(enemy)
+			-- check auto attack before using imprison
+			local orbDamage = getOrbDamage(myMana, orb)
+			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
+			local oneHitDamage = physicalDamage + orbDamage
+			if enemyHp <= oneHitDamage and NPC.IsEntityInRange(enemy, myHero, attackRange) then
+				Player.AttackTarget(Players.GetLocal(), myHero, enemy)
+			end
+
+			local trueMagicDamage = imprisonDamage * magicDamageFactor
+			if enemyHp <= trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
+				Ability.CastTarget(imprison, enemy)
+			end
+			-- need to avoid imprison enemy that dueled by teammate
+		end
+	end		
+
+end
+
+function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
+
 	local myIntell = Hero.GetIntellectTotal(myHero)
 	local myMana = NPC.GetMana(myHero)
-	local orb = NPC.GetAbilityByIndex(myHero, 0)
 	local orbLevel = Ability.GetLevel(orb)
 	-- 6% 7% 8% 9% of mana pool into orb damaga
 	local manaToOrbDamagePara = (orbLevel > 0) and (0.05 + 0.01 * orbLevel) or 0
-	local orbDamage = myMana * manaToOrbDamagePara
+	local orbDamage = getOrbDamage(myMana, orb)
 	local intellToManaPara = 12 -- every 1 point intelligence == 12 points mana
 	local intellSteal = orbLevel
 	local orbHitDamageAccumulator = intellSteal * intellToManaPara * manaToOrbDamagePara
 
-	local ultimate = NPC.GetAbilityByIndex(myHero, 3)
 	local ultimateLevel = Ability.GetLevel(ultimate)
 	-- int diff damaga multiplier are : 8 / 9 / 10
 	local intDiffDamageMultiplier = 7 + ultimateLevel
 
-	local magicDamageFactor = 0.75
-
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
-		if (not NPC.IsIllusion(enemy)) and not (Entity.GetTeamNum(enemy) == myTeam) then
+		if (not NPC.IsIllusion(enemy)) and not Entity.IsSameTeam(myHero, enemy) then
 
 			local enemyHp = Entity.GetHealth(enemy)
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
@@ -93,6 +130,13 @@ function OutworldDevourer.Awareness(myHero)
 
 	end -- end for loop
 
+end
+
+function getOrbDamage(myMana, orb)
+	local orbLevel = Ability.GetLevel(orb)
+	-- 6% 7% 8% 9% of mana pool into orb damaga
+	local manaToOrbDamagePara = (orbLevel > 0) and (0.05 + 0.01 * orbLevel) or 0
+	return myMana * manaToOrbDamagePara
 end
 
 return OutworldDevourer
