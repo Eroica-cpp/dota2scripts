@@ -55,11 +55,17 @@ function OutworldDevourer.OnDraw()
 			end
 			
 			local enemyHpLeft = math.floor(enemyHp - ultimateDamage)
-			-- solve a quadratic equation
-			local a = 0.5*orbHitDamageAccumulator
-			local b = oneHitDamage - 0.5*orbHitDamageAccumulator
-			local c = -enemyHpLeft
-			local hitsLeft = math.ceil( (-b + math.sqrt(b*b - 4*a*c)) / (2*a) )
+
+			local hitsLeft = 999999
+			if orbLevel > 0 then
+				-- solve a quadratic equation
+				local a = 0.5*orbHitDamageAccumulator
+				local b = oneHitDamage - 0.5*orbHitDamageAccumulator
+				local c = -enemyHpLeft
+				hitsLeft = math.ceil( (-b + math.sqrt(b*b - 4*a*c)) / (2*a) )
+			else
+				hitsLeft = math.ceil(enemyHpLeft / physicalDamage)
+			end
 
 			-- draw
 			local pos = NPC.GetAbsOrigin(enemy)
