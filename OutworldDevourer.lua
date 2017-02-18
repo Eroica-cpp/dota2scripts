@@ -23,7 +23,11 @@ function OutworldDevourer.OnDraw()
 	local orb = NPC.GetAbilityByIndex(myHero, 0)
 	local orbLevel = Ability.GetLevel(orb)
 	-- 6% 7% 8% 9% of mana pool into orb damaga
-	local orbDamage = orb and myMana * (0.05 + 0.01 * orbLevel) or 0
+	local manaToOrbDamagePara = (orbLevel > 0) and (0.05 + 0.01 * orbLevel) or 0
+	local orbDamage = myMana * manaToOrbDamagePara
+	local intellToManaPara = 12 -- every 1 point intelligence == 12 points mana
+	local intellSteal = orbLevel
+	local orbHitDamageAccumulator = intellSteal * intellToManaPara * manaToOrbDamagePara
 
 	local ultimate = NPC.GetAbilityByIndex(myHero, 3)
 	local ultimateLevel = Ability.GetLevel(ultimate)
@@ -32,10 +36,6 @@ function OutworldDevourer.OnDraw()
 
 	local magicDamageFactor = 0.75
 
-	-- local radius = 2000
-	-- local unitsAround = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
-
-	-- for i, enemy in ipairs(unitsAround) do
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
 		if (not NPC.IsIllusion(enemy)) and not (Entity.GetTeamNum(enemy) == myTeam) then
@@ -55,7 +55,11 @@ function OutworldDevourer.OnDraw()
 			end
 			
 			local enemyHpLeft = math.floor(enemyHp - ultimateDamage)
-			local hitsLeft = math.ceil( enemyHpLeft / oneHitDamage )
+			-- solve a quadratic equation
+			local a = 0.5*orbHitDamageAccumulator
+			local b = oneHitDamage - 0.5*orbHitDamageAccumulator
+			local c = -enemyHpLeft
+			local hitsLeft = math.ceil( (-b + math.sqrt(b*b - 4*a*c)) / (2*a) )
 
 			-- draw
 			local pos = NPC.GetAbsOrigin(enemy)
