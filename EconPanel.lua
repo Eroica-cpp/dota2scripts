@@ -1,5 +1,5 @@
 -- ===========================================
--- Economic Panel (Version 1.0)
+-- Economic Panel (Version 1.1)
 -- Author : Eroica (eroicacmcs@gmail.com)
 -- Date : 2017.2.18
 -- ===========================================
@@ -325,8 +325,8 @@ function EconPanel.OnDraw()
 	local lineGap = 20
 	local wordGap = 10
 	local maxWidth = 200
-	local maxGold = 35000
-	local rectHeight = 10
+	local maxGold = 0
+	local rectHeight = lineGap - 1
 
 	local myTeamEcon = 0
 	local enemyTeamEcon = 0
@@ -334,20 +334,23 @@ function EconPanel.OnDraw()
 	for i, v in ipairs(econTable) do
 		local heroName = v[1]
 		local econValue = v[2]
+		maxGold = econValue > maxGold and econValue or maxGold
 
 		if isSameTeamTable[heroName] then
-			Renderer.SetDrawColor(0, 255, 0, 150)
+			Renderer.SetDrawColor(0, 255, 0, 125)
 			myTeamEcon = myTeamEcon + econValue
 		else
-			Renderer.SetDrawColor(255, 0, 0, 150)
+			Renderer.SetDrawColor(255, 0, 0, 125)
 			enemyTeamEcon = enemyTeamEcon + econValue
 		end
 
 		drawY = drawY + lineGap
 		local rectWidth = math.floor(maxWidth * econValue / maxGold)
-		Renderer.DrawFilledRect(drawX, math.floor(drawY+0.5*rectHeight), rectWidth, rectHeight)
-		local drawText = heroName.." ("..econValue..")"
-		Renderer.DrawText(EconPanel.font, drawX+wordGap+rectWidth, drawY, drawText, 1)
+		Renderer.DrawFilledRect(drawX, drawY, rectWidth, rectHeight)
+		
+		local drawText = econValue.." - "..heroName
+		Renderer.SetDrawColor(255, 255, 255, 255)
+		Renderer.DrawText(EconPanel.font, drawX+wordGap, drawY, drawText, 1)
 	end
 
 	local econDiff = myTeamEcon - enemyTeamEcon
@@ -356,8 +359,8 @@ function EconPanel.OnDraw()
 	else
 		Renderer.SetDrawColor(255, 0, 0, 255)
 	end
-	drawY = drawY + 2 * lineGap
-	Renderer.DrawText(EconPanel.font, drawX, drawY, "Economic Difference: "..econDiff, 1)
+	drawY = drawY - #econTable * lineGap
+	Renderer.DrawText(EconPanel.font, drawX+wordGap, drawY, "Economic Difference: "..econDiff, 1)
 
 end
 
