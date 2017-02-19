@@ -296,7 +296,11 @@ function EconPanel.OnDraw()
 	-- draw parameters
 	local drawX = 10
 	local drawY = 100
-	local gap = 20
+	local lineGap = 20
+	local wordGap = 10
+	local maxWidth = 200
+	local maxGold = 30000
+	local rectHeight = 10
 
 	for i, v in ipairs(econTable) do
 		local heroName = v[1]
@@ -308,13 +312,12 @@ function EconPanel.OnDraw()
 			Renderer.SetDrawColor(255, 0, 0, 125)
 		end
 
+		drawY = drawY + lineGap
+		local rectWidth = math.floor(maxWidth * econValue / maxGold)
+		Renderer.DrawFilledRect(drawX, math.floor(drawY+0.5*rectHeight), rectWidth, rectHeight)
 		local drawText = heroName.." ("..econValue..")"
-		drawY = drawY + gap
-		Renderer.DrawText(EconPanel.font, drawX, drawY, drawText, 1)
+		Renderer.DrawText(EconPanel.font, drawX+wordGap+rectWidth, drawY, drawText, 1)
 	end
-
-	-- Renderer.SetDrawColor(0, 0, 0, 125)
-	-- Renderer.DrawFilledRect(0, 180, 220, size)
 
 end
 
