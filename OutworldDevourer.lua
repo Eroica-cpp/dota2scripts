@@ -52,6 +52,9 @@ function OutworldDevourer.OnUpdate( ... )
 end
 
 function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
+
+	if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return end
+	
 	local myMana = NPC.GetMana(myHero)
 	local imprisonRange = Ability.GetCastRange(imprison)
 	
@@ -70,6 +73,8 @@ end
 
 function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 
+	if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return end
+	
 	local myMana = NPC.GetMana(myHero)
 	local imprisonLevel = Ability.GetLevel(imprison)
 	-- Ability.GetDamage(imprison) doesnt work
