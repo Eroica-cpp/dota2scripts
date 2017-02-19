@@ -293,15 +293,28 @@ function EconPanel.OnDraw()
 	-- sort econTable by econValue in descending order
 	table.sort(econTable, function(a, b) return a[2] > b[2] end)
 	
-	local size = 20
+	-- draw parameters
+	local drawX = 10
+	local drawY = 100
+	local gap = 20
+
 	for i, v in ipairs(econTable) do
 		local heroName = v[1]
 		local econValue = v[2]
-		Log.Write(i.."  "..v[1].."  "..v[2])
+
+		if isSameTeamTable[heroName] then
+			Renderer.SetDrawColor(0, 255, 0, 125)
+		else
+			Renderer.SetDrawColor(255, 0, 0, 125)
+		end
+
+		local drawText = heroName.." ("..econValue..")"
+		drawY = drawY + gap
+		Renderer.DrawText(EconPanel.font, drawX, drawY, drawText, 1)
 	end
 
-	Renderer.SetDrawColor(0, 0, 0, 125)
-	Renderer.DrawFilledRect(0, 180, 220, size)
+	-- Renderer.SetDrawColor(0, 0, 0, 125)
+	-- Renderer.DrawFilledRect(0, 180, 220, size)
 
 end
 
