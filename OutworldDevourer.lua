@@ -1,7 +1,7 @@
 -- ==================================
 -- File Name : OutworldDevourer.lua
 -- Author    : Eroica
--- Version   : 2.1
+-- Version   : 2.2
 -- Date      : 2017.2.18
 -- ==================================
 
@@ -59,7 +59,7 @@ function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
 		local ally = Heroes.Get(i)
 		if (not NPC.IsIllusion(ally)) and Entity.IsSameTeam(myHero, ally) and (Hero.GetPlayerID(myHero) ~= Hero.GetPlayerID(ally)) then
 
-			if NPC.IsStunned(ally) and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(ally, myHero, imprisonRange) then
+			if NPC.IsStunned(ally) and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(ally, myHero, imprisonRange) and Entity.IsAlive(ally) then
 				Ability.CastTarget(imprison, ally)
 			end
 
@@ -79,7 +79,7 @@ function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
-		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) then
+		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 			
 			local enemyHp = Entity.GetHealth(enemy)
 			local orbDamage = getOrbDamage(myMana, orb)
@@ -89,7 +89,9 @@ function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 
 			if enemyHp <= oneHitDamage and NPC.IsEntityInRange(enemy, myHero, attackRange) then
 				Player.AttackTarget(Players.GetLocal(), myHero, enemy)
-			elseif enemyHp <= trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
+			end
+
+			if enemyHp <= trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
 				Ability.CastTarget(imprison, enemy)
 			end
 			-- need to avoid imprison enemy that dueled by teammate
