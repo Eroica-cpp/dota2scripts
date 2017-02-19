@@ -198,16 +198,22 @@ EconPanel.item2price["item_black_king_bar"] = 3975 -- "Black King Bar"
 EconPanel.item2price["item_blade_mail"] = 2200 -- "Blade Mail"
 EconPanel.item2price["item_bloodstone"] = 4900 -- "Bloodstone"
 EconPanel.item2price["item_bloodthorn"] = 7195 -- "Bloodthorn"
-EconPanel.item2price["item_travel_boots_#"] = 2400 -- "Boots of Travel2"
+EconPanel.item2price["item_travel_boots"] = 2400 -- "Boots of Trave 1"
+EconPanel.item2price["item_travel_boots_2"] = 4400 -- "Boots of Trave 2"
 EconPanel.item2price["item_bracer"] = 505 -- "Bracer"
 EconPanel.item2price["item_buckler"] = 800 -- "Buckler"
 EconPanel.item2price["item_butterfly"] = 5525 -- "Butterfly"
 EconPanel.item2price["item_crimson_guard"] = 3550 -- "Crimson Guard"
 EconPanel.item2price["item_lesser_crit"] = 2120 -- "Crystalys"
 EconPanel.item2price["item_greater_crit"] = 5520 -- "Daedalus"
-EconPanel.item2price["item_dagon_#"] = 2720 -- "Dagon2"
+EconPanel.item2price["item_dagon"] = 2720 -- "Dagon 1"
+EconPanel.item2price["item_dagon_2"] = 3972 -- "Dagon 2"
+EconPanel.item2price["item_dagon_3"] = 5220 -- "Dagon 3"
+EconPanel.item2price["item_dagon_4"] = 6470 -- "Dagon 4"
+EconPanel.item2price["item_dagon_5"] = 7720 -- "Dagon 5"
 EconPanel.item2price["item_desolator"] = 3500 -- "Desolator"
-EconPanel.item2price["item_diffusal_blade_#"] = 3150 -- "Diffusal Blade2"
+EconPanel.item2price["item_diffusal_blade"] = 3150 -- "Diffusal Blade 1"
+EconPanel.item2price["item_diffusal_blade_2"] = 3850 -- "Diffusal Blade 2"
 EconPanel.item2price["item_dragon_lance"] = 1900 -- "Dragon Lance"
 EconPanel.item2price["item_ancient_janggo"] = 1780 -- "Drum of Endurance"
 EconPanel.item2price["item_echo_sabre"] = 2650 -- "Echo Sabre"
@@ -236,7 +242,9 @@ EconPanel.item2price["item_mekansm"] = 2275 -- "Mekansm"
 EconPanel.item2price["item_mjollnir"] = 5700 -- "Mjollnir"
 EconPanel.item2price["item_monkey_king_bar"] = 5400 -- "Monkey King Bar"
 EconPanel.item2price["item_moon_shard"] = 4000 -- "Moon Shard"
-EconPanel.item2price["item_necronomicon_#"] = 2650 -- "Necronomicon2"
+EconPanel.item2price["item_necronomicon"] = 2650 -- "Necronomicon 1"
+EconPanel.item2price["item_necronomicon_2"] = 3850 -- "Necronomicon 2"
+EconPanel.item2price["item_necronomicon_3"] = 5050 -- "Necronomicon 3"
 EconPanel.item2price["item_null_talisman"] = 470 -- "Null Talisman"
 EconPanel.item2price["item_oblivion_staff"] = 1650 -- "Oblivion Staff"
 EconPanel.item2price["item_ward_dispenser"] = 165 -- "Observer and Sentry Wards"
@@ -281,6 +289,17 @@ function EconPanel.OnDraw()
 	local econTable = {} -- econTable = { {heroName_1, econValue_1}, {heroName_2, econValue_2}, ...}
 	local isSameTeamTable = {} -- isSameTeamTable[heroName] = True/False
 
+	-- test code
+	-- item_travel_boots_#
+	local tmp = NPC.HasItem(myHero, "item_necronomicon_3", true)
+	if tmp then
+		Log.Write("yes")
+	else
+		Log.Write("no")
+	end
+
+	-- test code
+
 	for i = 1, Heroes.Count() do
 		local hero = Heroes.Get(i)
 		if not NPC.IsIllusion(hero) then
@@ -299,7 +318,7 @@ function EconPanel.OnDraw()
 	local lineGap = 20
 	local wordGap = 10
 	local maxWidth = 200
-	local maxGold = 30000
+	local maxGold = 35000
 	local rectHeight = 10
 
 	for i, v in ipairs(econTable) do
