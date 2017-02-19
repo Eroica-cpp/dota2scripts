@@ -1,5 +1,5 @@
 -- ===========================================
--- Economic Panel (Version 1.1)
+-- Economic Panel (Version 1.2)
 -- Author : Eroica (eroicacmcs@gmail.com)
 -- Date : 2017.2.18
 -- ===========================================
@@ -325,7 +325,7 @@ function EconPanel.OnDraw()
 	local lineGap = 20
 	local wordGap = 10
 	local maxWidth = 200
-	local maxGold = 0
+	local maxGold = 1
 	local rectHeight = lineGap - 1
 
 	local myTeamEcon = 0
@@ -334,7 +334,7 @@ function EconPanel.OnDraw()
 	for i, v in ipairs(econTable) do
 		local heroName = v[1]
 		local econValue = v[2]
-		maxGold = econValue > maxGold and econValue or maxGold
+		maxGold = econValue >= maxGold and econValue or maxGold
 
 		if isSameTeamTable[heroName] then
 			Renderer.SetDrawColor(0, 255, 0, 125)
