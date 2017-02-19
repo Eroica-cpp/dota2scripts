@@ -60,7 +60,7 @@ function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
 		if (not NPC.IsIllusion(ally)) and Entity.IsSameTeam(myHero, ally) and (Hero.GetPlayerID(myHero) ~= Hero.GetPlayerID(ally)) then
 
 			if NPC.IsStunned(ally) and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(ally, myHero, imprisonRange) then
-				Ability.CastTarget(imprison, ally, true)
+				Ability.CastTarget(imprison, ally)
 			end
 
 		end
@@ -68,7 +68,6 @@ function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
 
 end
 
--- queue parameter in Ability.CastTarget(), Ability.CastNoTarget(), Ability.CastPosition() has to set as True in case some weird conditions.
 function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 
 	local myMana = NPC.GetMana(myHero)
@@ -83,17 +82,15 @@ function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) then
 			
 			local enemyHp = Entity.GetHealth(enemy)
-			-- check auto attack before using imprison
 			local orbDamage = getOrbDamage(myMana, orb)
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
 			local oneHitDamage = physicalDamage + orbDamage
-			if enemyHp <= oneHitDamage and NPC.IsEntityInRange(enemy, myHero, attackRange) then
-				Player.AttackTarget(Players.GetLocal(), myHero, enemy, true)
-			end
-
 			local trueMagicDamage = imprisonDamage * magicDamageFactor
-			if enemyHp <= trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
-				Ability.CastTarget(imprison, enemy, true)
+
+			if enemyHp <= oneHitDamage and NPC.IsEntityInRange(enemy, myHero, attackRange) then
+				Player.AttackTarget(Players.GetLocal(), myHero, enemy)
+			elseif enemyHp <= trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
+				Ability.CastTarget(imprison, enemy)
 			end
 			-- need to avoid imprison enemy that dueled by teammate
 		end
