@@ -116,7 +116,7 @@ function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
-		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) then
+		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 
 			local enemyHp = Entity.GetHealth(enemy)
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
