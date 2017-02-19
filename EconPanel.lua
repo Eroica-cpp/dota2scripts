@@ -1,7 +1,7 @@
 local EconPanel = {}
 
 EconPanel.optionEnable = Menu.AddOption({ "Awareness" }, "Econ Panel", "show hero ranking of total item price")
-EconPanel.font = Renderer.LoadFont("Arial", 16, Enum.FontWeight.EXTRABOLD)
+EconPanel.font = Renderer.LoadFont("Tahoma", 16, Enum.FontWeight.EXTRABOLD)
 
 EconPanel.heroes = {}
 EconPanel.heroes["npc_dota_hero_abaddon"] = "Abaddon"
@@ -289,17 +289,6 @@ function EconPanel.OnDraw()
 	local econTable = {} -- econTable = { {heroName_1, econValue_1}, {heroName_2, econValue_2}, ...}
 	local isSameTeamTable = {} -- isSameTeamTable[heroName] = True/False
 
-	-- test code
-	-- item_travel_boots_#
-	local tmp = NPC.HasItem(myHero, "item_necronomicon_3", true)
-	if tmp then
-		Log.Write("yes")
-	else
-		Log.Write("no")
-	end
-
-	-- test code
-
 	for i = 1, Heroes.Count() do
 		local hero = Heroes.Get(i)
 		if not NPC.IsIllusion(hero) then
@@ -321,14 +310,19 @@ function EconPanel.OnDraw()
 	local maxGold = 35000
 	local rectHeight = 10
 
+	local myTeamEcon = 0
+	local enemyTeamEcon = 0
+
 	for i, v in ipairs(econTable) do
 		local heroName = v[1]
 		local econValue = v[2]
 
 		if isSameTeamTable[heroName] then
-			Renderer.SetDrawColor(0, 255, 0, 125)
+			Renderer.SetDrawColor(0, 255, 0, 150)
+			myTeamEcon = myTeamEcon + econValue
 		else
-			Renderer.SetDrawColor(255, 0, 0, 125)
+			Renderer.SetDrawColor(255, 0, 0, 150)
+			enemyTeamEcon = enemyTeamEcon + econValue
 		end
 
 		drawY = drawY + lineGap
@@ -337,6 +331,15 @@ function EconPanel.OnDraw()
 		local drawText = heroName.." ("..econValue..")"
 		Renderer.DrawText(EconPanel.font, drawX+wordGap+rectWidth, drawY, drawText, 1)
 	end
+
+	local econDiff = myTeamEcon - enemyTeamEcon
+	if econDiff > 0 then
+		Renderer.SetDrawColor(0, 255, 0, 255)
+	else
+		Renderer.SetDrawColor(255, 0, 0, 255)
+	end
+	drawY = drawY + 2 * lineGap
+	Renderer.DrawText(EconPanel.font, drawX, drawY, "Economic Difference: "..econDiff, 1)
 
 end
 
