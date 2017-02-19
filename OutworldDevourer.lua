@@ -1,7 +1,7 @@
 -- ==================================
 -- File Name : OutworldDevourer.lua
 -- Author    : Eroica
--- Version   : 2.0
+-- Version   : 2.1
 -- Date      : 2017.2.18
 -- ==================================
 
