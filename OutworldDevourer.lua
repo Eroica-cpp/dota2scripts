@@ -28,7 +28,19 @@ function OutworldDevourer.OnDraw()
 	if Menu.IsEnabled(OutworldDevourer.killableAwareness) then 
 		OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 	end
-	
+end
+
+function OutworldDevourer.OnUpdate( ... )
+
+	-- initiation
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_obsidian_destroyer" then return end
+
+	local orb = NPC.GetAbilityByIndex(myHero, 0)
+	local imprison = NPC.GetAbilityByIndex(myHero, 1)
+	local ultimate = NPC.GetAbilityByIndex(myHero, 3)
+
 	if Menu.IsEnabled(OutworldDevourer.autoLifeSteal) then 
 		OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 	end
@@ -48,7 +60,7 @@ function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
 		if (not NPC.IsIllusion(ally)) and Entity.IsSameTeam(myHero, ally) and (Hero.GetPlayerID(myHero) ~= Hero.GetPlayerID(ally)) then
 
 			if NPC.IsStunned(ally) and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(ally, myHero, imprisonRange) then
-				Ability.CastTarget(imprison, ally)
+				Ability.CastTarget(imprison, ally, true)
 			end
 
 		end
@@ -56,6 +68,7 @@ function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
 
 end
 
+-- queue parameter in Ability.CastTarget(), Ability.CastNoTarget(), Ability.CastPosition() has to set as True in case some weird conditions.
 function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 
 	local myMana = NPC.GetMana(myHero)
@@ -75,12 +88,12 @@ function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
 			local oneHitDamage = physicalDamage + orbDamage
 			if enemyHp <= oneHitDamage and NPC.IsEntityInRange(enemy, myHero, attackRange) then
-				Player.AttackTarget(Players.GetLocal(), myHero, enemy)
+				Player.AttackTarget(Players.GetLocal(), myHero, enemy, true)
 			end
 
 			local trueMagicDamage = imprisonDamage * magicDamageFactor
 			if enemyHp <= trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
-				Ability.CastTarget(imprison, enemy)
+				Ability.CastTarget(imprison, enemy, true)
 			end
 			-- need to avoid imprison enemy that dueled by teammate
 		end
