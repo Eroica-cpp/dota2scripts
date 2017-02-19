@@ -1,6 +1,7 @@
 local EconPanel = {}
 
-EconPanel.optionEnable = Menu.AddOption({ "Utility" }, "Econ Panel", "show hero ranking of total item price")
+EconPanel.optionEnable = Menu.AddOption({ "Awareness" }, "Econ Panel", "show hero ranking of total item price")
+EconPanel.font = Renderer.LoadFont("Arial", 16, Enum.FontWeight.EXTRABOLD)
 
 EconPanel.heroes = {}
 EconPanel.heroes["npc_dota_hero_abaddon"] = "Abaddon"
@@ -270,5 +271,49 @@ EconPanel.item2price["item_veil_of_discord"] = 2240 -- "Veil of Discord"
 EconPanel.item2price["item_vladmir"] = 2275 -- "Vladmir's Offering"
 EconPanel.item2price["item_wraith_band"] = 485 -- "Wraith Band"
 EconPanel.item2price["item_yasha"] = 2050 -- "Yasha"
+
+function EconPanel.OnDraw()
+	if not Menu.IsEnabled(EconPanel.optionEnable) then return end
+
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+
+	local econTable = {} -- econTable = { {heroName_1, econValue_1}, {heroName_2, econValue_2}, ...}
+	local isSameTeamTable = {} -- isSameTeamTable[heroName] = True/False
+
+	for i = 1, Heroes.Count() do
+		local hero = Heroes.Get(i)
+		if not NPC.IsIllusion(hero) then
+			local heroName = EconPanel.heroes[NPC.GetUnitName(hero)]
+			isSameTeamTable[heroName] = Entity.IsSameTeam(myHero, hero)
+			econTable[#econTable + 1] = {heroName, EconPanel.GetEcon(hero)}
+		end
+	end
+
+	-- sort econTable by econValue in descending order
+	table.sort(econTable, function(a, b) return a[2] > b[2] end)
+	
+	local size = 20
+	for i, v in ipairs(econTable) do
+		local heroName = v[1]
+		local econValue = v[2]
+		Log.Write(i.."  "..v[1].."  "..v[2])
+	end
+
+	Renderer.SetDrawColor(0, 0, 0, 125)
+	Renderer.DrawFilledRect(0, 180, 220, size)
+
+end
+
+-- Cant count repeated items. For example. if have two moon shards, it only counts once.
+function EconPanel.GetEcon(hero)
+	local totalEcon = 0
+	for key, value in pairs(EconPanel.item2price) do
+		if NPC.HasItem(hero, key, true) then
+			totalEcon = totalEcon + EconPanel.item2price[key]
+		end
+	end
+	return totalEcon
+end
 
 return EconPanel
