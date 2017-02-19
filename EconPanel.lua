@@ -1,3 +1,21 @@
+-- ===========================================
+-- Economic Panel (Version 1.0)
+-- Author : Eroica (eroicacmcs@gmail.com)
+-- Date : 2017.2.18
+-- ===========================================
+-- 
+-- Usage:
+-- 1. Place this script to ./scripts/ folder
+-- 2. Navigate in menu : "Awareness" -> "Economic Panel" (On/Off)
+-- 
+-- Features:
+-- 1. Show ecomomic status of every player in game (like spetator mode). It is based on the total value of items that players have in inventory.
+-- 2. Show economic difference between two teams.
+-- 
+-- Thanks @paroxysm for his item panel script. It is a great reference.
+-- Please feel free to report bugs or provide suggestions.
+-- ===========================================
+
 local EconPanel = {}
 
 EconPanel.optionEnable = Menu.AddOption({ "Awareness" }, "Econ Panel", "show hero ranking of total item price")
