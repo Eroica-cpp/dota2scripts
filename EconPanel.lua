@@ -9,7 +9,7 @@
 -- 2. Navigate in menu : "Awareness" -> "Economic Panel" (On/Off)
 -- 
 -- Features:
--- 1. Show ecomomic status of every player in game (like spetator mode). It is based on the total value of items that players have in inventory.
+-- 1. Show economic status of every player in game (like spetator mode). It is based on the total value of items that players have in inventory.
 -- 2. Show economic difference between two teams.
 -- 
 -- Thanks @paroxysm for his item panel script. It is a great reference.
