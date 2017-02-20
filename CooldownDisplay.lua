@@ -3,6 +3,8 @@ local CooldownDisplay = {}
 CooldownDisplay.option = Menu.AddOption({ "Awareness", "Cooldown Display" }, "Cooldown Display", "Displays enemy hero cooldowns in an easy and intuitive way.")
 CooldownDisplay.boxSizeOption = Menu.AddOption({ "Awareness", "Cooldown Display" }, "Cooldown Display Size", "", 21, 64, 1)
 CooldownDisplay.needsInit = true
+CooldownDisplay.spellIconPath = "resource/flash3/images/spellicons/"
+CooldownDisplay.cachedIcons = {}
 
 CooldownDisplay.colors = {}
 
@@ -14,6 +16,8 @@ CooldownDisplay.InsertColor("Green", 0, 255, 0)
 CooldownDisplay.InsertColor("Yellow", 234, 255, 0)
 CooldownDisplay.InsertColor("Red", 255, 0, 0)
 CooldownDisplay.InsertColor("Blue", 0, 0, 255)
+CooldownDisplay.InsertColor("White", 255, 255, 255)
+CooldownDisplay.InsertColor("Black", 0, 0, 0)
 
 CooldownDisplay.levelColorOption = Menu.AddOption({ "Awareness", "Cooldown Display" }, "Cooldown Display Level Color", "", 1, #CooldownDisplay.colors, 1)
 
@@ -71,16 +75,39 @@ function CooldownDisplay.DrawDisplay(hero)
 end
 
 function CooldownDisplay.DrawAbilitySquare(hero, ability, x, y, index)
-    local realX = x + (index * CooldownDisplay.boxSize) + 2
+    local abilityName = Ability.GetName(ability)
+    local imageHandle = CooldownDisplay.cachedIcons[abilityName]
 
-    if Ability.IsCastable(ability, NPC.GetMana(hero), true) then
-        Renderer.SetDrawColor(0, 255, 0)
-    elseif Ability.GetManaCost(ability) > NPC.GetMana(hero) then
-        Renderer.SetDrawColor(0, 0, 255)
-    else
-        Renderer.SetDrawColor(255, 0, 0)
+    if imageHandle == nil then
+        imageHandle = Renderer.LoadImage(CooldownDisplay.spellIconPath .. abilityName .. ".png")
+        CooldownDisplay.cachedIcons[abilityName] = imageHandle
     end
 
+    local realX = x + (index * CooldownDisplay.boxSize) + 2
+
+    local castable = Ability.IsCastable(ability, NPC.GetMana(hero), true)
+
+    -- default colors = can cast
+    local imageColor = { 255, 255, 255 }
+    local outlineColor = { 0, 255 , 0 }
+
+    if not castable then
+        if Ability.GetLevel(ability) == 0 then
+            imageColor = { 125, 125, 125 }
+            outlineColor = { 255, 0, 0 }
+        elseif Ability.GetManaCost(ability) > NPC.GetMana(hero) then
+            imageColor = { 150, 150, 255 }
+            outlineColor = { 0, 0, 255 }
+        else
+            imageColor = { 255, 150, 150 }
+            outlineColor = { 255, 0, 0 }
+        end
+    end
+
+    Renderer.SetDrawColor(imageColor[1], imageColor[2], imageColor[3], 255)
+    Renderer.DrawImage(imageHandle, realX, y, CooldownDisplay.boxSize, CooldownDisplay.boxSize)
+
+    Renderer.SetDrawColor(outlineColor[1], outlineColor[2], outlineColor[3], 255)
     Renderer.DrawOutlineRect(realX, y, CooldownDisplay.boxSize, CooldownDisplay.boxSize)
 
     local cdLength = Ability.GetCooldownLength(ability)
@@ -90,7 +117,7 @@ function CooldownDisplay.DrawAbilitySquare(hero, ability, x, y, index)
         local cooldownSize = math.floor(CooldownDisplay.innerBoxSize * cooldownRatio)
 
         Renderer.SetDrawColor(255, 255, 255, 50)
-        Renderer.DrawFilledRect(realX + 1, y + cooldownSize + 1, CooldownDisplay.innerBoxSize, CooldownDisplay.innerBoxSize - cooldownSize)
+        Renderer.DrawFilledRect(realX + 1, y + (CooldownDisplay.innerBoxSize - cooldownSize) + 1, CooldownDisplay.innerBoxSize, cooldownSize)
 
         Renderer.SetDrawColor(255, 255, 255)
         Renderer.DrawText(CooldownDisplay.font, realX + 1, y, math.floor(Ability.GetCooldown(ability)), 0)
