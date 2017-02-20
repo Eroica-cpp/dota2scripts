@@ -364,14 +364,21 @@ function EconPanel.OnDraw()
 
 end
 
--- Cant count repeated items. For example. if have two moon shards, it only counts once.
+-- doesnt include gold of recipes
 function EconPanel.GetEcon(hero)
 	local totalEcon = 0
-	for key, value in pairs(EconPanel.item2price) do
-		if NPC.HasItem(hero, key, true) then
-			totalEcon = totalEcon + EconPanel.item2price[key]
+	local slotNum = 9
+	for i = 0, slotNum-1 do
+		myItem = NPC.GetItemByIndex(hero, i) -- index starts from 0
+		if myItem then
+			itemName = Ability.GetName(myItem)
+			Log.Write(i .. ": " .. itemName)
+			if EconPanel.item2price[itemName] then -- database doesnt include all itemName, such as recipes.
+				totalEcon = totalEcon + EconPanel.item2price[itemName]
+			end
 		end
 	end
+	
 	return totalEcon
 end
 
