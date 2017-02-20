@@ -69,8 +69,9 @@ function ItemCooldown.DrawDisplay(hero)
 	-- draw para
 	local pos = NPC.GetAbsOrigin(hero)
 	local x, y, visible = Renderer.WorldToScreen(pos)
-	local gapX = 30
+	local gapX = 50
 	local gapY = 20
+	y = y - 4 * gapY
 
 	for i = 0, slotNum-1 do
 		local item = NPC.GetItemByIndex(hero, i)
@@ -82,13 +83,14 @@ function ItemCooldown.DrawDisplay(hero)
 				local itemCd = math.ceil(Ability.GetCooldown(item))
 
 				-- draw
+				local shortItemName = ItemCooldown.importantItems[itemName]
 				if itemCd > 0 then
 					Renderer.SetDrawColor(255, 0, 0, 255)
-					local text = itemName.."("..itemCd..")"
-					Renderer.DrawTextCentered(ItemCooldown.font, x+gapX, y, text, 1)
+					local text = shortItemName.."("..itemCd..")"
+					Renderer.DrawTextCenteredY(ItemCooldown.font, x+gapX, y, text, 1)
 				else
 					Renderer.SetDrawColor(0, 255, 0, 255)
-					Renderer.DrawTextCentered(ItemCooldown.font, x+gapX, y, itemName, 1)
+					Renderer.DrawTextCenteredY(ItemCooldown.font, x+gapX, y, shortItemName, 1)
 				end
 				y = y + gapY
 
