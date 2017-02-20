@@ -1,7 +1,7 @@
 -- ===========================================
--- Economic Panel (Version 1.2)
+-- Economic Panel (Version 1.3)
 -- Author : Eroica (eroicacmcs@gmail.com)
--- Date : 2017.2.18
+-- Date : 2017.2.19
 -- ===========================================
 -- 
 -- Usage:
@@ -372,7 +372,6 @@ function EconPanel.GetEcon(hero)
 		myItem = NPC.GetItemByIndex(hero, i) -- index starts from 0
 		if myItem then
 			itemName = Ability.GetName(myItem)
-			Log.Write(i .. ": " .. itemName)
 			if EconPanel.item2price[itemName] then -- database doesnt include all itemName, such as recipes.
 				totalEcon = totalEcon + EconPanel.item2price[itemName]
 			end
