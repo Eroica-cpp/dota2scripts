@@ -5,73 +5,89 @@ TinkerExtended.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 TinkerExtended.optionKey = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Spell Key", Enum.ButtonCode.KEY_D)
 TinkerExtended.threshold = 75
 
-time = 0
-delay = 0
+local mutex = true
 
 function TinkerExtended.OnUpdate()
 	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
 	if Menu.IsKeyDown(TinkerExtended.optionKey) then
 
 		-- test code
-		local myHero = Heroes.GetLocal()
-		castLaser(myHero)
+		-- local myHero = Heroes.GetLocal()
+		-- castLaser(myHero)
 		-- test code
 
-		-- TinkerExtended.ComboWombo()
+		TinkerExtended.ComboWombo()
 	end
 end
 
 function TinkerExtended.ComboWombo()
 
-    if (os.clock() - time) < delay then return end
-
     local myHero = Heroes.GetLocal()
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
-    local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
-
-    local enemyPos = Entity.GetAbsOrigin(enemy)
-    local laser = NPC.GetAbilityByIndex(myHero, 0)
-    local missile = NPC.GetAbilityByIndex(myHero, 1)
-
-    local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
-    local hex = NPC.GetItem(myHero, "item_sheepstick", true)
-    local rod = NPC.GetItem(myHero, "item_rod_of_atos", true)
-    local orchid = NPC.GetItem(myHero, "item_orchid", true)
-    local ethereal = NPC.GetItem(myHero, "item_ethereal_blade", true)
-
+    if NPC.IsStunned(myHero) then return end
     local myMana = NPC.GetMana(myHero)
     if myMana <= TinkerExtended.threshold then return end
-    local mousePos = Input.GetWorldCursorPos()
 
-    Log.Write("TESTING!!!")
-
+    local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+    if not enemy or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
+    
+    -- =====================================
+    -- Item section
+    -- =====================================
+    -- local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
+    -- local hex = NPC.GetItem(myHero, "item_sheepstick", true)
+    -- local rod = NPC.GetItem(myHero, "item_rod_of_atos", true)
+    -- local orchid = NPC.GetItem(myHero, "item_orchid", true)
+    -- local ethereal = NPC.GetItem(myHero, "item_ethereal_blade", true)
+    
     -- item : hex
-    if hex and enemy and Ability.IsCastable(hex, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(hex)) then 
+    local hex = NPC.GetItem(myHero, "item_sheepstick", true)
+    if mutex and hex and Ability.IsCastable(hex, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(hex)) then 
+        mutex = false
         Ability.CastTarget(hex, enemy)
-        MakeDelay(0.01)
+        mutex = true
     end
 
     -- item : dagon
-    for i = 0, 5 do
-        local dagon = NPC.GetItem(myHero, "item_dagon_" .. i, true)
-        if i == 0 then dagon = NPC.GetItem(myHero, "item_dagon", true) end
-        if dagon and enemy and Ability.IsCastable(dagon, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
-            Ability.CastTarget(dagon, enemy)
-            MakeDelay(0.01)
-            return
-        end
+    local dagon = NPC.GetItem(myHero, "item_dagon", true)
+    for i = 2, 5 do
+        local tmp = NPC.GetItem(myHero, "item_dagon_" .. i, true)
+        if tmp then dagon = tmp end
+    end
+    if mutex and dagon and Ability.IsCastable(dagon, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
+        mutex = false
+        Ability.CastTarget(dagon, enemy)
+        mutex = true
     end
 
-    -- spell : laser
-    if enemy and Ability.IsCastable(laser, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(laser)) then 
-        Ability.CastTarget(laser, enemy)
-        MakeDelay(0.01)
-    end
+    -- for i = 0, 5 do
+    --     local dagon = NPC.GetItem(myHero, "item_dagon_" .. i, true)
+    --     if i == 0 then dagon = NPC.GetItem(myHero, "item_dagon", true) end
+    --     if dagon and enemy and Ability.IsCastable(dagon, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
+    --         Ability.CastTarget(dagon, enemy)
+    --         sleep(0.01)
+    --         return
+    --     end
+    -- end
+
+    -- =====================================
+    -- Spell section
+    -- =====================================
+    if NPC.IsSilenced(myHero) then return end
 
     -- spell : missile
-    if enemy and Ability.IsCastable(missile, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
-        Ability.CastNoTarget(missile, false)
-        MakeDelay(0.01)
+    local missile = NPC.GetAbilityByIndex(myHero, 1)
+    if mutex and Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
+        mutex = false
+        Ability.CastNoTarget(missile)
+        mutex = true
+    end
+
+    -- spell : laser (has to put castLaser() at last because casting laser has delay)
+    if mutex then
+        mutex = false
+        castLaser(myHero)
+        mutex = true
     end
 
 end
@@ -168,6 +184,7 @@ function castLaser(myHero)
 	-- has agh scepter
 	local enemyUnits = NPC.GetUnitsInRadius(myHero, laserCastRange, Enum.TeamType.TEAM_ENEMY)
 	for i, npc in ipairs(enemyUnits) do
+        -- NPC.GetHeroesInRadius(npc, radius, team) gets heroes around but not npc itself, and team side is from npc's view
 		local enemyHeroesAround = NPC.GetHeroesInRadius(npc, laserRefractRange, Enum.TeamType.TEAM_FRIEND)
 		if npc and (#enemyHeroesAround > 0 or NPC.IsHero(npc)) and not NPC.IsStructure(npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(myHero, npc, laserCastRange) then
 			Ability.CastTarget(laser, npc)
@@ -177,17 +194,10 @@ function castLaser(myHero)
 
 end
 
-
-function MakeDelay(sec)
-    delay = sec
-    time = os.clock()
-end
-
 local clock = os.clock
 function sleep(n)  -- seconds
     local t0 = clock()
     while clock() - t0 <= n do end
 end
-
 
 return TinkerExtended
