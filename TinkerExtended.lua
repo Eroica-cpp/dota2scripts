@@ -19,6 +19,8 @@ function signal()
     mutex = mutex - 1
 end
 
+lastUsedAbility = ""
+
 function TinkerExtended.OnUpdate()
 	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
 	
@@ -47,14 +49,13 @@ function TinkerExtended.Rearm()
     
     local rearm = NPC.GetAbilityByIndex(myHero, 3)
     if Ability.IsCastable(rearm, NPC.GetMana(myHero)) and not Ability.IsInAbilityPhase(rearm) and not Ability.IsChannelling(rearm) then 
-        -- wait()
         Ability.CastNoTarget(rearm, true)
         sleep(0.1)
-        -- signal()
     end    
 
 end
 
+-- using mutex or lastUsedAbility seemingly doesnt work.
 function TinkerExtended.OneKey()
 
     local myHero = Heroes.GetLocal()
@@ -72,9 +73,7 @@ function TinkerExtended.OneKey()
     -- item : hex
     local hex = NPC.GetItem(myHero, "item_sheepstick", true)
     if hex and Ability.IsCastable(hex, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(hex)) then 
-        wait()
         Ability.CastTarget(hex, enemy)
-        signal()
     end
 
     -- item : ethereal blade
@@ -88,9 +87,7 @@ function TinkerExtended.OneKey()
     -- item : shivas guard
     local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
     if shiva and Ability.IsCastable(shiva, myMana) then 
-        wait()
         Ability.CastNoTarget(shiva)
-        signal()
     end    
 
     -- item : dagon
@@ -100,9 +97,7 @@ function TinkerExtended.OneKey()
         if tmp then dagon = tmp end
     end
     if dagon and Ability.IsCastable(dagon, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
-        wait()
         Ability.CastTarget(dagon, enemy)
-        signal()
     end
 
     -- =====================================
@@ -113,16 +108,12 @@ function TinkerExtended.OneKey()
     -- spell : missile
     local missile = NPC.GetAbilityByIndex(myHero, 1)
     if Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
-        wait()
         Ability.CastNoTarget(missile)
-        signal()
     end
 
     -- spell : laser (has to put castLaser() at last because casting laser has delay)
-    wait()
     castLaser(myHero)
-    signal()
-
+    
 end
 
 -- Auto Spell for KS
