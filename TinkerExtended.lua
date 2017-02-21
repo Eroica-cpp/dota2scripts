@@ -109,8 +109,13 @@ function TinkerExtended.OneKey()
         Ability.CastNoTarget(missile)
     end
 
-    -- spell : laser (has to put castLaser() at last because casting laser has delay)
-    castLaser(myHero)
+    -- spell : laser (has to put castLaser() at last because casting laser has animation delay)
+    local laser = NPC.GetAbilityByIndex(myHero, 0)
+    local target = getLaserCastTarget(myHero, enemy)
+    if target and Ability.IsCastable(laser, myMana) and not NPC.HasState(target, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(myHero, target, Ability.GetCastRange(laser)) and not NPC.IsStructure(target) then
+        Ability.CastTarget(laser, target)    
+    end
+    -- castLaser(myHero, enemy)
     
 end
 
@@ -162,8 +167,21 @@ function TinkerExtended.OnDraw()
             local hasRearm = Ability.GetLevel(rearm) > 0
 			local drawText = hasRearm and "x"..comboLeft or hitsLeft
             
-            Renderer.SetDrawColor(255, 255, 0, 255)
-			Renderer.DrawTextCentered(TinkerExtended.font, x, y, drawText, 1)
+            if hitsLeft <= 0 or comboLeft <= 0 then
+                Renderer.SetDrawColor(255, 0, 0, 255)
+                Renderer.DrawTextCentered(TinkerExtended.font, x, y, "Kill", 1)
+            else
+                Renderer.SetDrawColor(0, 255, 0, 255)
+    			Renderer.DrawTextCentered(TinkerExtended.font, x, y, drawText, 1)
+            end
+
+            local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)
+            local target = enemy
+            if hasAghScepter then
+                Log.Write("test!!!!")
+            else
+                Log.Write("test!!!!")
+            end
 
 			-- local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
 
@@ -186,38 +204,28 @@ function TinkerExtended.OnDraw()
 
 end
 
--- Auto cast laser to nearest enemy in range
--- If has agh scepter, can also cast laser to a enemy unit in range so as to reflect to enemy.
-function castLaser(myHero)
-	if not myHero or NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
-	
-	local laser = NPC.GetAbilityByIndex(myHero, 0)
-	local laserCastRange = Ability.GetCastRange(laser) -- Ability.GetCastRange() already considers bonus cast range.
-	local laserRefractRange = 650
+-- If exists, return the enemy hero in the cast range of laser
+-- If has agh scepter, return a enemy unit in the cast range of laser that can refract laser to a enemy
+function getLaserCastTarget(myHero, enemy)
+    if not myHero then return enemy end
+    local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)
+    if not hasAghScepter then return enemy end
+    
+    local laser = NPC.GetAbilityByIndex(myHero, 0)
+    local laserCastRange = Ability.GetCastRange(laser) -- Ability.GetCastRange() already considers bonus cast range.
+    local laserRefractRange = 650
 
-	if not Ability.IsCastable(laser, NPC.GetMana(myHero)) then return end
+    if NPC.IsEntityInRange(myHero, enemy, laserCastRange) then return enemy end
+    
+    -- if has agh scepter
+    local enemyUnits = NPC.GetUnitsInRadius(myHero, laserCastRange, Enum.TeamType.TEAM_ENEMY)
+    for i, npc in ipairs(enemyUnits) do
+        if npc and NPC.IsEntityInRange(npc, enemy, laserRefractRange) and not NPC.IsStructure(npc) then
+            return npc
+        end
+    end
 
-	local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)
-
-	-- -- dont have agh scepter
-	if not hasAghScepter then
-		local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
-		if enemy and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, laserCastRange) then
-			Ability.CastTarget(laser, enemy)
-		end
-		return
-	end
-
-	-- has agh scepter
-	local enemyUnits = NPC.GetUnitsInRadius(myHero, laserCastRange, Enum.TeamType.TEAM_ENEMY)
-	for i, npc in ipairs(enemyUnits) do
-        -- NPC.GetHeroesInRadius(npc, radius, team) gets heroes around but not npc itself, and team side is from npc's view
-		local enemyHeroesAround = NPC.GetHeroesInRadius(npc, laserRefractRange, Enum.TeamType.TEAM_FRIEND)
-		if npc and (#enemyHeroesAround > 0 or NPC.IsHero(npc)) and not NPC.IsStructure(npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(myHero, npc, laserCastRange) then
-			Ability.CastTarget(laser, npc)
-			return
-		end
-	end
+    return nil
 
 end
 
