@@ -2,17 +2,57 @@ local TinkerExtended = {}
 
 TinkerExtended.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell", "On/Off")
 TinkerExtended.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
-TinkerExtended.optionKey = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Spell Key", Enum.ButtonCode.KEY_D)
-TinkerExtended.threshold = 75
+TinkerExtended.oneKeySpell = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Spell Key", Enum.ButtonCode.KEY_D)
+TinkerExtended.autoSoulRing = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Rearm Key", Enum.ButtonCode.KEY_T)
+TinkerExtended.manaThreshold = 75
+TinkerExtended.healthThreshold = 50
 
 -- using mutex to avoid bugs
-local mutex = true
+mutex = 0
+function wait()
+    repeat
+    until mutex <= 0
+    mutex = mutex + 1
+end
+
+function signal()
+    mutex = mutex - 1
+end
 
 function TinkerExtended.OnUpdate()
 	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
-	if Menu.IsKeyDown(TinkerExtended.optionKey) then
-		TinkerExtended.OneKey()
+	
+    if Menu.IsKeyDown(TinkerExtended.oneKeySpell) then
+        TinkerExtended.OneKey()
 	end
+    
+    if Menu.IsKeyDown(TinkerExtended.autoSoulRing) then
+        TinkerExtended.Rearm()
+    end
+
+end
+
+-- auto use soul ring when rearm
+function TinkerExtended.Rearm()
+
+    local myHero = Heroes.GetLocal()
+    if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
+    if NPC.IsStunned(myHero) then return end
+    if Entity.GetHealth(myHero) <= TinkerExtended.healthThreshold then return end
+
+    local soul_ring = NPC.GetItem(myHero, "item_soul_ring", true)
+    if soul_ring and Ability.IsReady(soul_ring) then
+        Ability.CastNoTarget(soul_ring, true)
+    end
+    
+    local rearm = NPC.GetAbilityByIndex(myHero, 3)
+    if Ability.IsCastable(rearm, NPC.GetMana(myHero)) and not Ability.IsInAbilityPhase(rearm) and not Ability.IsChannelling(rearm) then 
+        -- wait()
+        Ability.CastNoTarget(rearm, true)
+        sleep(0.1)
+        -- signal()
+    end    
+
 end
 
 function TinkerExtended.OneKey()
@@ -21,7 +61,7 @@ function TinkerExtended.OneKey()
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
     if NPC.IsStunned(myHero) then return end
     local myMana = NPC.GetMana(myHero)
-    if myMana <= TinkerExtended.threshold then return end
+    if myMana <= TinkerExtended.manaThreshold then return end
 
     local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
     if not enemy or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
@@ -31,10 +71,10 @@ function TinkerExtended.OneKey()
     -- =====================================
     -- item : hex
     local hex = NPC.GetItem(myHero, "item_sheepstick", true)
-    if mutex and hex and Ability.IsCastable(hex, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(hex)) then 
-        mutex = false
+    if hex and Ability.IsCastable(hex, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(hex)) then 
+        wait()
         Ability.CastTarget(hex, enemy)
-        mutex = true
+        signal()
     end
 
     -- item : ethereal blade
@@ -47,10 +87,10 @@ function TinkerExtended.OneKey()
 
     -- item : shivas guard
     local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
-    if mutex and shiva and Ability.IsCastable(shiva, myMana) then 
-        mutex = false
+    if shiva and Ability.IsCastable(shiva, myMana) then 
+        wait()
         Ability.CastNoTarget(shiva)
-        mutex = true
+        signal()
     end    
 
     -- item : dagon
@@ -59,10 +99,10 @@ function TinkerExtended.OneKey()
         local tmp = NPC.GetItem(myHero, "item_dagon_" .. i, true)
         if tmp then dagon = tmp end
     end
-    if mutex and dagon and Ability.IsCastable(dagon, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
-        mutex = false
+    if dagon and Ability.IsCastable(dagon, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
+        wait()
         Ability.CastTarget(dagon, enemy)
-        mutex = true
+        signal()
     end
 
     -- =====================================
@@ -72,18 +112,16 @@ function TinkerExtended.OneKey()
 
     -- spell : missile
     local missile = NPC.GetAbilityByIndex(myHero, 1)
-    if mutex and Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
-        mutex = false
+    if Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
+        wait()
         Ability.CastNoTarget(missile)
-        mutex = true
+        signal()
     end
 
     -- spell : laser (has to put castLaser() at last because casting laser has delay)
-    if mutex then
-        mutex = false
-        castLaser(myHero)
-        mutex = true
-    end
+    wait()
+    castLaser(myHero)
+    signal()
 
 end
 
