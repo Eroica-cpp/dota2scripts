@@ -5,22 +5,17 @@ TinkerExtended.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 TinkerExtended.optionKey = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Spell Key", Enum.ButtonCode.KEY_D)
 TinkerExtended.threshold = 75
 
+-- using mutex to avoid bugs
 local mutex = true
 
 function TinkerExtended.OnUpdate()
 	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
 	if Menu.IsKeyDown(TinkerExtended.optionKey) then
-
-		-- test code
-		-- local myHero = Heroes.GetLocal()
-		-- castLaser(myHero)
-		-- test code
-
-		TinkerExtended.ComboWombo()
+		TinkerExtended.OneKey()
 	end
 end
 
-function TinkerExtended.ComboWombo()
+function TinkerExtended.OneKey()
 
     local myHero = Heroes.GetLocal()
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
@@ -34,12 +29,6 @@ function TinkerExtended.ComboWombo()
     -- =====================================
     -- Item section
     -- =====================================
-    -- local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
-    -- local hex = NPC.GetItem(myHero, "item_sheepstick", true)
-    -- local rod = NPC.GetItem(myHero, "item_rod_of_atos", true)
-    -- local orchid = NPC.GetItem(myHero, "item_orchid", true)
-    -- local ethereal = NPC.GetItem(myHero, "item_ethereal_blade", true)
-    
     -- item : hex
     local hex = NPC.GetItem(myHero, "item_sheepstick", true)
     if mutex and hex and Ability.IsCastable(hex, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(hex)) then 
@@ -47,6 +36,22 @@ function TinkerExtended.ComboWombo()
         Ability.CastTarget(hex, enemy)
         mutex = true
     end
+
+    -- item : ethereal blade
+    -- local ethereal = NPC.GetItem(myHero, "item_ethereal_blade", true)
+    -- if mutex and ethereal and Ability.IsCastable(ethereal, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(ethereal)) then 
+    --     mutex = false
+    --     Ability.CastTarget(ethereal, enemy)
+    --     mutex = true
+    -- end
+
+    -- item : shivas guard
+    local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
+    if mutex and shiva and Ability.IsCastable(shiva, myMana) then 
+        mutex = false
+        Ability.CastNoTarget(shiva)
+        mutex = true
+    end    
 
     -- item : dagon
     local dagon = NPC.GetItem(myHero, "item_dagon", true)
@@ -59,16 +64,6 @@ function TinkerExtended.ComboWombo()
         Ability.CastTarget(dagon, enemy)
         mutex = true
     end
-
-    -- for i = 0, 5 do
-    --     local dagon = NPC.GetItem(myHero, "item_dagon_" .. i, true)
-    --     if i == 0 then dagon = NPC.GetItem(myHero, "item_dagon", true) end
-    --     if dagon and enemy and Ability.IsCastable(dagon, myMana) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
-    --         Ability.CastTarget(dagon, enemy)
-    --         sleep(0.01)
-    --         return
-    --     end
-    -- end
 
     -- =====================================
     -- Spell section
