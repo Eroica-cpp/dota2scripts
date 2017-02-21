@@ -7,11 +7,11 @@
 -- Usage:
 -- 1. Place this script to ./scripts/ folder
 -- 2. Navigate in menu : "Awareness" -> "Item Cooldown Display" (On/Off)
--- 
+
 -- Features:
--- 1. Display certin important items in enemy's inventory (smoke, dust, blink dagger, BKB, linken's shpere, sheepstick, etc)
+-- 1. Display certain important items in enemy's inventory (smoke, dust, blink dagger, BKB, linken's shpere, sheepstick, etc)
 -- 2. Show cooldown of these items.
--- 
+
 -- Please feel free to report bugs or provide suggestions.
 -- ===========================================
 
