@@ -1,9 +1,10 @@
 -- ==================================
 -- File Name : Phoenix.lua
 -- Author    : Eroica
--- Version   : 1.2
--- Date      : 2017.2.18
+-- Version   : 1.3
+-- Date      : 2017.2.20
 -- ==================================
+
 
 local Phoenix = {}
 
@@ -19,26 +20,32 @@ function Phoenix.OnUpdate()
 
 	local dive = NPC.GetAbilityByIndex(myHero, 0)
 	local fireSpirit = NPC.GetAbilityByIndex(myHero, 1)
-	local fireSpiritLevel = Ability.GetLevel(fireSpirit)
 
-	if fireSpiritLevel <= 0 or (not Ability.IsInAbilityPhase(dive)) then return end
+	if not Ability.IsCastable(fireSpirit, myMana) or not Ability.IsInAbilityPhase(dive) then return end
 
 	for i = 1, Heroes.Count() do
 		
 		local npc = Heroes.Get(i)
 		
-		if (not NPC.IsIllusion(npc)) and (not Entity.IsSameTeam(npc, myHero)) then
+		if not NPC.IsIllusion(npc) and not Entity.IsSameTeam(npc, myHero) then
 			
 			local enemyPos = NPC.GetAbsOrigin(npc)
 			
-			if Ability.IsCastable(fireSpirit, myMana) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(npc, myHero, Ability.GetCastRange(fireSpirit)) then
+			if not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(npc, myHero, Ability.GetCastRange(fireSpirit)) then
 				Ability.CastPosition(fireSpirit, enemyPos)
+				sleep(0.01)
 			end
 
 		end
 
 	end
 
+end
+
+local clock = os.clock
+function sleep(n)  -- seconds
+	local t0 = clock()
+	while clock() - t0 <= n do end
 end
 
 return Phoenix
