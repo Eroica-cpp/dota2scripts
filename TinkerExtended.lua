@@ -1,6 +1,6 @@
 local TinkerExtended = {}
 
-TinkerExtended.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell", "On/Off")
+TinkerExtended.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell for KS", "On/Off")
 TinkerExtended.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 TinkerExtended.oneKeySpell = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Spell Key", Enum.ButtonCode.KEY_D)
 TinkerExtended.autoSoulRing = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Rearm Key", Enum.ButtonCode.KEY_T)
@@ -18,8 +18,6 @@ end
 function signal()
     mutex = mutex - 1
 end
-
-lastUsedAbility = ""
 
 function TinkerExtended.OnUpdate()
 	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
@@ -117,71 +115,76 @@ function TinkerExtended.OneKey()
 end
 
 -- Auto Spell for KS
--- function TinkerExtended.OnDraw()
+function TinkerExtended.OnDraw()
 
--- 	if not Menu.IsEnabled( TinkerExtended.optionEnable ) then return end
--- 	if not GameRules.GetGameState() == 5 then return end
+	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
+	
+	local myHero = Heroes.GetLocal()
+	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
+    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return end
 
--- 	local myHero = Heroes.GetLocal()
--- 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
+	local myMana = NPC.GetMana(myHero)
+	local laser = NPC.GetAbilityByIndex(myHero, 0)
+	local missile = NPC.GetAbilityByIndex(myHero, 1)
+    local rearm = NPC.GetAbilityByIndex(myHero, 3)
 
--- 	local manaPoint = NPC.GetMana(myHero)
+	local magicDamageFactor = 0.75
 
--- 	local laser = NPC.GetAbilityByIndex(myHero, 0)
--- 	local missile = NPC.GetAbilityByIndex(myHero, 1)
--- 	local lens = NPC.GetItem(myHero, "item_aether_lens", true)
--- 	local laser_cast_range = 650 -- didnt consider tinker's extra 75 cast range talent in level 20
--- 	local missile_cast_range = 2500
--- 	local magicDamageFactor = 0.75
-
--- 	if lens then
--- 		laser_cast_range = laser_cast_range + 220
--- 		missile_cast_range = missile_cast_range + 220
--- 	end
-
--- 	for n, npc in pairs(NPC.GetHeroesInRadius(myHero, missile_cast_range, Enum.TeamType.TEAM_ENEMY)) do
+	for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if not NPC.IsIllusion(enemy) 
+            and not Entity.IsSameTeam(myHero, enemy) 
+            and not Entity.IsDormant(enemy)
+            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
+            and Entity.IsAlive(enemy) then		
 		
--- 		if Entity.IsHero(npc) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+			local laserLevel = Ability.GetLevel(laser)
+			local laserDmg = 80 * laserLevel
+            -- assumes that you add +100 laser damage talent at level 25
+            if NPC.GetCurrentLevel(myHero) == 25 then
+                laserDmg = laserDmg + 100
+            end
+			
+			local missileLevel = Ability.GetLevel(missile)
+			local missileDmg = (missileLevel > 0) and 125+75*(missileLevel-1) or 0
+			missileDmg = missileDmg * magicDamageFactor
+			
+			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
+			
+			local enemyHealth = Entity.GetHealth(enemy)
+			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg
+			local hitsLeft = math.ceil(enemyHealthLeft / hitDmg)
+            local comboLeft = math.ceil(enemyHealth / (laserDmg + missileDmg))
+
+			local pos = NPC.GetAbsOrigin(enemy)
+			local x, y, visible = Renderer.WorldToScreen(pos)
+
+            local hasRearm = Ability.GetLevel(rearm) > 0
+			local drawText = hasRearm and "x"..comboLeft or hitsLeft
+            
+            Renderer.SetDrawColor(255, 255, 0, 255)
+			Renderer.DrawTextCentered(TinkerExtended.font, x, y, drawText, 1)
+
+			-- local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
+
+			-- if (enemyHealthLeft <= 0 and comboManaCost < manaPoint) and (Ability.IsCastable(laser, manaPoint) and Ability.IsCastable(missile, manaPoint)) and NPC.IsEntityInRange(myHero, npc, laser_cast_range) then
+			-- 	Ability.CastNoTarget(missile, false)
+			-- 	Ability.CastTarget(laser, npc)
+			-- end
+
+			-- if enemyHealth < laserDmg and Ability.IsCastable(laser, manaPoint) and NPC.IsEntityInRange(myHero, npc, laser_cast_range) then
+			-- 	Ability.CastTarget(laser, npc)
+			-- end
+
+			-- if enemyHealth < missileDmg and Ability.IsCastable(missile, manaPoint) and NPC.IsEntityInRange(myHero, npc, missile_cast_range) then
+			-- 	Ability.CastNoTarget(missile, false)
+			-- end			
 		
--- 			local laserLevel = Ability.GetLevel(laser)
--- 			local laserDmg = 80 * laserLevel
-			
--- 			local missileLevel = Ability.GetLevel(missile)
--- 			local missileDmg = 125 + 75 * (missileLevel - 1)
--- 			if missileLevel == 0 then missileDmg = 0 end
--- 			missileDmg = missileDmg * magicDamageFactor
-			
--- 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, npc) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(npc))
-			
--- 			local enemyHealth = Entity.GetHealth(npc)
--- 			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg
--- 			local hitsLeft = math.ceil(enemyHealthLeft / hitDmg)
+		end -- end of the if statement
 
--- 			local pos = NPC.GetAbsOrigin(npc)
--- 			local x, y, visible = Renderer.WorldToScreen(pos)
--- 			Renderer.SetDrawColor(255, 255, 0, 255)
--- 			Renderer.DrawTextCentered(TinkerExtended.font, x, y, hitsLeft, 1)
+	end -- end of the for loop
 
--- 			local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
-
--- 			if (enemyHealthLeft <= 0 and comboManaCost < manaPoint) and (Ability.IsCastable(laser, manaPoint) and Ability.IsCastable(missile, manaPoint)) and NPC.IsEntityInRange(myHero, npc, laser_cast_range) then
--- 				Ability.CastNoTarget(missile, false)
--- 				Ability.CastTarget(laser, npc)
--- 			end
-
--- 			if enemyHealth < laserDmg and Ability.IsCastable(laser, manaPoint) and NPC.IsEntityInRange(myHero, npc, laser_cast_range) then
--- 				Ability.CastTarget(laser, npc)
--- 			end
-
--- 			if enemyHealth < missileDmg and Ability.IsCastable(missile, manaPoint) and NPC.IsEntityInRange(myHero, npc, missile_cast_range) then
--- 				Ability.CastNoTarget(missile, false)
--- 			end			
-		
--- 		end
-
--- 	end
-
--- end
+end
 
 -- Auto cast laser to nearest enemy in range
 -- If has agh scepter, can also cast laser to a enemy unit in range so as to reflect to enemy.
