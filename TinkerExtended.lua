@@ -7,18 +7,6 @@ TinkerExtended.autoSoulRing = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "R
 TinkerExtended.manaThreshold = 75
 TinkerExtended.healthThreshold = 50
 
--- using mutex to avoid bugs
-mutex = 0
-function wait()
-    repeat
-    until mutex <= 0
-    mutex = mutex + 1
-end
-
-function signal()
-    mutex = mutex - 1
-end
-
 function TinkerExtended.OnUpdate()
 	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
 	
@@ -109,13 +97,12 @@ function TinkerExtended.OneKey()
         Ability.CastNoTarget(missile)
     end
 
-    -- spell : laser (has to put castLaser() at last because casting laser has animation delay)
+    -- spell : laser (has to cast laser at last because casting laser has animation delay)
     local laser = NPC.GetAbilityByIndex(myHero, 0)
     local target = getLaserCastTarget(myHero, enemy)
-    if target and Ability.IsCastable(laser, myMana) and not NPC.HasState(target, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(myHero, target, Ability.GetCastRange(laser)) and not NPC.IsStructure(target) then
+    if target and Ability.IsCastable(laser, myMana) then
         Ability.CastTarget(laser, target)    
     end
-    -- castLaser(myHero, enemy)
     
 end
 
@@ -135,6 +122,17 @@ function TinkerExtended.OnDraw()
 
 	local magicDamageFactor = 0.75
 
+    local laserLevel = Ability.GetLevel(laser)
+    local laserDmg = 80 * laserLevel
+    -- assumes that you add +100 laser damage talent at level 25
+    if NPC.GetCurrentLevel(myHero) == 25 then
+        laserDmg = laserDmg + 100
+    end
+    
+    local missileLevel = Ability.GetLevel(missile)
+    local missileDmg = (missileLevel > 0) and 125+75*(missileLevel-1) or 0
+    missileDmg = missileDmg * magicDamageFactor
+
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if not NPC.IsIllusion(enemy) 
@@ -142,17 +140,6 @@ function TinkerExtended.OnDraw()
             and not Entity.IsDormant(enemy)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
             and Entity.IsAlive(enemy) then		
-		
-			local laserLevel = Ability.GetLevel(laser)
-			local laserDmg = 80 * laserLevel
-            -- assumes that you add +100 laser damage talent at level 25
-            if NPC.GetCurrentLevel(myHero) == 25 then
-                laserDmg = laserDmg + 100
-            end
-			
-			local missileLevel = Ability.GetLevel(missile)
-			local missileDmg = (missileLevel > 0) and 125+75*(missileLevel-1) or 0
-			missileDmg = missileDmg * magicDamageFactor
 			
 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
 			
@@ -175,28 +162,31 @@ function TinkerExtended.OnDraw()
     			Renderer.DrawTextCentered(TinkerExtended.font, x, y, drawText, 1)
             end
 
-            local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)
-            local target = enemy
-            if hasAghScepter then
-                Log.Write("test!!!!")
-            else
-                Log.Write("test!!!!")
+            -- auto cast laser for KS
+            if enemyHealth <= laserDmg and Ability.IsCastable(laser, myMana) then
+                local target = getLaserCastTarget(myHero, enemy)
+                if target then
+                    Ability.CastTarget(laser, target) 
+                    break
+                end
             end
 
-			-- local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
+            -- auto cast missile for KS
+            if enemyHealth < missileDmg and Ability.IsCastable(missile, myMana) and NPC.IsEntityInRange(myHero, enemy, Ability.GetCastRange(missile)) then
+                Ability.CastNoTarget(missile)
+                break
+            end
 
-			-- if (enemyHealthLeft <= 0 and comboManaCost < manaPoint) and (Ability.IsCastable(laser, manaPoint) and Ability.IsCastable(missile, manaPoint)) and NPC.IsEntityInRange(myHero, npc, laser_cast_range) then
-			-- 	Ability.CastNoTarget(missile, false)
-			-- 	Ability.CastTarget(laser, npc)
-			-- end
-
-			-- if enemyHealth < laserDmg and Ability.IsCastable(laser, manaPoint) and NPC.IsEntityInRange(myHero, npc, laser_cast_range) then
-			-- 	Ability.CastTarget(laser, npc)
-			-- end
-
-			-- if enemyHealth < missileDmg and Ability.IsCastable(missile, manaPoint) and NPC.IsEntityInRange(myHero, npc, missile_cast_range) then
-			-- 	Ability.CastNoTarget(missile, false)
-			-- end			
+            -- auto cast both laser and missile for KS
+			local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
+            if enemyHealthLeft <= 0 and comboManaCost <= myMana and Ability.IsCastable(laser, myMana) and Ability.IsCastable(missile, myMana) then
+                local target = getLaserCastTarget(myHero, enemy)
+                if target then
+    				Ability.CastNoTarget(missile)
+    				Ability.CastTarget(laser, target)
+                    break
+                end
+			end
 		
 		end -- end of the if statement
 
@@ -206,26 +196,35 @@ end
 
 -- If exists, return the enemy hero in the cast range of laser
 -- If has agh scepter, return a enemy unit in the cast range of laser that can refract laser to a enemy
+-- If no such enemy or unit, return nil
 function getLaserCastTarget(myHero, enemy)
-    if not myHero then return enemy end
-    local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)
-    if not hasAghScepter then return enemy end
     
+    if not myHero then return nil end
+    
+    local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)    
     local laser = NPC.GetAbilityByIndex(myHero, 0)
     local laserCastRange = Ability.GetCastRange(laser) -- Ability.GetCastRange() already considers bonus cast range.
     local laserRefractRange = 650
-
-    if NPC.IsEntityInRange(myHero, enemy, laserCastRange) then return enemy end
     
-    -- if has agh scepter
-    local enemyUnits = NPC.GetUnitsInRadius(myHero, laserCastRange, Enum.TeamType.TEAM_ENEMY)
-    for i, npc in ipairs(enemyUnits) do
-        if npc and NPC.IsEntityInRange(npc, enemy, laserRefractRange) and not NPC.IsStructure(npc) then
-            return npc
+    -- if dont have agh scepter
+    if not hasAghScepter then 
+        if NPC.IsEntityInRange(myHero, enemy, laserCastRange) then
+            return enemy
+        else 
+            return nil
         end
     end
 
-    return nil
+    -- if have agh scepter
+    local enemyUnitsAround = NPC.GetUnitsInRadius(myHero, laserCastRange, Enum.TeamType.TEAM_ENEMY)
+    for i, npc in ipairs(enemyUnitsAround) do
+        if npc and NPC.IsEntityInRange(npc, enemy, laserRefractRange)
+            and NPC.IsEntityInRange(npc, myHero, laserCastRange) 
+            and not NPC.IsStructure(npc) 
+            and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+            return npc
+        end
+    end
 
 end
 
