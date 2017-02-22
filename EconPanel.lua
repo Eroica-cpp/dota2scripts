@@ -18,8 +18,10 @@
 
 local EconPanel = {}
 
-EconPanel.optionEnable = Menu.AddOption({ "Awareness" }, "Econ Panel", "show hero ranking of total item price")
+EconPanel.optionEnable = Menu.AddOption({ "Awareness", "Econ Panel" }, "Enable Econ Panel", "show hero ranking of total item price")
+EconPanel.key = Menu.AddKeyOption({ "Awareness", "Econ Panel" }, "Turn On/Off Key", Enum.ButtonCode.KEY_L)
 EconPanel.font = Renderer.LoadFont("Tahoma", 16, Enum.FontWeight.EXTRABOLD)
+EconPanel.isOpen = true
 
 EconPanel.heroes = {}
 EconPanel.heroes["npc_dota_hero_abaddon"] = "Abaddon"
@@ -298,8 +300,14 @@ EconPanel.item2price["item_vladmir"] = 2275 -- "Vladmir's Offering"
 EconPanel.item2price["item_wraith_band"] = 485 -- "Wraith Band"
 EconPanel.item2price["item_yasha"] = 2050 -- "Yasha"
 
+function EconPanel.OnUpdate()
+	if Menu.IsEnabled(EconPanel.optionEnable) and Menu.IsKeyDownOnce(EconPanel.key) then
+		EconPanel.isOpen = not EconPanel.isOpen
+	end
+end
+
 function EconPanel.OnDraw()
-	if not Menu.IsEnabled(EconPanel.optionEnable) then return end
+	if not Menu.IsEnabled(EconPanel.optionEnable) or not EconPanel.isOpen then return end
 
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
