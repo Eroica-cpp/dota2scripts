@@ -1,7 +1,7 @@
 -- ===========================================
--- Economic Panel (Version 1.3)
+-- Economic Panel (Version 2.0)
 -- Author : Eroica (eroicacmcs@gmail.com)
--- Date : 2017.2.19
+-- Date : 2017.2.22
 -- ===========================================
 -- 
 -- Usage:
@@ -22,121 +22,123 @@ EconPanel.optionEnable = Menu.AddOption({ "Awareness", "Econ Panel" }, "Enable E
 EconPanel.key = Menu.AddKeyOption({ "Awareness", "Econ Panel" }, "Turn On/Off Key", Enum.ButtonCode.KEY_L)
 EconPanel.font = Renderer.LoadFont("Tahoma", 16, Enum.FontWeight.EXTRABOLD)
 EconPanel.isOpen = true
+EconPanel.heroIconPath = "resource/flash3/images/heroes/"
+handlers = {}
 
-EconPanel.heroes = {}
-EconPanel.heroes["npc_dota_hero_abaddon"] = "Abaddon"
-EconPanel.heroes["npc_dota_hero_alchemist"] = "Alchemist"
-EconPanel.heroes["npc_dota_hero_antimage"] = "Anti-Mage"
-EconPanel.heroes["npc_dota_hero_ancient_apparition"] = "Ancient Apparition"
-EconPanel.heroes["npc_dota_hero_arcwarden"] = "Arc Warden"
-EconPanel.heroes["npc_dota_hero_axe"] = "Axe"
-EconPanel.heroes["npc_dota_hero_bane"] = "Bane"
-EconPanel.heroes["npc_dota_hero_batrider"] = "Batrider"
-EconPanel.heroes["npc_dota_hero_beastmaster"] = "Beastmaster"
-EconPanel.heroes["npc_dota_hero_bloodseeker"] = "Bloodseeker"
-EconPanel.heroes["npc_dota_hero_bounty_hunter"] = "Bounty Hunter"
-EconPanel.heroes["npc_dota_hero_brewmaster"] = "Brewmaster"
-EconPanel.heroes["npc_dota_hero_bristleback"] = "Bristleback"
-EconPanel.heroes["npc_dota_hero_broodmother"] = "Broodmother"
-EconPanel.heroes["npc_dota_hero_centaur"] = "Centaur Warrunner"
-EconPanel.heroes["npc_dota_hero_chaos_knight"] = "Chaos Knight"
-EconPanel.heroes["npc_dota_hero_chen"] = "Chen"
-EconPanel.heroes["npc_dota_hero_clinkz"] = "Clinkz"
-EconPanel.heroes["npc_dota_hero_rattletrap"] = "Clockwerk"
-EconPanel.heroes["npc_dota_hero_crystal_maiden"] = "Crystal Maiden"
-EconPanel.heroes["npc_dota_hero_dark_seer"] = "Dark Seer"
-EconPanel.heroes["npc_dota_hero_dazzle"] = "Dazzle"
-EconPanel.heroes["npc_dota_hero_death_prophet"] = "Death Prophet"
-EconPanel.heroes["npc_dota_hero_disruptor"] = "Disruptor"
-EconPanel.heroes["npc_dota_hero_doom_bringer"] = "Doom"
-EconPanel.heroes["npc_dota_hero_dragon_knight"] = "Dragon Knight"
-EconPanel.heroes["npc_dota_hero_drow_ranger"] = "Drow Ranger"
-EconPanel.heroes["npc_dota_hero_earth_spirit"] = "Earth Spirit"
-EconPanel.heroes["npc_dota_hero_earthshaker"] = "Earthshaker"
-EconPanel.heroes["npc_dota_hero_elder_titan"] = "Elder Titan"
-EconPanel.heroes["npc_dota_hero_ember_spirit"] = "Ember Spirit"
-EconPanel.heroes["npc_dota_hero_enchantress"] = "Enchantress"
-EconPanel.heroes["npc_dota_hero_enigma"] = "Enigma"
-EconPanel.heroes["npc_dota_hero_faceless_void"] = "Faceless Void"
-EconPanel.heroes["npc_dota_hero_gyrocopter"] = "Gyrocopter"
-EconPanel.heroes["npc_dota_hero_huskar"] = "Huskar"
-EconPanel.heroes["npc_dota_hero_invoker"] = "Invoker"
-EconPanel.heroes["npc_dota_hero_wisp"] = "Io"
-EconPanel.heroes["npc_dota_hero_jakiro"] = "Jakiro"
-EconPanel.heroes["npc_dota_hero_juggernaut"] = "Juggernaut"
-EconPanel.heroes["npc_dota_hero_keeper_of_the_light"] = "Keeper of the Light"
-EconPanel.heroes["npc_dota_hero_kunkka"] = "Kunkka"
-EconPanel.heroes["npc_dota_hero_legion_commander"] = "Legion Commander"
-EconPanel.heroes["npc_dota_hero_leshrac"] = "Leshrac"
-EconPanel.heroes["npc_dota_hero_lich"] = "Lich"
-EconPanel.heroes["npc_dota_hero_life_stealer"] = "Lifestealer"
-EconPanel.heroes["npc_dota_hero_lina"] = "Lina"
-EconPanel.heroes["npc_dota_hero_lion"] = "Lion"
-EconPanel.heroes["npc_dota_hero_lone_druid"] = "Lone Druid"
-EconPanel.heroes["npc_dota_hero_luna"] = "Luna"
-EconPanel.heroes["npc_dota_hero_lycan"] = "Lycan"
-EconPanel.heroes["npc_dota_hero_magnataur"] = "Magnus"
-EconPanel.heroes["npc_dota_hero_medusa"] = "Medusa"
-EconPanel.heroes["npc_dota_hero_meepo"] = "Meepo"
-EconPanel.heroes["npc_dota_hero_mirana"] = "Mirana"
-EconPanel.heroes["npc_dota_hero_morphling"] = "Morphling"
-EconPanel.heroes["npc_dota_hero_monkey_king"] = "Monkey King"
-EconPanel.heroes["npc_dota_hero_naga_siren"] = "Naga Siren"
-EconPanel.heroes["npc_dota_hero_furion"] = "Nature's Prophet"
-EconPanel.heroes["npc_dota_hero_necrolyte"] = "Necrophos"
-EconPanel.heroes["npc_dota_hero_night_stalker"] = "Night Stalker"
-EconPanel.heroes["npc_dota_hero_nyx_assassin"] = "Nyx Assassin"
-EconPanel.heroes["npc_dota_hero_ogre_magi"] = "Ogre Magi"
-EconPanel.heroes["npc_dota_hero_omniknight"] = "Omniknight"
-EconPanel.heroes["npc_dota_hero_oracle"] = "Oracle"
-EconPanel.heroes["npc_dota_hero_obsidian_destroyer"] = "Outworld Devourer"
-EconPanel.heroes["npc_dota_hero_phantom_assassin"] = "Phantom Assassin"
-EconPanel.heroes["npc_dota_hero_phantom_lancer"] = "Phantom Lancer"
-EconPanel.heroes["npc_dota_hero_phoenix"] = "Phoenix"
-EconPanel.heroes["npc_dota_hero_puck"] = "Puck"
-EconPanel.heroes["npc_dota_hero_pudge"] = "Pudge"
-EconPanel.heroes["npc_dota_hero_pugna"] = "Pugna"
-EconPanel.heroes["npc_dota_hero_queenofpain"] = "Queen of Pain"
-EconPanel.heroes["npc_dota_hero_razor"] = "Razor"
-EconPanel.heroes["npc_dota_hero_riki"] = "Riki"
-EconPanel.heroes["npc_dota_hero_rubick"] = "Rubick"
-EconPanel.heroes["npc_dota_hero_sand_king"] = "Sand King"
-EconPanel.heroes["npc_dota_hero_shadow_demon"] = "Shadow Demon"
-EconPanel.heroes["npc_dota_hero_nevermore"] = "Shadow Fiend"
-EconPanel.heroes["npc_dota_hero_shadow_shaman"] = "Shadow Shaman"
-EconPanel.heroes["npc_dota_hero_silencer"] = "Silencer"
-EconPanel.heroes["npc_dota_hero_skywrath_mage"] = "Skywrath Mage"
-EconPanel.heroes["npc_dota_hero_slardar"] = "Slardar"
-EconPanel.heroes["npc_dota_hero_slark"] = "Slark"
-EconPanel.heroes["npc_dota_hero_sniper"] = "Sniper"
-EconPanel.heroes["npc_dota_hero_spectre"] = "Spectre"
-EconPanel.heroes["npc_dota_hero_spirit_breaker"] = "Spirit Breaker"
-EconPanel.heroes["npc_dota_hero_storm_spirit"] = "Storm Spirit"
-EconPanel.heroes["npc_dota_hero_sven"] = "Sven"
-EconPanel.heroes["npc_dota_hero_techies"] = "Techies"
-EconPanel.heroes["npc_dota_hero_templar_assassin"] = "Templar Assassin"
-EconPanel.heroes["npc_dota_hero_terrorblade"] = "Terrorblade"
-EconPanel.heroes["npc_dota_hero_tidehunter"] = "Tidehunter"
-EconPanel.heroes["npc_dota_hero_shredder"] = "Timbersaw"
-EconPanel.heroes["npc_dota_hero_tinker"] = "Tinker"
-EconPanel.heroes["npc_dota_hero_tiny"] = "Tiny"
-EconPanel.heroes["npc_dota_hero_treant"] = "Treant Protector"
-EconPanel.heroes["npc_dota_hero_troll_warlord"] = "Troll Warlord"
-EconPanel.heroes["npc_dota_hero_tusk"] = "Tusk"
-EconPanel.heroes["npc_dota_hero_abyssal_underlord"] = "Underlord"
-EconPanel.heroes["npc_dota_hero_undying"] = "Undying"
-EconPanel.heroes["npc_dota_hero_ursa"] = "Ursa"
-EconPanel.heroes["npc_dota_hero_vengefulspirit"] = "Vengeful Spirit"
-EconPanel.heroes["npc_dota_hero_venomancer"] = "Venomancer"
-EconPanel.heroes["npc_dota_hero_viper"] = "Viper"
-EconPanel.heroes["npc_dota_hero_visage"] = "Visage"
-EconPanel.heroes["npc_dota_hero_warlock"] = "Warlock"
-EconPanel.heroes["npc_dota_hero_weaver"] = "Weaver"
-EconPanel.heroes["npc_dota_hero_windrunner"] = "Windranger"
-EconPanel.heroes["npc_dota_hero_winter_wyvern"] = "Winter Wyvern"
-EconPanel.heroes["npc_dota_hero_witch_doctor"] = "Witch Doctor"
-EconPanel.heroes["npc_dota_hero_skeleton_king"] = "Wraith King"
-EconPanel.heroes["npc_dota_hero_zuus"] = "Zeus"
+-- EconPanel.heroes = {}
+-- EconPanel.heroes["npc_dota_hero_abaddon"] = "Abaddon"
+-- EconPanel.heroes["npc_dota_hero_alchemist"] = "Alchemist"
+-- EconPanel.heroes["npc_dota_hero_antimage"] = "Anti-Mage"
+-- EconPanel.heroes["npc_dota_hero_ancient_apparition"] = "Ancient Apparition"
+-- EconPanel.heroes["npc_dota_hero_arcwarden"] = "Arc Warden"
+-- EconPanel.heroes["npc_dota_hero_axe"] = "Axe"
+-- EconPanel.heroes["npc_dota_hero_bane"] = "Bane"
+-- EconPanel.heroes["npc_dota_hero_batrider"] = "Batrider"
+-- EconPanel.heroes["npc_dota_hero_beastmaster"] = "Beastmaster"
+-- EconPanel.heroes["npc_dota_hero_bloodseeker"] = "Bloodseeker"
+-- EconPanel.heroes["npc_dota_hero_bounty_hunter"] = "Bounty Hunter"
+-- EconPanel.heroes["npc_dota_hero_brewmaster"] = "Brewmaster"
+-- EconPanel.heroes["npc_dota_hero_bristleback"] = "Bristleback"
+-- EconPanel.heroes["npc_dota_hero_broodmother"] = "Broodmother"
+-- EconPanel.heroes["npc_dota_hero_centaur"] = "Centaur Warrunner"
+-- EconPanel.heroes["npc_dota_hero_chaos_knight"] = "Chaos Knight"
+-- EconPanel.heroes["npc_dota_hero_chen"] = "Chen"
+-- EconPanel.heroes["npc_dota_hero_clinkz"] = "Clinkz"
+-- EconPanel.heroes["npc_dota_hero_rattletrap"] = "Clockwerk"
+-- EconPanel.heroes["npc_dota_hero_crystal_maiden"] = "Crystal Maiden"
+-- EconPanel.heroes["npc_dota_hero_dark_seer"] = "Dark Seer"
+-- EconPanel.heroes["npc_dota_hero_dazzle"] = "Dazzle"
+-- EconPanel.heroes["npc_dota_hero_death_prophet"] = "Death Prophet"
+-- EconPanel.heroes["npc_dota_hero_disruptor"] = "Disruptor"
+-- EconPanel.heroes["npc_dota_hero_doom_bringer"] = "Doom"
+-- EconPanel.heroes["npc_dota_hero_dragon_knight"] = "Dragon Knight"
+-- EconPanel.heroes["npc_dota_hero_drow_ranger"] = "Drow Ranger"
+-- EconPanel.heroes["npc_dota_hero_earth_spirit"] = "Earth Spirit"
+-- EconPanel.heroes["npc_dota_hero_earthshaker"] = "Earthshaker"
+-- EconPanel.heroes["npc_dota_hero_elder_titan"] = "Elder Titan"
+-- EconPanel.heroes["npc_dota_hero_ember_spirit"] = "Ember Spirit"
+-- EconPanel.heroes["npc_dota_hero_enchantress"] = "Enchantress"
+-- EconPanel.heroes["npc_dota_hero_enigma"] = "Enigma"
+-- EconPanel.heroes["npc_dota_hero_faceless_void"] = "Faceless Void"
+-- EconPanel.heroes["npc_dota_hero_gyrocopter"] = "Gyrocopter"
+-- EconPanel.heroes["npc_dota_hero_huskar"] = "Huskar"
+-- EconPanel.heroes["npc_dota_hero_invoker"] = "Invoker"
+-- EconPanel.heroes["npc_dota_hero_wisp"] = "Io"
+-- EconPanel.heroes["npc_dota_hero_jakiro"] = "Jakiro"
+-- EconPanel.heroes["npc_dota_hero_juggernaut"] = "Juggernaut"
+-- EconPanel.heroes["npc_dota_hero_keeper_of_the_light"] = "Keeper of the Light"
+-- EconPanel.heroes["npc_dota_hero_kunkka"] = "Kunkka"
+-- EconPanel.heroes["npc_dota_hero_legion_commander"] = "Legion Commander"
+-- EconPanel.heroes["npc_dota_hero_leshrac"] = "Leshrac"
+-- EconPanel.heroes["npc_dota_hero_lich"] = "Lich"
+-- EconPanel.heroes["npc_dota_hero_life_stealer"] = "Lifestealer"
+-- EconPanel.heroes["npc_dota_hero_lina"] = "Lina"
+-- EconPanel.heroes["npc_dota_hero_lion"] = "Lion"
+-- EconPanel.heroes["npc_dota_hero_lone_druid"] = "Lone Druid"
+-- EconPanel.heroes["npc_dota_hero_luna"] = "Luna"
+-- EconPanel.heroes["npc_dota_hero_lycan"] = "Lycan"
+-- EconPanel.heroes["npc_dota_hero_magnataur"] = "Magnus"
+-- EconPanel.heroes["npc_dota_hero_medusa"] = "Medusa"
+-- EconPanel.heroes["npc_dota_hero_meepo"] = "Meepo"
+-- EconPanel.heroes["npc_dota_hero_mirana"] = "Mirana"
+-- EconPanel.heroes["npc_dota_hero_morphling"] = "Morphling"
+-- EconPanel.heroes["npc_dota_hero_monkey_king"] = "Monkey King"
+-- EconPanel.heroes["npc_dota_hero_naga_siren"] = "Naga Siren"
+-- EconPanel.heroes["npc_dota_hero_furion"] = "Nature's Prophet"
+-- EconPanel.heroes["npc_dota_hero_necrolyte"] = "Necrophos"
+-- EconPanel.heroes["npc_dota_hero_night_stalker"] = "Night Stalker"
+-- EconPanel.heroes["npc_dota_hero_nyx_assassin"] = "Nyx Assassin"
+-- EconPanel.heroes["npc_dota_hero_ogre_magi"] = "Ogre Magi"
+-- EconPanel.heroes["npc_dota_hero_omniknight"] = "Omniknight"
+-- EconPanel.heroes["npc_dota_hero_oracle"] = "Oracle"
+-- EconPanel.heroes["npc_dota_hero_obsidian_destroyer"] = "Outworld Devourer"
+-- EconPanel.heroes["npc_dota_hero_phantom_assassin"] = "Phantom Assassin"
+-- EconPanel.heroes["npc_dota_hero_phantom_lancer"] = "Phantom Lancer"
+-- EconPanel.heroes["npc_dota_hero_phoenix"] = "Phoenix"
+-- EconPanel.heroes["npc_dota_hero_puck"] = "Puck"
+-- EconPanel.heroes["npc_dota_hero_pudge"] = "Pudge"
+-- EconPanel.heroes["npc_dota_hero_pugna"] = "Pugna"
+-- EconPanel.heroes["npc_dota_hero_queenofpain"] = "Queen of Pain"
+-- EconPanel.heroes["npc_dota_hero_razor"] = "Razor"
+-- EconPanel.heroes["npc_dota_hero_riki"] = "Riki"
+-- EconPanel.heroes["npc_dota_hero_rubick"] = "Rubick"
+-- EconPanel.heroes["npc_dota_hero_sand_king"] = "Sand King"
+-- EconPanel.heroes["npc_dota_hero_shadow_demon"] = "Shadow Demon"
+-- EconPanel.heroes["npc_dota_hero_nevermore"] = "Shadow Fiend"
+-- EconPanel.heroes["npc_dota_hero_shadow_shaman"] = "Shadow Shaman"
+-- EconPanel.heroes["npc_dota_hero_silencer"] = "Silencer"
+-- EconPanel.heroes["npc_dota_hero_skywrath_mage"] = "Skywrath Mage"
+-- EconPanel.heroes["npc_dota_hero_slardar"] = "Slardar"
+-- EconPanel.heroes["npc_dota_hero_slark"] = "Slark"
+-- EconPanel.heroes["npc_dota_hero_sniper"] = "Sniper"
+-- EconPanel.heroes["npc_dota_hero_spectre"] = "Spectre"
+-- EconPanel.heroes["npc_dota_hero_spirit_breaker"] = "Spirit Breaker"
+-- EconPanel.heroes["npc_dota_hero_storm_spirit"] = "Storm Spirit"
+-- EconPanel.heroes["npc_dota_hero_sven"] = "Sven"
+-- EconPanel.heroes["npc_dota_hero_techies"] = "Techies"
+-- EconPanel.heroes["npc_dota_hero_templar_assassin"] = "Templar Assassin"
+-- EconPanel.heroes["npc_dota_hero_terrorblade"] = "Terrorblade"
+-- EconPanel.heroes["npc_dota_hero_tidehunter"] = "Tidehunter"
+-- EconPanel.heroes["npc_dota_hero_shredder"] = "Timbersaw"
+-- EconPanel.heroes["npc_dota_hero_tinker"] = "Tinker"
+-- EconPanel.heroes["npc_dota_hero_tiny"] = "Tiny"
+-- EconPanel.heroes["npc_dota_hero_treant"] = "Treant Protector"
+-- EconPanel.heroes["npc_dota_hero_troll_warlord"] = "Troll Warlord"
+-- EconPanel.heroes["npc_dota_hero_tusk"] = "Tusk"
+-- EconPanel.heroes["npc_dota_hero_abyssal_underlord"] = "Underlord"
+-- EconPanel.heroes["npc_dota_hero_undying"] = "Undying"
+-- EconPanel.heroes["npc_dota_hero_ursa"] = "Ursa"
+-- EconPanel.heroes["npc_dota_hero_vengefulspirit"] = "Vengeful Spirit"
+-- EconPanel.heroes["npc_dota_hero_venomancer"] = "Venomancer"
+-- EconPanel.heroes["npc_dota_hero_viper"] = "Viper"
+-- EconPanel.heroes["npc_dota_hero_visage"] = "Visage"
+-- EconPanel.heroes["npc_dota_hero_warlock"] = "Warlock"
+-- EconPanel.heroes["npc_dota_hero_weaver"] = "Weaver"
+-- EconPanel.heroes["npc_dota_hero_windrunner"] = "Windranger"
+-- EconPanel.heroes["npc_dota_hero_winter_wyvern"] = "Winter Wyvern"
+-- EconPanel.heroes["npc_dota_hero_witch_doctor"] = "Witch Doctor"
+-- EconPanel.heroes["npc_dota_hero_skeleton_king"] = "Wraith King"
+-- EconPanel.heroes["npc_dota_hero_zuus"] = "Zeus"
 
 EconPanel.item2price = {}
 EconPanel.item2price["item_aegis"] = 0 --"Aegis of the Immortal"
@@ -318,7 +320,8 @@ function EconPanel.OnDraw()
 	for i = 1, Heroes.Count() do
 		local hero = Heroes.Get(i)
 		if not NPC.IsIllusion(hero) then
-			local heroName = EconPanel.heroes[NPC.GetUnitName(hero)]
+			-- local heroName = EconPanel.heroes[NPC.GetUnitName(hero)]
+			local heroName = NPC.GetUnitName(hero)
 			isSameTeamTable[heroName] = Entity.IsSameTeam(myHero, hero)
 			econTable[#econTable + 1] = {heroName, EconPanel.GetEcon(hero)}
 		end
@@ -335,6 +338,7 @@ function EconPanel.OnDraw()
 	local maxWidth = 200
 	local maxGold = 1
 	local rectHeight = lineGap - 1
+	local heroIconWidth = math.floor(rectHeight * 128 / 72) -- original image is 128 * 72 (pixels)
 
 	local myTeamEcon = 0
 	local enemyTeamEcon = 0
@@ -353,12 +357,27 @@ function EconPanel.OnDraw()
 		end
 
 		drawY = drawY + lineGap
+		-- draw bar
 		local rectWidth = math.floor(maxWidth * econValue / maxGold)
 		Renderer.DrawFilledRect(drawX, drawY, rectWidth, rectHeight)
 		
-		local drawText = econValue.." - "..heroName
+		-- draw text
+		local drawText = econValue -- .." - "..heroName
 		Renderer.SetDrawColor(255, 255, 255, 255)
-		Renderer.DrawText(EconPanel.font, drawX+wordGap, drawY, drawText, 1)
+		Renderer.DrawText(EconPanel.font, drawX+heroIconWidth+wordGap, drawY, drawText, 1)
+
+		-- draw hero icon
+		local tmpHeroName = string.gsub(heroName, "npc_dota_hero_", "")
+		local imageHandle
+		if handlers[tmpHeroName] then -- need to cache image handlers, instead of calling LoadImage() evrytime
+			imageHandle = handlers[tmpHeroName]
+		else
+			imageHandle = Renderer.LoadImage(EconPanel.heroIconPath .. tmpHeroName .. ".png")
+			handlers[tmpHeroName] = imageHandle
+		end
+		Renderer.SetDrawColor(255, 255, 255, 255)
+		Renderer.DrawImage(imageHandle, drawX, drawY, heroIconWidth, rectHeight)
+
 	end
 
 	local econDiff = myTeamEcon - enemyTeamEcon
