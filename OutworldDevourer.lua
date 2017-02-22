@@ -1,8 +1,8 @@
 -- ==================================
 -- File Name : OutworldDevourer.lua
 -- Author    : Eroica
--- Version   : 2.2
--- Date      : 2017.2.18
+-- Version   : 2.3
+-- Date      : 2017.2.22
 -- ==================================
 
 local OutworldDevourer = {}
@@ -142,7 +142,7 @@ function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 			local enemyIntell = Hero.GetIntellectTotal(enemy)
 			local intellDiff = (myIntell >= enemyIntell) and (myIntell - enemyIntell) or 0
 			local ultimateDamage = intellDiff * intDiffDamageMultiplier * magicDamageFactor
-			
+
 			-- if has ultimate, counts hits left to ultimate
 			-- if not, counts hits left to imprison
 			local enemyHpLeft = enemyHp
@@ -161,7 +161,8 @@ function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 				end
 			else
 				if Ability.IsCastable(imprison, myMana) then
-					enemyHpLeft = enemyHpLeft - trueImprisonDamage
+					-- consider health regen in 4s imprison
+					enemyHpLeft = enemyHpLeft - trueImprisonDamage + 4*NPC.GetHealthRegen(enemy)
 				end
 				hitsLeft = math.ceil(enemyHpLeft / oneHitDamage)
 			end
