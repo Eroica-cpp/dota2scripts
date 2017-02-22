@@ -92,11 +92,12 @@ function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 			local oneHitDamage = physicalDamage + orbDamage
 			local trueMagicDamage = imprisonDamage * magicDamageFactor
 
-			if enemyHp <= oneHitDamage and NPC.IsEntityInRange(enemy, myHero, attackRange) then
+			if enemyHp < oneHitDamage and NPC.IsEntityInRange(enemy, myHero, attackRange) then
 				Player.AttackTarget(Players.GetLocal(), myHero, enemy)
 			end
 
-			if enemyHp <= trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
+			enemyHp = enemyHp + 4 * NPC.GetHealthRegen(enemy) -- enemyHp increases during 4s imprison
+			if enemyHp < trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
 				Ability.CastTarget(imprison, enemy)
 			end
 			-- need to avoid imprison enemy that dueled by teammate
@@ -117,39 +118,52 @@ function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 	local intellSteal = orbLevel
 	local orbHitDamageAccumulator = intellSteal * intellToManaPara * manaToOrbDamagePara
 
+	local imprisonLevel = Ability.GetLevel(imprison)
+	-- Ability.GetDamage(imprison) doesnt work
+	local imprisonDamage = (imprisonLevel > 0) and 100+75*(imprisonLevel-1) or 0
+
 	local ultimateLevel = Ability.GetLevel(ultimate)
 	-- int diff damaga multiplier are : 8 / 9 / 10
-	local intDiffDamageMultiplier = 7 + ultimateLevel
+	local intDiffDamageMultiplier = (ultimateLevel > 0) and 7 + ultimateLevel or 0
 
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
 		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 
+			-- orb damage
 			local enemyHp = Entity.GetHealth(enemy)
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
 			local oneHitDamage = physicalDamage + orbDamage
 
+			-- imprison damage
+			local trueImprisonDamage = imprisonDamage * magicDamageFactor
+			
+			-- ultimate damage
 			local enemyIntell = Hero.GetIntellectTotal(enemy)
 			local intellDiff = (myIntell >= enemyIntell) and (myIntell - enemyIntell) or 0
-
-			local ultimateDamage = 0
-			if ultimateLevel > 0 and Ability.IsCastable(ultimate, myMana) then
-				ultimateDamage = intellDiff * intDiffDamageMultiplier * magicDamageFactor
-				-- this calculation is tricky, each hit creates 2*intDiffDamageMultiplier*orbLevel extra damage into ultimate
-				oneHitDamage = oneHitDamage + 2 * orbLevel * intDiffDamageMultiplier
-			end
+			local ultimateDamage = intellDiff * intDiffDamageMultiplier * magicDamageFactor
 			
-			local enemyHpLeft = math.floor(enemyHp - ultimateDamage)
-
+			-- if has ultimate, counts hits left to ultimate
+			-- if not, counts hits left to imprison
+			local enemyHpLeft = enemyHp
 			local hitsLeft = 999999
-			if orbLevel > 0 then
-				-- solve a quadratic equation
-				local a = 0.5*orbHitDamageAccumulator
-				local b = oneHitDamage - 0.5*orbHitDamageAccumulator
-				local c = -enemyHpLeft
-				hitsLeft = math.ceil( (-b + math.sqrt(b*b - 4*a*c)) / (2*a) )
+			if Ability.IsCastable(ultimate, myMana) then
+				oneHitDamage = oneHitDamage + 2 * orbLevel * intDiffDamageMultiplier
+				enemyHpLeft = enemyHpLeft - ultimateDamage
+				if orbLevel > 0 then
+					-- solve a quadratic equation
+					local a = 0.5*orbHitDamageAccumulator
+					local b = oneHitDamage - 0.5*orbHitDamageAccumulator
+					local c = -enemyHpLeft
+					hitsLeft = math.ceil( (-b + math.sqrt(b*b - 4*a*c)) / (2*a) )
+				else
+					hitsLeft = math.ceil(enemyHpLeft / physicalDamage)
+				end
 			else
-				hitsLeft = math.ceil(enemyHpLeft / physicalDamage)
+				if Ability.IsCastable(imprison, myMana) then
+					enemyHpLeft = enemyHpLeft - trueImprisonDamage
+				end
+				hitsLeft = math.ceil(enemyHpLeft / oneHitDamage)
 			end
 
 			-- draw
@@ -157,7 +171,7 @@ function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 			local x, y, visible = Renderer.WorldToScreen(pos)
 
 			-- red : can kill; green : cant kill
-			if enemyHpLeft <= 0 and ultimateLevel > 0 then
+			if enemyHpLeft <= 0 then
 				Renderer.SetDrawColor(255, 0, 0, 255)
 				Renderer.DrawTextCentered(OutworldDevourer.font, x, y, "Kill", 1)
 			else
@@ -173,9 +187,14 @@ end
 
 function getOrbDamage(myMana, orb)
 	local orbLevel = Ability.GetLevel(orb)
+	if orbLevel <= 0 then return 0 end
+
 	-- 6% 7% 8% 9% of mana pool into orb damaga
-	local manaToOrbDamagePara = (orbLevel > 0) and (0.05 + 0.01 * orbLevel) or 0
-	return myMana * manaToOrbDamagePara
+	local manaToOrbDamagePara = (0.05 + 0.01 * orbLevel)
+	-- cost 100/120/140/160 mana
+	local orbManaCost = 100 + (orbLevel - 1) * 20
+
+	return (myMana - orbManaCost) * manaToOrbDamagePara
 end
 
 return OutworldDevourer
