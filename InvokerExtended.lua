@@ -2,6 +2,7 @@ local InvokerExtended = {}
 
 InvokerExtended.autoSunStrikeOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Sun Strike", "On/Off")
 InvokerExtended.autoAlacrityOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Alacrity", "On/Off")
+-- InvokerExtended.autoSwitchInstanceOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Switch Instance", "On/Off")
 InvokerExtended.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 function InvokerExtended.OnUpdate()
@@ -19,7 +20,13 @@ function InvokerExtended.OnUpdate()
 
 	if Menu.IsEnabled(InvokerExtended.autoSunStrikeOption) then
 		InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
-end	end
+	end	
+
+	-- if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
+		-- InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
+	-- end	
+
+end
 
 -- auto cast alacrity after cold snap
 function InvokerExtended.AutoAlacrity(myHero, Q, W, E, R)
@@ -44,15 +51,14 @@ function InvokerExtended.AutoAlacrity(myHero, Q, W, E, R)
 			Ability.CastNoTarget(W)
 			Ability.CastNoTarget(E)
 			Ability.CastNoTarget(R)
-			sleep(0.05)
 		end
 		Ability.CastTarget(alacrity, myHero, true)
 		Ability.CastNoTarget(E)
 		Ability.CastNoTarget(E)
 		Ability.CastNoTarget(E)
-		sleep(0.05)
 	end
 
+	sleep(0.02)
 end
 
 -- To be done
@@ -62,6 +68,43 @@ function InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 	local myMana = NPC.GetMana(myHero)
 	local sunstrike = NPC.GetAbility(myHero, "invoker_sun_strike")
 	-- Log.Write("ok for now !!")
+end
+
+-- this function lags as hell. recommend to turn it off
+function InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
+	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
+	local QWEState = getQWEState(myHero)
+	local switchManaCost = 0
+	
+	-- Log.Write("W: " .. tostring(Ability.IsCastable(W, switchManaCost)))
+	
+	if NPC.IsRunning(myHero) then
+		if QWEState ~= "WWW" then
+			if Ability.IsCastable(W, switchManaCost) then
+				Ability.CastNoTarget(W)
+				Ability.CastNoTarget(W)
+				Ability.CastNoTarget(W)
+			end
+		end
+	elseif NPC.IsAttacking(myHero) then
+		if QWEState ~= "EEE" then
+			if Ability.IsCastable(E, switchManaCost) then
+				Ability.CastNoTarget(E)
+				Ability.CastNoTarget(E)
+				Ability.CastNoTarget(E)
+			end
+		end
+	else
+		if QWEState ~= "QQQ" then
+			if Ability.IsCastable(Q, switchManaCost) then
+				Ability.CastNoTarget(Q)
+				Ability.CastNoTarget(Q)
+				Ability.CastNoTarget(Q)
+			end
+		end
+	end
+
+	sleep(0.02)
 end
 
 -- return current state of QWE ("QWE", "QQQ", "EEE", etc)
