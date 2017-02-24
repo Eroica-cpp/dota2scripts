@@ -2,7 +2,7 @@ local InvokerExtended = {}
 
 InvokerExtended.autoSunStrikeOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Sun Strike", "On/Off")
 InvokerExtended.autoAlacrityOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Alacrity", "On/Off")
--- InvokerExtended.autoSwitchInstanceOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Switch Instance", "On/Off")
+InvokerExtended.autoSwitchInstanceOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Switch Instance", "On/Off")
 InvokerExtended.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 function InvokerExtended.OnUpdate()
@@ -22,9 +22,9 @@ function InvokerExtended.OnUpdate()
 		InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 	end	
 
-	-- if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
-		-- InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
-	-- end	
+	if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
+		InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
+	end	
 
 end
 
@@ -81,25 +81,25 @@ function InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
 	if NPC.IsRunning(myHero) then
 		if QWEState ~= "WWW" then
 			if Ability.IsCastable(W, switchManaCost) then
-				Ability.CastNoTarget(W)
-				Ability.CastNoTarget(W)
-				Ability.CastNoTarget(W)
+				Ability.CastNoTarget(W, true)
+				Ability.CastNoTarget(W, true)
+				Ability.CastNoTarget(W, true)
 			end
 		end
 	elseif NPC.IsAttacking(myHero) then
 		if QWEState ~= "EEE" then
 			if Ability.IsCastable(E, switchManaCost) then
-				Ability.CastNoTarget(E)
-				Ability.CastNoTarget(E)
-				Ability.CastNoTarget(E)
+				Ability.CastNoTarget(E, true)
+				Ability.CastNoTarget(E, true)
+				Ability.CastNoTarget(E, true)
 			end
 		end
 	else
 		if QWEState ~= "QQQ" then
 			if Ability.IsCastable(Q, switchManaCost) then
-				Ability.CastNoTarget(Q)
-				Ability.CastNoTarget(Q)
-				Ability.CastNoTarget(Q)
+				Ability.CastNoTarget(Q, true)
+				Ability.CastNoTarget(Q, true)
+				Ability.CastNoTarget(Q, true)
 			end
 		end
 	end
@@ -138,7 +138,7 @@ function hasInvoked(myHero, spell)
 	return (spell == spell_1) or (spell == spell_2)
 end
 
--- 0.05s delay works good for me
+-- 0.02s delay works good for me
 local clock = os.clock
 function sleep(n)  -- seconds
     local t0 = clock()
