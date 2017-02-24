@@ -66,8 +66,34 @@ function InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 	
 	local myMana = NPC.GetMana(myHero)
+	local invokeManaCost = NPC.HasItem(myHero, "item_ultimate_scepter", true) and 0 or 60
 	local sunstrike = NPC.GetAbility(myHero, "invoker_sun_strike")
-	-- Log.Write("ok for now !!")
+	if not sunstrike then return end
+	
+	for i = 1, Heroes.Count() do
+		local enemy = Heroes.Get(i)
+		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
+
+			local pos = NPC.GetAbsOrigin(enemy)
+
+			-- auto cast sunstrike when enemy is in a fixed position
+			if inFixedPosition(enemy) then
+				if not hasInvoked(myHero, sunstrike) and Ability.IsCastable(sunstrike, myMana-invokeManaCost) then
+					Ability.CastNoTarget(E)
+					Ability.CastNoTarget(E)
+					Ability.CastNoTarget(E)
+					Ability.CastNoTarget(R)
+					Ability.CastPosition(sunstrike, pos)
+				end
+				if hasInvoked(myHero, sunstrike)and Ability.IsCastable(sunstrike, myMana) then
+					Ability.CastPosition(sunstrike, pos)
+				end
+			end
+
+
+		end
+	end
+
 end
 
 -- this function lags as hell. recommend to turn it off
@@ -136,6 +162,16 @@ function hasInvoked(myHero, spell)
 	local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
 	local spell_2 = NPC.GetAbilityByIndex(myHero, 4)
 	return (spell == spell_1) or (spell == spell_2)
+end
+
+-- return true if npc is stunned, rooted, duel by LC, etc
+function inFixedPosition(npc)
+	return NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) 
+	or NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED)
+	or NPC.HasModifier(npc, "modifier_legion_commander_duel")
+	or NPC.HasModifier(npc, "modifier_axe_berserkers_call")
+	or NPC.HasModifier(npc, "modifier_faceless_void_chronosphere")
+	or NPC.HasModifier(npc, "modifier_enigma_black_hole_pull")
 end
 
 -- 0.02s delay works good for me
