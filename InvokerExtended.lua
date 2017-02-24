@@ -21,32 +21,37 @@ function InvokerExtended.OnUpdate()
 		InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 end	end
 
-
+-- auto cast alacrity after cold snap
 function InvokerExtended.AutoAlacrity(myHero, Q, W, E, R)
 	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 	
 	local myMana = NPC.GetMana(myHero)
+	local invokeManaCost = NPC.HasItem(myHero, "item_ultimate_scepter", true) and 0 or 60
+
 	local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
+	local cold_snap = NPC.GetAbility(myHero, "invoker_cold_snap")
+	local hasUsedColdSnap = false
+	for i = 1, Heroes.Count() do
+		local enemy = Heroes.Get(i)
+		if NPC.HasModifier(enemy, "modifier_invoker_cold_snap") then
+			hasUsedColdSnap = true
+		end
+	end
 
-	-- if alacrity then
-	-- 	modTable = NPC.GetModifiers(myHero)
-	-- 	for i, mod in ipairs(modTable) do
-	-- 		Log.Write(i .. ": " .. Modifier.GetName(mod))
-	-- 	end
-	-- end
-	Log.Write("QWE state: " .. getQWEState(myHero))
-
-	-- if alacrity and Ability.IsCastable(alacrity, myMana) then
-	-- 	Ability.CastNoTarget(W)
-	-- 	Ability.CastNoTarget(W)
-	-- 	Ability.CastNoTarget(E)
-	-- 	Ability.CastNoTarget(R)
-	-- 	Ability.CastTarget(alacrity, myHero, false)
-	-- 	Ability.CastNoTarget(E)
-	-- 	Ability.CastNoTarget(E)
-	-- 	Ability.CastNoTarget(E)
-	-- 	sleep(0.01)
-	-- end
+	if alacrity and Ability.IsCastable(alacrity, myMana-invokeManaCost) and hasUsedColdSnap then
+		if not hasInvoked(myHero, alacrity) then
+			Ability.CastNoTarget(W)
+			Ability.CastNoTarget(W)
+			Ability.CastNoTarget(E)
+			Ability.CastNoTarget(R)
+			sleep(0.05)
+		end
+		Ability.CastTarget(alacrity, myHero, true)
+		Ability.CastNoTarget(E)
+		Ability.CastNoTarget(E)
+		Ability.CastNoTarget(E)
+		sleep(0.05)
+	end
 
 end
 
@@ -59,6 +64,7 @@ function InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 	-- Log.Write("ok for now !!")
 end
 
+-- return current state of QWE ("QWE", "QQQ", "EEE", etc)
 function getQWEState(myHero)
 	local modTable = NPC.GetModifiers(myHero)
 	local Q_num, W_num, E_num = 0, 0, 0
@@ -81,6 +87,15 @@ function getQWEState(myHero)
 	return QWE_text
 end
 
+-- return whether a spell has been invoked.
+function hasInvoked(myHero, spell)
+	if not myHero or not spell then return false end
+	local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
+	local spell_2 = NPC.GetAbilityByIndex(myHero, 4)
+	return (spell == spell_1) or (spell == spell_2)
+end
+
+-- 0.05s delay works good for me
 local clock = os.clock
 function sleep(n)  -- seconds
     local t0 = clock()
