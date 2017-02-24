@@ -1,7 +1,8 @@
 local ShadowFiend = {}
 
-ShadowFiend.autoRaze = Menu.AddOption({"Hero Specific", "Shadow Fiend"}, "Auto Raze for KS", "On/Off")
+-- ShadowFiend.autoRaze = Menu.AddOption({"Hero Specific", "Shadow Fiend"}, "Auto Raze for KS", "On/Off")
 ShadowFiend.awareness = Menu.AddOption({"Hero Specific", "Shadow Fiend"}, "Awareness", "Show Kill Potential")
+ShadowFiend.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 function ShadowFiend.OnDraw()
 
@@ -30,24 +31,66 @@ function ShadowFiend.OnDraw()
 
             local enemyHp = Entity.GetHealth(enemy)
             local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
-            local hitsLeft = math.ceil((enemyHp - true_raze_damage) / physicalDamage)
+            local hitsLeft = (physicalDamage > 0) and math.ceil((enemyHp - true_raze_damage) / physicalDamage) or 999999
 
-            -- draw
+            -- =================
+            -- Awareness
+            -- =================
             local pos = NPC.GetAbsOrigin(enemy)
             local x, y, visible = Renderer.WorldToScreen(pos)
 
             -- red : can kill; green : cant kill
-            if hitsLeft <= 0 then
+            if enemyHp - true_raze_damage <= 0 then
                 Renderer.SetDrawColor(255, 0, 0, 255)
-                Renderer.DrawTextCentered(OutworldDevourer.font, x, y, "Kill", 1)
+                Renderer.DrawTextCentered(ShadowFiend.font, x, y, "One", 1)
+            elseif enemyHp - 2 * true_raze_damage <= 0 then
+                Renderer.SetDrawColor(255, 0, 0, 255)
+                Renderer.DrawTextCentered(ShadowFiend.font, x, y, "Two", 1)
             else
                 Renderer.SetDrawColor(0, 255, 0, 255)
-                Renderer.DrawTextCentered(OutworldDevourer.font, x, y, hitsLeft, 1)
+                Renderer.DrawTextCentered(ShadowFiend.font, x, y, hitsLeft, 1)
             end
+
+            -- ======================
+            -- auto kill using razes
+            -- ======================
+            -- local myPos = NPC.GetAbsOrigin(myHero)
+            -- local myAngle = Entity.GetRotation(myHero)
+
+            -- -- one raze to kill
+            -- if enemyHp - true_raze_damage <= 0 then
+            --     -- short_range +/- raze_radius/2
+            --     if Ability.IsCastable(raze_short, myMana) and NPC.IsEntityInRange(enemy, myHero, short_range+raze_radius/2) then
+            --         Ability.CastNoTarget(raze_short)
+            --         sleep(0.02)
+            --     end
+            --     -- mid_range +/- raze_radius/2
+            --     if Ability.IsCastable(raze_short, myMana) and not NPC.IsEntityInRange(enemy, myHero, mid_range-raze_radius/2) and NPC.IsEntityInRange(enemy, myHero, mid_range+raze_radius/2) then
+            --         Ability.CastNoTarget(raze_mid)
+            --         sleep(0.02)
+            --     end
+            --     -- long_range +/- raze_radius/2
+            --     if Ability.IsCastable(raze_short, myMana) and not NPC.IsEntityInRange(enemy, myHero, long_range-raze_radius/2) and NPC.IsEntityInRange(enemy, myHero, long_range+raze_radius/2) then
+            --         Ability.CastNoTarget(raze_long)
+            --         sleep(0.02)
+            --     end
+
+            -- -- two razes to kill
+            -- elseif enemyHp - 2 * true_raze_damage <= 0 then
+
+            -- end
 
         end -- end of if statement
     end -- end of for loop
 
+end
+
+
+
+local clock = os.clock
+function sleep(n)  -- seconds
+    local t0 = clock()
+    while clock() - t0 <= n do end
 end
 
 return ShadowFiend
