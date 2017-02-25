@@ -13,24 +13,32 @@ AutoStash.dontStashList = {
     item_bottle = true
 }
 
--- mutex is true  => to put items to stash
--- mutex is false => to put items to inventory
 local hasStashed = false
 
 function AutoStash.OnUpdate()
 	if not Menu.IsEnabled(AutoStash.optionEnable) then return end
 	
     local myHero = Heroes.GetLocal()
+    if not isInFountain(myHero) then return end
 
-    if not hasStashed and isInFountain(myHero) then
-        inventory2stash(myHero)
-        hasStashed = true
-    end
-    if hasStashed and not isInFountain(myHero) then
+    local tp = NPC.GetItem(myHero, "item_tpscroll", true)
+    local tp_boot_1 = NPC.GetItem(myHero, "item_travel_boots", true)
+    local tp_boot_2 = NPC.GetItem(myHero, "item_travel_boots_2", true)
+
+    local isTping = false
+    isTping = tp and (isTping or Ability.IsChannelling(tp)) or isTping
+    isTping = tp_boot_1 and (isTping or Ability.IsChannelling(tp_boot_1)) or isTping
+    isTping = tp_boot_2 and (isTping or Ability.IsChannelling(tp_boot_2)) or isTping
+    
+    if isTping and hasStashed then
         stash2inventory(myHero)
         hasStashed = false
     end
 
+    if not isTping and not hasStashed then
+        inventory2stash(myHero)
+        hasStashed = true
+    end
 end
 
 function inventory2stash(myHero)
