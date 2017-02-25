@@ -78,11 +78,12 @@ function InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 
 			-- auto cast sunstrike when enemy is in a fixed position
 			if inFixedPosition(enemy) then
-				if not hasInvoked(myHero, sunstrike) and Ability.IsCastable(sunstrike, myMana-invokeManaCost) then
+				if not hasInvoked(myHero, sunstrike) and Ability.IsCastable(sunstrike, myMana-invokeManaCost) and Ability.IsCastable(R, myMana) then
 					Ability.CastNoTarget(E)
 					Ability.CastNoTarget(E)
 					Ability.CastNoTarget(E)
 					Ability.CastNoTarget(R)
+					sleep(0.02)
 					Ability.CastPosition(sunstrike, pos)
 				end
 				if hasInvoked(myHero, sunstrike)and Ability.IsCastable(sunstrike, myMana) then
