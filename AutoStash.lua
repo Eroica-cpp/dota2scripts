@@ -19,7 +19,13 @@ function AutoStash.OnUpdate()
 	if not Menu.IsEnabled(AutoStash.optionEnable) then return end
 	
     local myHero = Heroes.GetLocal()
-    if not isInFountain(myHero) then return end
+    
+    if not isInFountain(myHero) then
+        if NPC.HasModifier(myHero, "modifier_fountain_aura_buff") and hasStashed then
+            stash2inventory(myHero)
+        end
+        return
+    end
 
     local tp = NPC.GetItem(myHero, "item_tpscroll", true)
     local tp_boot_1 = NPC.GetItem(myHero, "item_travel_boots", true)
@@ -30,15 +36,9 @@ function AutoStash.OnUpdate()
     isTping = tp_boot_1 and (isTping or Ability.IsChannelling(tp_boot_1)) or isTping
     isTping = tp_boot_2 and (isTping or Ability.IsChannelling(tp_boot_2)) or isTping
     
-    if isTping and hasStashed then
-        stash2inventory(myHero)
-        hasStashed = false
-    end
+    if isTping and hasStashed then stash2inventory(myHero) end
+    if not isTping and not hasStashed then inventory2stash(myHero) end
 
-    if not isTping and not hasStashed then
-        inventory2stash(myHero)
-        hasStashed = true
-    end
 end
 
 function inventory2stash(myHero)
@@ -52,6 +52,7 @@ function inventory2stash(myHero)
             end
         end
     end
+    hasStashed = true
 end
 
 function stash2inventory(myHero)
@@ -62,6 +63,7 @@ function stash2inventory(myHero)
             moveItemToSlot(myHero, item, i-delta)
         end
     end
+    hasStashed = false
 end
 
 function moveItemToSlot(myHero, item, slot_index)
