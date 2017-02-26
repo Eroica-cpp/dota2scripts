@@ -10,7 +10,13 @@ AutoStash.dontStashList = {
     item_travel_boots = true,
     item_travel_boots_2 = true,
     item_blink = true,
-    item_bottle = true
+    item_bottle = true,
+    item_faerie_fire = true,
+    item_flask = true, -- healing salve
+    item_clarity = true,
+    item_tango = true,
+    item_tango_single = true,
+    item_enchanted_mango = true
 }
 
 local hasStashed = false
