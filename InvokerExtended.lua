@@ -14,38 +14,62 @@ function InvokerExtended.OnUpdate()
 	local E = NPC.GetAbilityByIndex(myHero, 2)
 	local R = NPC.GetAbilityByIndex(myHero, 5)
 
-	if Menu.IsEnabled(InvokerExtended.autoAlacrityOption) then
-		InvokerExtended.AutoAlacrity(myHero, Q, W, E, R)
-	end
+	-- if Menu.IsEnabled(InvokerExtended.autoAlacrityOption) then
+	-- 	InvokerExtended.AutoAlacrity(myHero, Q, W, E, R)
+	-- end
 
 	if Menu.IsEnabled(InvokerExtended.autoSunStrikeOption) then
 		InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 	end	
 
-	if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
-		InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
-	end	
+	-- if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
+	-- 	InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
+	-- end	
 
 end
 
--- auto cast alacrity after cold snap
-function InvokerExtended.AutoAlacrity(myHero, Q, W, E, R)
-	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
-	
-	local myMana = NPC.GetMana(myHero)
-	local invokeManaCost = NPC.HasItem(myHero, "item_ultimate_scepter", true) and 0 or 60
+function InvokerExtended.OnPrepareUnitOrders(orders)
+	if not orders then return true end
+	if not orders.npc then return true end
+	if NPC.GetUnitName(orders.npc) ~= "npc_dota_hero_invoker" then return true end
+	if not orders.ability then return true end
 
-	local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
-	local cold_snap = NPC.GetAbility(myHero, "invoker_cold_snap")
-	local hasUsedColdSnap = false
-	for i = 1, Heroes.Count() do
-		local enemy = Heroes.Get(i)
-		if NPC.HasModifier(enemy, "modifier_invoker_cold_snap") then
-			hasUsedColdSnap = true
-		end
+	local Q = NPC.GetAbilityByIndex(orders.npc, 0)
+	local W = NPC.GetAbilityByIndex(orders.npc, 1)
+	local E = NPC.GetAbilityByIndex(orders.npc, 2)
+	local R = NPC.GetAbilityByIndex(orders.npc, 5)
+
+	-- cast alacrity after using cold_snap
+	if Menu.IsEnabled(InvokerExtended.autoAlacrityOption) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
+		castAlacrity(orders, Q, W, E, R)
+		return false
 	end
 
-	if alacrity and Ability.IsCastable(alacrity, myMana-invokeManaCost) and hasUsedColdSnap then
+	-- if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
+	-- 	InvokerExtended.AutoSwitchInstance(orders, Q, W, E, R)
+	-- 	return false
+	-- end	
+
+	-- if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION then 
+	-- 	Log.Write("move !!!!")
+	-- end
+	-- Log.Write(tostring(Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION))
+	-- Log.Write("order: " .. orders.order)
+
+	Player.PrepareUnitOrders(orders.player, orders.order, orders.target, orders.position, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+	return false
+end
+
+-- auto cast alacrity after cold snap
+function castAlacrity(orders, Q, W, E, R)
+	local myHero = orders.npc
+	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
+	local myMana = NPC.GetMana(myHero)
+
+	local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
+	local invokeManaCost = NPC.HasItem(myHero, "item_ultimate_scepter", true) and 0 or 60
+
+	if alacrity and Ability.IsCastable(W, 0) and Ability.IsCastable(E, 0) and Ability.IsCastable(R, invokeManaCost) and Ability.IsCastable(alacrity, myMana-invokeManaCost) then
 		if not hasInvoked(myHero, alacrity) then
 			Ability.CastNoTarget(W)
 			Ability.CastNoTarget(W)
@@ -58,7 +82,7 @@ function InvokerExtended.AutoAlacrity(myHero, Q, W, E, R)
 		Ability.CastNoTarget(E)
 	end
 
-	sleep(0.02)
+	Player.PrepareUnitOrders(orders.player, orders.order, orders.target, orders.position, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
 end
 
 -- To be done
@@ -98,41 +122,38 @@ function InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 end
 
 -- this function lags as hell. recommend to turn it off
-function InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
-	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
-	local QWEState = getQWEState(myHero)
-	local switchManaCost = 0
+-- function InvokerExtended.AutoSwitchInstance(orders, Q, W, E, R)
+-- 	if NPC.IsStunned(orders.npc) or NPC.IsSilenced(orders.npc) then return end
+-- 	local QWEState = getQWEState(orders.npc)
+-- 	local switchManaCost = 0
 	
-	-- Log.Write("W: " .. tostring(Ability.IsCastable(W, switchManaCost)))
+-- 	-- Log.Write("W: " .. tostring(Ability.IsCastable(W, switchManaCost)))
 	
-	if NPC.IsRunning(myHero) then
-		if QWEState ~= "WWW" then
-			if Ability.IsCastable(W, switchManaCost) then
-				Ability.CastNoTarget(W, true)
-				Ability.CastNoTarget(W, true)
-				Ability.CastNoTarget(W, true)
-			end
-		end
-	elseif NPC.IsAttacking(myHero) then
-		if QWEState ~= "EEE" then
-			if Ability.IsCastable(E, switchManaCost) then
-				Ability.CastNoTarget(E, true)
-				Ability.CastNoTarget(E, true)
-				Ability.CastNoTarget(E, true)
-			end
-		end
-	else
-		if QWEState ~= "QQQ" then
-			if Ability.IsCastable(Q, switchManaCost) then
-				Ability.CastNoTarget(Q, true)
-				Ability.CastNoTarget(Q, true)
-				Ability.CastNoTarget(Q, true)
-			end
-		end
-	end
+-- 	-- if NPC.IsRunning(myHero) then
+-- 	if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET or orders.order == DOTA_UNIT_ORDER_MOVE_TO_POSITION then
+-- 		if QWEState ~= "WWW" and Ability.IsCastable(W, switchManaCost) then
+-- 			Ability.CastNoTarget(W, true)
+-- 			Ability.CastNoTarget(W, true)
+-- 			Ability.CastNoTarget(W, true)
+-- 		end
+-- 	-- elseif NPC.IsAttacking(myHero) then
+-- 	elseif orders.order == DOTA_UNIT_ORDER_ATTACK_MOVE or orders.order == DOTA_UNIT_ORDER_ATTACK_TARGET then
+-- 		if QWEState ~= "EEE" and Ability.IsCastable(E, switchManaCost) then
+-- 			Ability.CastNoTarget(E, true)
+-- 			Ability.CastNoTarget(E, true)
+-- 			Ability.CastNoTarget(E, true)
+-- 		end
+-- 	else
+-- 		if QWEState ~= "QQQ" and Ability.IsCastable(Q, switchManaCost) then
+-- 			Ability.CastNoTarget(Q, true)
+-- 			Ability.CastNoTarget(Q, true)
+-- 			Ability.CastNoTarget(Q, true)
+-- 		end
+-- 	end
 
-	sleep(0.02)
-end
+-- 	-- Player.PrepareUnitOrders(orders.player, orders.order, orders.target, orders.position, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+-- 	sleep(0.02)
+-- end
 
 -- return current state of QWE ("QWE", "QQQ", "EEE", etc)
 function getQWEState(myHero)
