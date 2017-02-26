@@ -106,7 +106,8 @@ function TinkerExtended.OneKey()
     
 end
 
--- Auto Spell for KS
+-- 1. Auto Spell for KS
+-- 2. Killable awareness (laser + missile + dagon)
 function TinkerExtended.OnDraw()
 
 	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
@@ -133,6 +134,14 @@ function TinkerExtended.OnDraw()
     local missileDmg = (missileLevel > 0) and 125+75*(missileLevel-1) or 0
     missileDmg = missileDmg * magicDamageFactor
 
+    local dagon = NPC.GetItem(myHero, "item_dagon", true)
+    local dagonLevel = dagon and 1 or 0
+    for i = 2, 5 do
+        if NPC.GetItem(myHero, "item_dagon_" .. i, true) then dagonLevel = i end
+    end
+    local dagonDmg = (dagonLevel > 0) and 400+100*(dagonLevel-1) or 0
+    dagonDmg = dagonDmg * magicDamageFactor
+
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if not NPC.IsIllusion(enemy) 
@@ -144,9 +153,9 @@ function TinkerExtended.OnDraw()
 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
 			
 			local enemyHealth = Entity.GetHealth(enemy)
-			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg
+			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg - dagonDmg
 			local hitsLeft = math.ceil(enemyHealthLeft / hitDmg)
-            local comboLeft = math.ceil(enemyHealth / (laserDmg + missileDmg))
+            local comboLeft = math.ceil(enemyHealth / (laserDmg + missileDmg + dagonDmg))
 
 			local pos = NPC.GetAbsOrigin(enemy)
 			local x, y, visible = Renderer.WorldToScreen(pos)
