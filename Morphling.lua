@@ -24,8 +24,8 @@ function Morphling.Awareness(myHero)
 	local etherealCastRange = ethereal and Ability.GetCastRange(ethereal) or 0
 	local etherealDamge = getEtherealDamage(myHero, ethereal)
 
-	if not Ability.IsCastable(strike, myMana) then strikeDamage = 0 end
-	if not Ability.IsCastable(ethereal, myMana) then etherealDamge = 0 end
+	if not strike or not Ability.IsCastable(strike, myMana) then strikeDamage = 0 end
+	if not ethereal or not Ability.IsCastable(ethereal, myMana) then etherealDamge = 0 end
 
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
@@ -33,6 +33,10 @@ function Morphling.Awareness(myHero)
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
 			local trueStrikeDamage = strikeDamage * NPC.GetMagicalArmorDamageMultiplier(enemy)
 			local trueEtherealDamage = etherealDamge * NPC.GetMagicalArmorDamageMultiplier(enemy)
+
+			if ethereal and Ability.IsCastable(ethereal, myMana) then
+				trueEtherealDamage = 1.4 * trueEtherealDamage
+			end
 
 			local enemyHp = Entity.GetHealth(enemy)
 			local enemyHpLeft = enemyHp - trueStrikeDamage - trueEtherealDamage
@@ -43,11 +47,11 @@ function Morphling.Awareness(myHero)
 
 			-- red : can kill; green : cant kill
 			if enemyHpLeft <= 0 then
-				if strike and Ability.IsCastable(strike, myMana) and NPC.IsEntityInRange(enemy, myHero, strikeCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
-					Ability.CastTarget(strike, enemy)
-				end
 				if ethereal and Ability.IsCastable(ethereal, myMana) and NPC.IsEntityInRange(enemy, myHero, etherealCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 					Ability.CastTarget(ethereal, enemy)
+				end
+				if strike and Ability.IsCastable(strike, myMana) and NPC.IsEntityInRange(enemy, myHero, strikeCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+					Ability.CastTarget(strike, enemy)
 				end
 				Renderer.SetDrawColor(255, 0, 0, 255)
 				Renderer.DrawTextCentered(Morphling.font, x, y, "Kill", 1)
