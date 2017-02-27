@@ -4,8 +4,6 @@ Morphling.killableAwareness = Menu.AddOption({"Hero Specific","Morphling"},"Kill
 Morphling.autoLifeSteal = Menu.AddOption({"Hero Specific","Morphling"},"Auto Life Steal", "auto KS")
 Morphling.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
-local magicDamageFactor = 0.75
-
 function Morphling.OnDraw()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
@@ -20,14 +18,24 @@ function Morphling.Awareness(myHero)
 	local myMana = NPC.GetMana(myHero)
 	local strike = NPC.GetAbilityByIndex(myHero, 1)
 	local strikeCastRange = Ability.GetCastRange(strike)
-	local strikeDamage = getStrikeDamamge(myHero) * magicDamageFactor
+	local strikeDamage = getStrikeDamamge(myHero)
 	
+	local ethereal = NPC.GetItem(myHero, "item_ethereal_blade", true)
+	local etherealCastRange = ethereal and Ability.GetCastRange(ethereal) or 0
+	local etherealDamge = getEtherealDamage(myHero, ethereal)
+
+	if not Ability.IsCastable(strike, myMana) then strikeDamage = 0 end
+	if not Ability.IsCastable(ethereal, myMana) then etherealDamge = 0 end
+
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
 		if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
+			local trueStrikeDamage = strikeDamage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+			local trueEtherealDamage = etherealDamge * NPC.GetMagicalArmorDamageMultiplier(enemy)
+
 			local enemyHp = Entity.GetHealth(enemy)
-			local enemyHpLeft = enemyHp - strikeDamage
+			local enemyHpLeft = enemyHp - trueStrikeDamage - trueEtherealDamage
 			local hitsLeft = math.ceil(enemyHpLeft / physicalDamage)
 
 			local pos = NPC.GetAbsOrigin(enemy)
@@ -37,6 +45,9 @@ function Morphling.Awareness(myHero)
 			if enemyHpLeft <= 0 then
 				if strike and Ability.IsCastable(strike, myMana) and NPC.IsEntityInRange(enemy, myHero, strikeCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 					Ability.CastTarget(strike, enemy)
+				end
+				if ethereal and Ability.IsCastable(ethereal, myMana) and NPC.IsEntityInRange(enemy, myHero, etherealCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+					Ability.CastTarget(ethereal, enemy)
 				end
 				Renderer.SetDrawColor(255, 0, 0, 255)
 				Renderer.DrawTextCentered(Morphling.font, x, y, "Kill", 1)
@@ -71,6 +82,12 @@ function getStrikeDamamge(myHero)
 	multiplier = multiplier < minMultiplier and minMultiplier or multiplier
 
 	return basicDamage + myAgility * multiplier
+end
+
+function getEtherealDamage(myHero, ethereal)
+	if not ethereal then return 0 end
+	local myAgility = Hero.GetAgilityTotal(myHero)
+	return 1.4 * (2 * myAgility + 75)
 end
 
 return Morphling
