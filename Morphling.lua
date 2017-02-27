@@ -1,7 +1,7 @@
 local Morphling = {}
 
-Morphling.killableAwareness = Menu.AddOption({"Hero Specific","Morphling"},"Killable Awareness", "show if can kill an enemy by hits or double edge")
-Morphling.autoLifeSteal = Menu.AddOption({"Hero Specific","Morphling"},"Auto Life Steal", "auto KS")
+Morphling.autoLifeSteal = Menu.AddOption({"Hero Specific","Morphling"},"Auto Life Steal", "auto KS using strike or ethereal blade, \n also show if can kill an enemy")
+Morphling.autoShiftOption = Menu.AddOption({"Hero Specific","Morphling"},"Auto Shift", "auto shift strength is got stunned")
 Morphling.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 function Morphling.OnDraw()
@@ -9,12 +9,36 @@ function Morphling.OnDraw()
 	if not myHero then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_morphling" then return end
 
-	if Menu.IsEnabled(Morphling.killableAwareness) then
-		Morphling.Awareness(myHero)
+	if Menu.IsEnabled(Morphling.autoLifeSteal) then
+		Morphling.AutoKill(myHero)
+	end
+
+	if Menu.IsEnabled(Morphling.autoShiftOption) then
+		Morphling.AutoShift(myHero)
+	end
+
+end
+
+function Morphling.AutoShift(myHero)
+	if NPC.IsSilenced(myHero) then return end
+
+	local myMana = NPC.GetMana(myHero)
+	local morph2 =  NPC.GetAbilityByIndex(myHero, 3)
+
+	if NPC.IsStunned(myHero) 
+		or NPC.HasModifier(myHero, "modifier_legion_commander_duel") 
+		or NPC.HasModifier(myHero, "modifier_axe_berserkers_call")
+		or NPC.HasModifier(myHero, "modifier_faceless_void_chronosphere")
+		or NPC.HasModifier(myHero, "modifier_enigma_black_hole_pull") then
+
+		if morph2 and Ability.IsCastable(morph2, myMana) and not Ability.GetToggleState(morph2) then
+			Ability.Toggle(morph2, true)
+		end
+
 	end
 end
 
-function Morphling.Awareness(myHero)
+function Morphling.AutoKill(myHero)
 	local myMana = NPC.GetMana(myHero)
 
 	local wave = NPC.GetAbilityByIndex(myHero, 0)
