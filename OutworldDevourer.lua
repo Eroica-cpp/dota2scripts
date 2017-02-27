@@ -1,8 +1,8 @@
 -- ==================================
 -- File Name : OutworldDevourer.lua
 -- Author    : Eroica
--- Version   : 2.3
--- Date      : 2017.2.22
+-- Version   : 2.4
+-- Date      : 2017.2.27
 -- ==================================
 
 local OutworldDevourer = {}
@@ -12,7 +12,7 @@ OutworldDevourer.autoLifeSteal = Menu.AddOption({"Hero Specific","Outworld Devou
 OutworldDevourer.autoSaveAlly = Menu.AddOption({"Hero Specific","Outworld Devourer"},"Auto Save Ally", "auto imprison a nearby teammate who get stunned")
 OutworldDevourer.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
-local magicDamageFactor = 0.75
+-- local magicDamageFactor = 0.75
 
 function OutworldDevourer.OnDraw()
 
@@ -30,7 +30,7 @@ function OutworldDevourer.OnDraw()
 	end
 end
 
-function OutworldDevourer.OnUpdate( ... )
+function OutworldDevourer.OnUpdate()
 
 	-- initiation
 	local myHero = Heroes.GetLocal()
@@ -62,7 +62,7 @@ function OutworldDevourer.AutoSave(myHero, orb, imprison, ultimate)
 		local ally = Heroes.Get(i)
 		if (not NPC.IsIllusion(ally)) and Entity.IsSameTeam(myHero, ally) and (Hero.GetPlayerID(myHero) ~= Hero.GetPlayerID(ally)) then
 
-			if NPC.IsStunned(ally) and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(ally, myHero, imprisonRange) and Entity.IsAlive(ally) then
+			if NPC.IsStunned(ally) and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(ally, myHero, imprisonRange) and Entity.IsAlive(ally) and not NPC.HasState(ally, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 				Ability.CastTarget(imprison, ally)
 			end
 
@@ -90,14 +90,14 @@ function OutworldDevourer.LifeSteal(myHero, orb, imprison, ultimate)
 			local orbDamage = getOrbDamage(myMana, orb)
 			local physicalDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
 			local oneHitDamage = physicalDamage + orbDamage
-			local trueMagicDamage = imprisonDamage * magicDamageFactor
+			local trueMagicDamage = imprisonDamage * NPC.GetMagicalArmorDamageMultiplier(enemy)
 
 			if enemyHp < oneHitDamage and NPC.IsEntityInRange(enemy, myHero, attackRange) then
 				Player.AttackTarget(Players.GetLocal(), myHero, enemy)
 			end
 
 			enemyHp = enemyHp + 4 * NPC.GetHealthRegen(enemy) -- enemyHp increases during 4s imprison
-			if enemyHp < trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) then
+			if enemyHp < trueMagicDamage and Ability.IsCastable(imprison, myMana) and NPC.IsEntityInRange(enemy, myHero, imprisonRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 				Ability.CastTarget(imprison, enemy)
 			end
 			-- need to avoid imprison enemy that dueled by teammate
@@ -136,12 +136,12 @@ function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 			local oneHitDamage = physicalDamage + orbDamage
 
 			-- imprison damage
-			local trueImprisonDamage = imprisonDamage * magicDamageFactor
+			local trueImprisonDamage = imprisonDamage * NPC.GetMagicalArmorDamageMultiplier(enemy)
 			
 			-- ultimate damage
 			local enemyIntell = Hero.GetIntellectTotal(enemy)
 			local intellDiff = (myIntell >= enemyIntell) and (myIntell - enemyIntell) or 0
-			local ultimateDamage = intellDiff * intDiffDamageMultiplier * magicDamageFactor
+			local ultimateDamage = intellDiff * intDiffDamageMultiplier * NPC.GetMagicalArmorDamageMultiplier(enemy)
 
 			-- if has ultimate, counts hits left to ultimate
 			-- if not, counts hits left to imprison
