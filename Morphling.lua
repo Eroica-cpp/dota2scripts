@@ -4,6 +4,8 @@ Morphling.autoLifeSteal = Menu.AddOption({"Hero Specific","Morphling"},"Auto Lif
 Morphling.autoShiftOption = Menu.AddOption({"Hero Specific","Morphling"},"Auto Shift", "auto shift strength is got stunned")
 Morphling.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
+Morphling.HpThreshold = 0.15
+
 function Morphling.OnDraw()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
@@ -29,7 +31,9 @@ function Morphling.AutoShift(myHero)
 		or NPC.HasModifier(myHero, "modifier_legion_commander_duel") 
 		or NPC.HasModifier(myHero, "modifier_axe_berserkers_call")
 		or NPC.HasModifier(myHero, "modifier_faceless_void_chronosphere")
-		or NPC.HasModifier(myHero, "modifier_enigma_black_hole_pull") then
+		or NPC.HasModifier(myHero, "modifier_enigma_black_hole_pull") 
+		or Entity.GetHealth(myHero) <= Entity.GetMaxHealth(myHero) * Morphling.HpThreshold
+		then
 
 		if morph2 and Ability.IsCastable(morph2, myMana) and not Ability.GetToggleState(morph2) then
 			Ability.Toggle(morph2, true)
