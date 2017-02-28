@@ -193,14 +193,14 @@ function EconPanel.OnUpdate()
 	end
 end
 
+local econTable = {} -- econTable = { {heroName_1, econValue_1}, {heroName_2, econValue_2}, ...}
+local isSameTeamTable = {} -- isSameTeamTable[heroName] = True/False
+
 function EconPanel.OnDraw()
 	if not Menu.IsEnabled(EconPanel.optionEnable) or not EconPanel.isOpen then return end
 
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
-
-	local econTable = {} -- econTable = { {heroName_1, econValue_1}, {heroName_2, econValue_2}, ...}
-	local isSameTeamTable = {} -- isSameTeamTable[heroName] = True/False
 
 	for i = 1, Heroes.Count() do
 		local hero = Heroes.Get(i)
@@ -208,7 +208,7 @@ function EconPanel.OnDraw()
 			-- local heroName = EconPanel.heroes[NPC.GetUnitName(hero)]
 			local heroName = NPC.GetUnitName(hero)
 			isSameTeamTable[heroName] = Entity.IsSameTeam(myHero, hero)
-			econTable[#econTable + 1] = {heroName, EconPanel.GetEcon(hero)}
+			econTable[i] = {heroName, EconPanel.GetEcon(hero)}
 		end
 	end
 
