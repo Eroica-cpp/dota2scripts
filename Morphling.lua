@@ -78,12 +78,11 @@ function Morphling.AutoKill(myHero)
 
 			-- red : can kill; green : cant kill
 			if enemyHp - trueStrikeDamage - trueEtherealDamage <= 0 then
-				local minCastRange = etherealCastRange < strikeCastRange and etherealCastRange or strikeCastRange
-				if ethereal and Ability.IsCastable(ethereal, myMana) and NPC.IsEntityInRange(enemy, myHero, minCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+				if ethereal and Ability.IsCastable(ethereal, myMana) and NPC.IsEntityInRange(enemy, myHero, etherealCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 					Ability.CastTarget(ethereal, enemy)
 					sleep(0.02)
 				end
-				if strike and Ability.IsCastable(strike, myMana) and NPC.IsEntityInRange(enemy, myHero, minCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+				if strike and Ability.IsCastable(strike, myMana) and NPC.IsEntityInRange(enemy, myHero, strikeCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 					Ability.CastTarget(strike, enemy)
 					sleep(0.02)
 				end
