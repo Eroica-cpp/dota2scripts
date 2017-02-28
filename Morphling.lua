@@ -4,7 +4,7 @@ Morphling.autoLifeSteal = Menu.AddOption({"Hero Specific","Morphling"},"Auto Lif
 Morphling.autoShiftOption = Menu.AddOption({"Hero Specific","Morphling"},"Auto Shift", "auto shift strength is got stunned")
 Morphling.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
-Morphling.HpThreshold = 0.15
+Morphling.HpThreshold = 0.20
 
 function Morphling.OnDraw()
 	local myHero = Heroes.GetLocal()
@@ -69,11 +69,6 @@ function Morphling.AutoKill(myHero)
 			local trueStrikeDamage = strikeDamage * NPC.GetMagicalArmorDamageMultiplier(enemy)
 			local trueEtherealDamage = etherealDamge * NPC.GetMagicalArmorDamageMultiplier(enemy)
 
-			-- didnt consider amplification of wave's damage
-			if ethereal and Ability.IsCastable(ethereal, myMana) then
-				trueEtherealDamage = 1.4 * trueEtherealDamage
-			end
-
 			local enemyHp = Entity.GetHealth(enemy)
 			local enemyHpLeft = enemyHp - trueStrikeDamage - trueEtherealDamage - trueWaveDamage
 			local hitsLeft = math.ceil(enemyHpLeft / physicalDamage)
@@ -83,11 +78,14 @@ function Morphling.AutoKill(myHero)
 
 			-- red : can kill; green : cant kill
 			if enemyHp - trueStrikeDamage - trueEtherealDamage <= 0 then
-				if ethereal and Ability.IsCastable(ethereal, myMana) and NPC.IsEntityInRange(enemy, myHero, etherealCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+				local minCastRange = etherealCastRange < strikeCastRange and etherealCastRange or strikeCastRange
+				if ethereal and Ability.IsCastable(ethereal, myMana) and NPC.IsEntityInRange(enemy, myHero, minCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 					Ability.CastTarget(ethereal, enemy)
+					sleep(0.02)
 				end
-				if strike and Ability.IsCastable(strike, myMana) and NPC.IsEntityInRange(enemy, myHero, strikeCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+				if strike and Ability.IsCastable(strike, myMana) and NPC.IsEntityInRange(enemy, myHero, minCastRange) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 					Ability.CastTarget(strike, enemy)
+					sleep(0.02)
 				end
 				Renderer.SetDrawColor(255, 0, 0, 255)
 				Renderer.DrawTextCentered(Morphling.font, x, y, "Kill", 1)
@@ -131,6 +129,13 @@ function getEtherealDamage(myHero, ethereal)
 	if not ethereal then return 0 end
 	local myAgility = Hero.GetAgilityTotal(myHero)
 	return 1.4 * (2 * myAgility + 75)
+end
+
+-- 0.02s delay works good for me
+local clock = os.clock
+function sleep(n)  -- seconds
+    local t0 = clock()
+    while clock() - t0 <= n do end
 end
 
 return Morphling
