@@ -8,7 +8,7 @@ Morphling.HpThreshold = 0.20
 
 function Morphling.OnDraw()
 	local myHero = Heroes.GetLocal()
-	if not myHero then return end
+	if not myHero or not Entity.IsAlive(myHero) then return end
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_morphling" then return end
 
 	if Menu.IsEnabled(Morphling.autoLifeSteal) then
