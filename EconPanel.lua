@@ -274,6 +274,8 @@ function EconPanel.OnDraw()
 	drawY = drawY - #econTable * lineGap
 	Renderer.DrawText(EconPanel.font, drawX+wordGap, drawY, "Economic Difference: "..econDiff, 1)
 
+	-- reallocate
+	econTable = {}
 end
 
 -- doesnt include gold of recipes
