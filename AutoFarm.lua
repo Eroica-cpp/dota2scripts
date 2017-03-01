@@ -45,23 +45,38 @@ function goFarm(npc)
 	-- attack enemy hero if possible
 	local heroRadius = 500
 	local enemyHeroesAround = NPC.GetHeroesInRadius(npc, heroRadius, Enum.TeamType.TEAM_ENEMY)
-	if #enemyHeroesAround > 0 then
-		local enemy = enemyHeroesAround[1]
+	for i, enemy in ipairs(enemyHeroesAround) do
 		if enemy and Entity.IsAlive(enemy) and not Entity.IsDormant(enemy) then
 			Player.AttackTarget(myPlayer, npc, enemy, true)
 			return
 		end
 	end	
 
-	-- farm lane creeps if no enemy heroes around
-	-- farm neutral creeps if no enemy heroes or lane creeps around
 	local creepRadius = 1200
 	local unitsAround = NPC.GetUnitsInRadius(npc, creepRadius, Enum.TeamType.TEAM_BOTH)
+	-- last hit
 	for i, creep in ipairs(unitsAround) do
-		Log.Write("NPC.IsNeutral(creep): " .. tostring(NPC.IsNeutral(creep)))
-		if creep and Entity.IsAlive(creep) and not Entity.IsDormant(creep) and (NPC.IsNeutral(creep) or NPC.IsAncient(creep)) then
+		local physicalDamage = NPC.GetTrueDamage(npc) * NPC.GetArmorDamageMultiplier(creep)
+		if Entity.IsAlive(creep) 
+			and not Entity.IsDormant(creep) 
+			and not Entity.IsSameTeam(npc, creep) 
+			and Entity.GetHealth(creep) <= physicalDamage
+			then
 			Player.AttackTarget(myPlayer, npc, creep, true)
 			return
+		end
+	end
+
+	-- hit creeps (not last hit)
+	for i, creep in ipairs(unitsAround) do
+		local physicalDamage = NPC.GetTrueDamage(npc) * NPC.GetArmorDamageMultiplier(creep)
+		if Entity.IsAlive(creep) 
+			and not Entity.IsDormant(creep) 
+			and not Entity.IsSameTeam(npc, creep) 
+			and Entity.GetHealth(creep) > 2 * physicalDamage
+			then
+			Player.AttackTarget(myPlayer, npc, creep, true)
+			return			
 		end
 	end
 
