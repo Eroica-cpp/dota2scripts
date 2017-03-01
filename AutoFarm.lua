@@ -46,7 +46,11 @@ function goFarm(npc)
 	local heroRadius = 500
 	local enemyHeroesAround = NPC.GetHeroesInRadius(npc, heroRadius, Enum.TeamType.TEAM_ENEMY)
 	for i, enemy in ipairs(enemyHeroesAround) do
-		if enemy and Entity.IsAlive(enemy) and not Entity.IsDormant(enemy) then
+		if enemy 
+			and Entity.IsAlive(enemy) 
+			and not Entity.IsDormant(enemy) 
+			and NPC.IsKillable(enemy)
+			then
 			Player.AttackTarget(myPlayer, npc, enemy, true)
 			return
 		end
@@ -60,6 +64,7 @@ function goFarm(npc)
 		if Entity.IsAlive(creep) 
 			and not Entity.IsDormant(creep) 
 			and not Entity.IsSameTeam(npc, creep) 
+			and NPC.IsKillable(creep)
 			and Entity.GetHealth(creep) <= physicalDamage
 			then
 			Player.AttackTarget(myPlayer, npc, creep, true)
@@ -73,6 +78,7 @@ function goFarm(npc)
 		if Entity.IsAlive(creep) 
 			and not Entity.IsDormant(creep) 
 			and not Entity.IsSameTeam(npc, creep) 
+			and NPC.IsKillable(creep)
 			and Entity.GetHealth(creep) > 2 * physicalDamage
 			then
 			Player.AttackTarget(myPlayer, npc, creep, true)
