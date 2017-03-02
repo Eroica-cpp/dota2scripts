@@ -25,41 +25,23 @@ function InvokerExtended.OnUpdate()
 end
 
 function InvokerExtended.OnPrepareUnitOrders(orders)
-	if not Menu.IsEnabled(InvokerExtended.autoAlacrityOption) then return true end
-
-	if not orders then return true end
-	-- if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_TARGET then return true end
-	if not orders.npc then return true end
+	if not orders or not orders.npc or not orders.ability then return true end
 	if NPC.GetUnitName(orders.npc) ~= "npc_dota_hero_invoker" then return true end
-	if not orders.ability then return true end
-	if Ability.GetName(orders.ability) ~= "invoker_cold_snap" then return true end
+	if not Entity.IsAbility(orders.ability) then return true end
 
 	local Q = NPC.GetAbilityByIndex(orders.npc, 0)
 	local W = NPC.GetAbilityByIndex(orders.npc, 1)
 	local E = NPC.GetAbilityByIndex(orders.npc, 2)
 	local R = NPC.GetAbilityByIndex(orders.npc, 5)
+	
+	if Menu.IsEnabled(InvokerExtended.autoAlacrityOption) 
+	and Ability.GetName(orders.ability) == "invoker_cold_snap" then
+		castAlacrity(orders, Q, W, E, R)
+	end
 
-	-- -- cast alacrity after using cold_snap
-	-- if Menu.IsEnabled(InvokerExtended.autoAlacrityOption) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
-	-- 	castAlacrity(orders, Q, W, E, R)
-	-- 	Player.PrepareUnitOrders(orders.player, orders.order, orders.target, orders.position, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
-	-- 	return false
-	-- end
+	Log.Write(tostring(Ability.GetName(orders.ability)))
 
-	-- if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
-	-- 	InvokerExtended.AutoSwitchInstance(orders, Q, W, E, R)
-	-- 	return false
-	-- end	
-
-	-- if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION then 
-	-- 	Log.Write("move !!!!")
-	-- end
-	-- Log.Write(tostring(Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION))
-	-- Log.Write("order: " .. orders.order)
-
-	castAlacrity(orders, Q, W, E, R)
-	Player.PrepareUnitOrders(orders.player, orders.order, orders.target, orders.position, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
-	return false
+	return true
 end
 
 -- auto cast alacrity after cold snap
