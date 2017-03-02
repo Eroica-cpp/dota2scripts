@@ -19,9 +19,10 @@ function AutoFarm.OnDraw()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 
-	for i = 1, Heroes.Count() do
-		local npc = Heroes.Get(i)
-		if npc and NPC.IsIllusion(npc) and Entity.GetOwner(myHero) == Entity.GetOwner(npc) then
+	for i = 1, NPCs.Count() do
+		local npc = NPCs.Get(i)
+		-- Log.Write(tostring(NPC.GetUnitName(npc)) .. " " .. tostring(Entity.GetOwner(npc)) .. " " .. tostring(Entity.OwnedBy(npc, myHero)))
+		if npc and npc ~= myHero and (Entity.GetOwner(myHero) == Entity.GetOwner(npc) or Entity.OwnedBy(npc, myHero)) then
 			goFarm(npc)
 		end
 	end
