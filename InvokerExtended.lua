@@ -18,10 +18,6 @@ function InvokerExtended.OnUpdate()
 		InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 	end	
 
-	-- if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
-	-- 	InvokerExtended.AutoSwitchInstance(myHero, Q, W, E, R)
-	-- end	
-
 end
 
 function InvokerExtended.OnPrepareUnitOrders(orders)
@@ -43,13 +39,14 @@ function InvokerExtended.OnPrepareUnitOrders(orders)
 		castAlacrity(myHero, Q, W, E, R)
 	end
 
-	-- Log.Write(tostring(orders.order) .. " " .. tostring(orders.npc))
+	if Menu.IsEnabled(InvokerExtended.autoSwitchInstanceOption) then
+		InvokerExtended.AutoSwitchInstance(myHero, orders, Q, W, E, R)
+	end	
 
 	return true
 end
 
 -- auto cast alacrity after cold snap
--- ERROR: unknown error causes crash
 function castAlacrity(myHero, Q, W, E, R)
 	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 	local myMana = NPC.GetMana(myHero)
@@ -108,29 +105,22 @@ function InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 
 end
 
--- this function lags as hell. recommend to turn it off
-function InvokerExtended.AutoSwitchInstance(orders, Q, W, E, R)
-	if NPC.IsStunned(orders.npc) or NPC.IsSilenced(orders.npc) then return end
-	local QWEState = getQWEState(orders.npc)
+-- switch EEE when attacking
+-- switch QQQ when hold position (pressing S/H)
+function InvokerExtended.AutoSwitchInstance(myHero, orders, Q, W, E, R)
+	if not myHero or not orders then return end
+	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
+
+	local QWEState = getQWEState(myHero)
 	local switchManaCost = 0
 	
-	-- Log.Write("W: " .. tostring(Ability.IsCastable(W, switchManaCost)))
-	
-	if NPC.IsRunning(myHero) then
-	-- if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET or orders.order == DOTA_UNIT_ORDER_MOVE_TO_POSITION then
-		if QWEState ~= "WWW" and Ability.IsCastable(W, switchManaCost) then
-			Ability.CastNoTarget(W, true)
-			Ability.CastNoTarget(W, true)
-			Ability.CastNoTarget(W, true)
-		end
-	elseif NPC.IsAttacking(myHero) then
-	-- elseif orders.order == DOTA_UNIT_ORDER_ATTACK_MOVE or orders.order == DOTA_UNIT_ORDER_ATTACK_TARGET then
+	if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
 		if QWEState ~= "EEE" and Ability.IsCastable(E, switchManaCost) then
 			Ability.CastNoTarget(E, true)
 			Ability.CastNoTarget(E, true)
 			Ability.CastNoTarget(E, true)
 		end
-	else
+	elseif orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_HOLD_POSITION then
 		if QWEState ~= "QQQ" and Ability.IsCastable(Q, switchManaCost) then
 			Ability.CastNoTarget(Q, true)
 			Ability.CastNoTarget(Q, true)
@@ -138,8 +128,6 @@ function InvokerExtended.AutoSwitchInstance(orders, Q, W, E, R)
 		end
 	end
 
-	-- Player.PrepareUnitOrders(orders.player, orders.order, orders.target, orders.position, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
-	-- sleep(0.02)
 end
 
 -- return current state of QWE ("QWE", "QQQ", "EEE", etc)
