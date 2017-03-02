@@ -25,29 +25,32 @@ function InvokerExtended.OnUpdate()
 end
 
 function InvokerExtended.OnPrepareUnitOrders(orders)
-	if not orders or not orders.npc or not orders.ability then return true end
-	if NPC.GetUnitName(orders.npc) ~= "npc_dota_hero_invoker" then return true end
-	if not Entity.IsAbility(orders.ability) then return true end
+	if not orders then return true end
 
-	local Q = NPC.GetAbilityByIndex(orders.npc, 0)
-	local W = NPC.GetAbilityByIndex(orders.npc, 1)
-	local E = NPC.GetAbilityByIndex(orders.npc, 2)
-	local R = NPC.GetAbilityByIndex(orders.npc, 5)
+	local myHero = Heroes.GetLocal()
+	if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return true end
+
+	local Q = NPC.GetAbilityByIndex(myHero, 0)
+	local W = NPC.GetAbilityByIndex(myHero, 1)
+	local E = NPC.GetAbilityByIndex(myHero, 2)
+	local R = NPC.GetAbilityByIndex(myHero, 5)
 	
 	if Menu.IsEnabled(InvokerExtended.autoAlacrityOption) 
-	and Ability.GetName(orders.ability) == "invoker_cold_snap" then
-		castAlacrity(orders, Q, W, E, R)
+	and orders.ability
+	and Entity.IsAbility(orders.ability) 
+	and Ability.GetName(orders.ability) == "invoker_cold_snap" 
+	then
+		castAlacrity(myHero, Q, W, E, R)
 	end
 
-	Log.Write(tostring(Ability.GetName(orders.ability)))
+	-- Log.Write(tostring(orders.order) .. " " .. tostring(orders.npc))
 
 	return true
 end
 
 -- auto cast alacrity after cold snap
 -- ERROR: unknown error causes crash
-function castAlacrity(orders, Q, W, E, R)
-	local myHero = orders.npc
+function castAlacrity(myHero, Q, W, E, R)
 	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 	local myMana = NPC.GetMana(myHero)
 
@@ -106,38 +109,38 @@ function InvokerExtended.AutoSunStrike(myHero, Q, W, E, R)
 end
 
 -- this function lags as hell. recommend to turn it off
--- function InvokerExtended.AutoSwitchInstance(orders, Q, W, E, R)
--- 	if NPC.IsStunned(orders.npc) or NPC.IsSilenced(orders.npc) then return end
--- 	local QWEState = getQWEState(orders.npc)
--- 	local switchManaCost = 0
+function InvokerExtended.AutoSwitchInstance(orders, Q, W, E, R)
+	if NPC.IsStunned(orders.npc) or NPC.IsSilenced(orders.npc) then return end
+	local QWEState = getQWEState(orders.npc)
+	local switchManaCost = 0
 	
--- 	-- Log.Write("W: " .. tostring(Ability.IsCastable(W, switchManaCost)))
+	-- Log.Write("W: " .. tostring(Ability.IsCastable(W, switchManaCost)))
 	
--- 	-- if NPC.IsRunning(myHero) then
--- 	if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET or orders.order == DOTA_UNIT_ORDER_MOVE_TO_POSITION then
--- 		if QWEState ~= "WWW" and Ability.IsCastable(W, switchManaCost) then
--- 			Ability.CastNoTarget(W, true)
--- 			Ability.CastNoTarget(W, true)
--- 			Ability.CastNoTarget(W, true)
--- 		end
--- 	-- elseif NPC.IsAttacking(myHero) then
--- 	elseif orders.order == DOTA_UNIT_ORDER_ATTACK_MOVE or orders.order == DOTA_UNIT_ORDER_ATTACK_TARGET then
--- 		if QWEState ~= "EEE" and Ability.IsCastable(E, switchManaCost) then
--- 			Ability.CastNoTarget(E, true)
--- 			Ability.CastNoTarget(E, true)
--- 			Ability.CastNoTarget(E, true)
--- 		end
--- 	else
--- 		if QWEState ~= "QQQ" and Ability.IsCastable(Q, switchManaCost) then
--- 			Ability.CastNoTarget(Q, true)
--- 			Ability.CastNoTarget(Q, true)
--- 			Ability.CastNoTarget(Q, true)
--- 		end
--- 	end
+	if NPC.IsRunning(myHero) then
+	-- if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET or orders.order == DOTA_UNIT_ORDER_MOVE_TO_POSITION then
+		if QWEState ~= "WWW" and Ability.IsCastable(W, switchManaCost) then
+			Ability.CastNoTarget(W, true)
+			Ability.CastNoTarget(W, true)
+			Ability.CastNoTarget(W, true)
+		end
+	elseif NPC.IsAttacking(myHero) then
+	-- elseif orders.order == DOTA_UNIT_ORDER_ATTACK_MOVE or orders.order == DOTA_UNIT_ORDER_ATTACK_TARGET then
+		if QWEState ~= "EEE" and Ability.IsCastable(E, switchManaCost) then
+			Ability.CastNoTarget(E, true)
+			Ability.CastNoTarget(E, true)
+			Ability.CastNoTarget(E, true)
+		end
+	else
+		if QWEState ~= "QQQ" and Ability.IsCastable(Q, switchManaCost) then
+			Ability.CastNoTarget(Q, true)
+			Ability.CastNoTarget(Q, true)
+			Ability.CastNoTarget(Q, true)
+		end
+	end
 
--- 	-- Player.PrepareUnitOrders(orders.player, orders.order, orders.target, orders.position, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
--- 	sleep(0.02)
--- end
+	-- Player.PrepareUnitOrders(orders.player, orders.order, orders.target, orders.position, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+	-- sleep(0.02)
+end
 
 -- return current state of QWE ("QWE", "QQQ", "EEE", etc)
 function getQWEState(myHero)
