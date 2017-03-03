@@ -87,6 +87,18 @@ function goFarm(npc)
 		end
 	end
 
+	-- auto follow friend hero or creep
+	for i, creep in ipairs(unitsAround) do
+		if Entity.IsSameTeam(npc, creep) 
+			and Entity.IsAlive(creep) 
+			and (NPC.IsCreep(creep) or NPC.IsHero(creep))
+			and creep ~= Heroes.GetLocal() 
+			then
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET, creep, Vector(0,0,0), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, npc)
+			return
+		end
+	end
+
 end
 
 -- 0.02s delay works good for me
