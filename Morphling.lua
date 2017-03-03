@@ -2,9 +2,37 @@ local Morphling = {}
 
 Morphling.autoLifeSteal = Menu.AddOption({"Hero Specific","Morphling"},"Auto Life Steal", "auto KS using strike or ethereal blade, \n also show if can kill an enemy")
 Morphling.autoShiftOption = Menu.AddOption({"Hero Specific","Morphling"},"Auto Shift", "auto shift strength is got stunned")
+Morphling.maxWaveRange = Menu.AddOption({"Hero Specific","Morphling"}, "Max Wave", "wave to a direction if instructed position out of range")
 Morphling.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 Morphling.HpThreshold = 0.20
+
+-- max wave
+function Morphling.OnPrepareUnitOrders(orders)
+	if not Menu.IsEnabled(Morphling.maxWaveRange) then return true end
+	if not orders or not orders.order or not orders.npc or not orders.ability then return true end
+	
+	if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION then return true end
+	if NPC.GetUnitName(orders.npc) ~= "npc_dota_hero_morphling" then return true end
+	if Ability.GetName(orders.ability) ~= "morphling_waveform" then return true end
+
+	local castRange = Ability.GetCastRange(orders.ability)
+	Log.Write("cast range: " .. castRange)
+	if NPC.IsPositionInRange(orders.npc, orders.position, castRange, 0) then return true end
+	
+    local origin = NPC.GetAbsOrigin(orders.npc)
+    local dir = orders.position - origin
+
+    dir:SetZ(0)
+    dir:Normalize()
+    dir:Scale(castRange - 1)
+
+    local pos = origin + dir
+
+    Player.PrepareUnitOrders(orders.player, orders.order, orders.target, pos, orders.ability, orders.orderIssuer, orders.npc, orders.queue, orders.showEffects)
+
+    return false
+end
 
 function Morphling.OnDraw()
 	local myHero = Heroes.GetLocal()
