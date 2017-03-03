@@ -5,16 +5,16 @@ Morphling.autoShiftOption = Menu.AddOption({"Hero Specific","Morphling"},"Auto S
 Morphling.maxWaveRange = Menu.AddOption({"Hero Specific","Morphling"}, "Max Wave", "wave to a direction if instructed position out of range")
 Morphling.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
-Morphling.HpThreshold = 0.20
+Morphling.HpThreshold = 0.25
 
 -- max wave
 function Morphling.OnPrepareUnitOrders(orders)
+	if not orders then return true end
 	if not Menu.IsEnabled(Morphling.maxWaveRange) then return true end
-	if not orders or not orders.order or not orders.npc or not orders.ability then return true end
 	
-	if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION then return true end
-	if NPC.GetUnitName(orders.npc) ~= "npc_dota_hero_morphling" then return true end
-	if Ability.GetName(orders.ability) ~= "morphling_waveform" then return true end
+	if not orders.order or orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_CAST_POSITION then return true end
+	if not orders.npc or NPC.GetUnitName(orders.npc) ~= "npc_dota_hero_morphling" then return true end
+	if not orders.ability or Ability.GetName(orders.ability) ~= "morphling_waveform" then return true end
 
 	local castRange = Ability.GetCastRange(orders.ability)
 	if NPC.IsPositionInRange(orders.npc, orders.position, castRange, 0) then return true end
