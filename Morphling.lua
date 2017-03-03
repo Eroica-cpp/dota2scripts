@@ -17,7 +17,6 @@ function Morphling.OnPrepareUnitOrders(orders)
 	if Ability.GetName(orders.ability) ~= "morphling_waveform" then return true end
 
 	local castRange = Ability.GetCastRange(orders.ability)
-	Log.Write("cast range: " .. castRange)
 	if NPC.IsPositionInRange(orders.npc, orders.position, castRange, 0) then return true end
 	
     local origin = NPC.GetAbsOrigin(orders.npc)
