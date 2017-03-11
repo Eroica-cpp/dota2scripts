@@ -14,25 +14,24 @@ function Troll.OnPrepareUnitOrders(orders)
 	if not swap or not Ability.IsCastable(swap, 0) then return true end
 
 	-- swap to melee when running
-	-- if not Ability.GetToggleState(swap) and 
-	-- 	(orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION 
-	-- 		or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET 
-	-- 		or orders.order == DOTA_UNIT_ORDER_ATTACK_MOVE) 
-	-- 	then
-	-- 	Ability.Toggle(swap, true)
-	-- 	return true
-	-- end
+	if not Ability.GetToggleState(swap) and 
+		(orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION 
+			or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET 
+			or orders.order == DOTA_UNIT_ORDER_ATTACK_MOVE) 
+		then
+		Ability.Toggle(swap, true)
+		return true
+	end
 
+	-- auto swap between melee and range
 	local melee_attack_range = 150
-	local range_attack_range = 500
-
 	if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
 		if NPC.IsEntityInRange(myHero, orders.target, melee_attack_range) and not Ability.GetToggleState(swap) then
 			Ability.Toggle(swap, true)
 			return true
 		end
 
-		if not NPC.IsEntityInRange(myHero, orders.target, melee_attack_range) and NPC.IsEntityInRange(myHero, orders.target, range_attack_range) and Ability.GetToggleState(swap) then
+		if not NPC.IsEntityInRange(myHero, orders.target, melee_attack_range) and Ability.GetToggleState(swap) then
 			Ability.Toggle(swap, true)
 			return true
 		end
