@@ -31,10 +31,35 @@ function Dodge.Defend(myHero)
 	if not myHero then return end
 	local myMana = NPC.GetMana(myHero)
 
+	-- life stealer's rage
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_life_stealer" then
 		local rage = NPC.GetAbilityByIndex(myHero, 0)
 		if rage and Ability.IsCastable(rage, myMana) then
 			Ability.CastNoTarget(rage)
+		end
+	end
+
+	-- juggernaut's spin
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_juggernaut" then
+		local spin = NPC.GetAbilityByIndex(myHero, 0)
+		if spin and Ability.IsCastable(spin, myMana) then
+			Ability.CastNoTarget(spin)
+		end
+	end
+
+	-- weaver's shukuchi
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_weaver" then
+		local shukuchi = NPC.GetAbilityByIndex(myHero, 1)
+		if shukuchi and Ability.IsCastable(shukuchi, myMana) then
+			Ability.CastNoTarget(shukuchi)
+		end
+	end
+
+	-- omni's repel
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_omniknight" then
+		local repel = NPC.GetAbilityByIndex(myHero, 1)
+		if repel and Ability.IsCastable(repel, myMana) then
+			Ability.CastTarget(repel, myHero)
 		end
 	end
 
