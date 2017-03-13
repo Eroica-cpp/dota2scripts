@@ -17,6 +17,16 @@ function Dodge.OnProjectile(projectile)
 	Dodge.Defend(myHero)
 end
 
+function Dodge.OnLinearProjectileCreate(projectile)
+	if not Menu.IsEnabled(Dodge.option) then return end
+	-- Log.Write(projectile.name)
+end
+
+function Dodge.OnUnitAnimation(animation)
+	if not Menu.IsEnabled(Dodge.option) then return end
+	-- Log.Write(animation.sequenceName)
+end
+
 function Dodge.Defend(myHero)
 	if not myHero then return end
 	local myMana = NPC.GetMana(myHero)
@@ -27,7 +37,7 @@ function Dodge.Defend(myHero)
 			Ability.CastNoTarget(rage)
 		end
 	end
-	
+
 end
 
 return Dodge
