@@ -136,6 +136,18 @@ function Dodge.Defend(myHero)
 		end
 	end
 
+	-- ember's fist (T)
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_ember_spirit" then
+		local fist = NPC.GetAbilityByIndex(myHero, 1)
+		local cast_range = 700 
+		local enemyUnits = NPC.GetUnitsInRadius(myHero, cast_range, Enum.TeamType.TEAM_ENEMY)
+		if fist and Ability.IsCastable(fist, myMana) and #enemyUnits > 0 then
+			local pos = nil
+			for i, enemy in ipairs(enemyUnits) do pos = NPC.GetAbsOrigin(enemy) end
+			if pos then Ability.CastPosition(fist, pos) end
+		end
+	end
+
 end
 
 return Dodge
