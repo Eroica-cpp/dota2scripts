@@ -96,6 +96,38 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- lion's finger
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lion" then
+		local radius = 900
+		if animation.sequenceName == "finger_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- lina's laguna blade
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lina" then
+		local radius = 725
+		if animation.sequenceName == "laguna_blade_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- luna's lucent
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_luna" then
+		local radius = 800
+		if animation.sequenceName == "moonfall_cast1_lucent_beam_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- tinker's laser
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_tinker" then
+		local radius = 725 + 220
+		if animation.sequenceName == "laser_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 end
 
 function Dodge.Defend(myHero)
@@ -152,7 +184,10 @@ function Dodge.Defend(myHero)
 		if fist and Ability.IsCastable(fist, myMana) and #enemyUnits > 0 then
 			local pos = nil
 			for i, enemy in ipairs(enemyUnits) do pos = NPC.GetAbsOrigin(enemy) end
-			if pos then Ability.CastPosition(fist, pos) end
+			
+			if pos and NPC.IsPositionInRange(myHero, pos, cast_range, 0) then 
+				Ability.CastPosition(fist, pos) 
+			end
 		end
 	end
 
