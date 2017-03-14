@@ -7,6 +7,7 @@ function Dodge.OnProjectile(projectile)
 	if not projectile.source or not projectile.target then return end
 	if not projectile.dodgeable then return end
 	if not Entity.IsHero(projectile.source) then return end
+	if projectile.isAttack then return end
 
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
@@ -29,7 +30,7 @@ function Dodge.OnUnitAnimation(animation)
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 
-	Log.Write(animation.sequenceName)
+	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
 	-- slardar's crush
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
@@ -43,6 +44,14 @@ function Dodge.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_centaur" then
 		local radius = 315
 		if animation.sequenceName == "cast_hoofstomp_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- legion's duel
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_legion_commander" then
+		local radius = 150
+		if animation.sequenceName == "dualwield_legion_commander_duel_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Defend(myHero)
 		end
 	end
