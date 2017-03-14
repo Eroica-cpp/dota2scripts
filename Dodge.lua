@@ -80,6 +80,14 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- warlock's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
+		local radius = 1200 + 600/2
+		if animation.sequenceName == "warlock_cast4_rain_chaos_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 end
 
 function Dodge.Defend(myHero)
