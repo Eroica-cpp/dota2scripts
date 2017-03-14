@@ -40,7 +40,7 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end	
 
-	-- 2. axe's culling blade
+	-- 2. axe's culling blade (cant catch call's animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_axe" then
 		local radius = 300
 		if animation.sequenceName == "culling_blade_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
@@ -77,18 +77,78 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end	
 
+	-- 5. bloodseeker's rupture
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_bloodseeker" then
+		local radius = 1000
+		if animation.sequenceName == "cast4_rupture_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end	
+
+	-- 6. centaur's stomp
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_centaur" then
+		local radius = 315
+		if animation.sequenceName == "cast_hoofstomp_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 7. chaos knight's bolt and rift (cant catch rift animation)
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_chaos_knight" then
+		local radius1 = 500
+		if animation.sequenceName == "chaosbolt_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
+			Dodge.Defend(myHero)
+		end
+
+		-- local radius2 = 700
+		-- if animation.sequenceName == "chaosbolt_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+		-- 	Dodge.Defend(myHero)
+		-- end		
+	end
+
+	-- 8. clock's hook
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_rattletrap" then
+		-- cant catch animation of hook
+	end
+
+	-- 9. crystal maiden's frostbite
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_crystal_maiden" then
+		local radius = 650
+		if animation.sequenceName == "frostbite_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 10. death prophet's silence
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_death_prophet" then
+		local radius = 1000 + 425/2
+		if animation.sequenceName == "cast2_silence_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 11. disruptor's glimpse (cant catch disruptor's ultimate)
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_disruptor" then
+		-- cant catch disruptor's ultimate
+	end
+
+	-- 12. doom
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_doom_bringer" then
+		local radius = 550
+		if animation.sequenceName == "cast_doom" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 13. dragon knight's stun
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_dragon_knight" then
+		-- dk's stun has no animation, and thus cant dodge
+	end
+
 	-- slardar's crush
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
 		local radius = 350
 		if animation.sequenceName == "crush_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-		
-	-- centaur's stomp
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_centaur" then
-		local radius = 315
-		if animation.sequenceName == "cast_hoofstomp_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Defend(myHero)
 		end
 	end
@@ -129,14 +189,6 @@ function Dodge.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
 		local radius = 1200 + 600/2
 		if animation.sequenceName == "warlock_cast4_rain_chaos_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-
-	-- doom
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_doom_bringer" then
-		local radius = 550
-		if animation.sequenceName == "cast_doom" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Defend(myHero)
 		end
 	end
