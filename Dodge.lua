@@ -53,6 +53,15 @@ function Dodge.OnUnitAnimation(animation)
 		end		
 	end	
 
+	-- 3. batrider's lasso
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_batrider" then
+		local radius = 200
+		if animation.sequenceName == "lasso_start_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Log.Write("12341231")
+			Dodge.Defend(myHero)
+		end
+	end	
+
 	-- slardar's crush
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
 		local radius = 350
@@ -71,7 +80,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- legion's duel
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_legion_commander" then
-		local radius = 150
+		local radius = 300
 		if animation.sequenceName == "dualwield_legion_commander_duel_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Defend(myHero)
 		end
