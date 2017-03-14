@@ -145,6 +145,47 @@ function Dodge.OnUnitAnimation(animation)
 		-- dk's stun has no animation, and thus cant dodge
 	end
 
+	-- 14. drow's silence
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_drow_ranger" then
+		local radius = 1000
+		if animation.sequenceName == "cast2_silence_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 15. earth spirit
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_earth_spirit" then
+	end
+
+	-- 16. earthshaker
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_earthshaker" then
+		local radius1 = 1400
+		if animation.sequenceName == "fissure_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
+			Dodge.Defend(myHero)
+		end
+
+		local radius2 = 350
+		if animation.sequenceName == "enchant_totem_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 17. engima's black hole
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_enigma" then
+		local radius = 275 + 420/2
+		if animation.sequenceName == "cast4_black_hole_chasm" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 18. void's chrono
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_faceless_void" then
+		local radius = 600 + 425/2
+		if animation.sequenceName == "chronosphere_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 	-- slardar's crush
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
 		local radius = 350
@@ -165,22 +206,6 @@ function Dodge.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_magnataur" then
 		local radius = 410
 		if animation.sequenceName == "polarity_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-
-	-- void's chrono
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_faceless_void" then
-		local radius = 600 + 425/2
-		if animation.sequenceName == "chronosphere_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-
-	-- engima's black hole
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_enigma" then
-		local radius = 275 + 420/2
-		if animation.sequenceName == "cast4_black_hole_chasm" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Defend(myHero)
 		end
 	end
