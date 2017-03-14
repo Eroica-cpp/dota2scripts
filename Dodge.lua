@@ -88,6 +88,14 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- doom
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_doom_bringer" then
+		local radius = 550
+		if animation.sequenceName == "cast_doom" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 end
 
 function Dodge.Defend(myHero)
