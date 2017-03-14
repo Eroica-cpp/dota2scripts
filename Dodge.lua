@@ -40,7 +40,15 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end	
 
-	-- 2. bane's nightmare and fiend's grip
+	-- 2. axe's culling blade
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_axe" then
+		local radius = 300
+		if animation.sequenceName == "culling_blade_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end	
+
+	-- 3. bane's nightmare and fiend's grip
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_bane" then
 		local radius1 = 825
 		if animation.sequenceName == "nightmare" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
@@ -53,11 +61,18 @@ function Dodge.OnUnitAnimation(animation)
 		end		
 	end	
 
-	-- 3. batrider's lasso
+	-- 4. batrider's lasso
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_batrider" then
 		local radius = 200
 		if animation.sequenceName == "lasso_start_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Log.Write("12341231")
+			Dodge.Defend(myHero)
+		end
+	end	
+
+	-- 5. beastmaster's roar
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_beastmaster" then
+		local radius = 950
+		if animation.sequenceName == "cast4_primal_roar_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Defend(myHero)
 		end
 	end	
