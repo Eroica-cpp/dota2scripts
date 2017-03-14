@@ -56,6 +56,30 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- magnus's rp
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_magnataur" then
+		local radius = 410
+		if animation.sequenceName == "polarity_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- void's chrono
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_faceless_void" then
+		local radius = 600 + 425/2
+		if animation.sequenceName == "chronosphere_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- engima's black hole
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_enigma" then
+		local radius = 275 + 420/2
+		if animation.sequenceName == "cast4_black_hole_chasm" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 end
 
 function Dodge.Defend(myHero)
