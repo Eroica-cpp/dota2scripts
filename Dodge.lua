@@ -128,6 +128,14 @@ function Dodge.Defend(myHero)
 		end
 	end
 
+	-- slark's dark pact
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_slark" then
+		local pact = NPC.GetAbilityByIndex(myHero, 0)
+		if pact and Ability.IsCastable(pact, myMana) then
+			Ability.CastNoTarget(pact)
+		end
+	end
+
 end
 
 return Dodge
