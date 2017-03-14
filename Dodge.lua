@@ -186,6 +186,133 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- 19. jakiro
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_jakiro" then
+		-- can be implemented by OnLinearProjectile()
+	end
+
+	-- 20. juggernaut's omnislash
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_juggernaut" then
+		local radius = 350 + 425/2
+		if animation.sequenceName == "attack_omni_cast" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 21. KoL's mana leak
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_keeper_of_the_light" then
+		-- no need to implement this
+	end
+
+	-- 22. legion's duel
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_legion_commander" then
+		local radius = 300
+		if animation.sequenceName == "dualwield_legion_commander_duel_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 23. lich's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lich" then
+		local radius = 1000
+		if animation.sequenceName == "chain_frost" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 24. lina's laguna blade
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lina" then
+		local radius = 725
+		if animation.sequenceName == "laguna_blade_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 25. lion's finger
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lion" then
+		local radius = 900
+		if animation.sequenceName == "finger_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 26. lone druid's roar
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lone_druid" then
+		local radius = 350
+		if animation.sequenceName == "cast_savage_roar" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 27. luna's lucent
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_luna" then
+		local radius = 800
+		if animation.sequenceName == "moonfall_cast1_lucent_beam_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 28. magnus's rp
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_magnataur" then
+		local radius = 410
+		if animation.sequenceName == "polarity_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 29. monkey king's strike
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_monkey_king" then
+		-- no animation detection for monkey king yet
+	end
+
+	-- 30. naga siren's song
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_naga_siren" then
+		local radius = 1250
+		if animation.sequenceName == "cast4_sirenSong_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 31. necro's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_necrolyte" then
+		local radius = 650
+		if animation.sequenceName == "cast_ult_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 32. night stalker's silence
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_night_stalker" then
+		local radius = 650
+		if animation.sequenceName == "cast_cripplingfear_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 32. nyx_assassin's impale
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_nyx_assassin" then
+		local radius = 700
+		if animation.sequenceName == "impale_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 33. ogre_magi's stun
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_ogre_magi" then
+		local radius = 600
+		if animation.sequenceName == "cast1_fireblast_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 34. puck's silence
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_puck" then
+		local radius = 450
+		if animation.sequenceName == "cast2_rift_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 	-- slardar's crush
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
 		local radius = 350
@@ -194,50 +321,10 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
-	-- legion's duel
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_legion_commander" then
-		local radius = 300
-		if animation.sequenceName == "dualwield_legion_commander_duel_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-
-	-- magnus's rp
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_magnataur" then
-		local radius = 410
-		if animation.sequenceName == "polarity_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-
 	-- warlock's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
 		local radius = 1200 + 600/2
 		if animation.sequenceName == "warlock_cast4_rain_chaos_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-
-	-- lion's finger
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lion" then
-		local radius = 900
-		if animation.sequenceName == "finger_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-
-	-- lina's laguna blade
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lina" then
-		local radius = 725
-		if animation.sequenceName == "laguna_blade_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
-
-	-- luna's lucent
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_luna" then
-		local radius = 800
-		if animation.sequenceName == "moonfall_cast1_lucent_beam_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Defend(myHero)
 		end
 	end
