@@ -2,7 +2,7 @@ local AbyssalHelper = {}
 
 AbyssalHelper.option = Menu.AddOption({"Utility", "Abyssal Blade Helper"}, "Use Blink Dagger", "use blink dagger if out of range")
 
--- use OnUpdate() to cancel animation backswing
+-- use OnUpdate() to cancel backswing animation
 function AbyssalHelper.OnUpdate()
 	if not Menu.IsEnabled(AbyssalHelper.option) then return end
 
@@ -47,7 +47,7 @@ function AbyssalHelper.OnPrepareUnitOrders(orders)
 	end
 
 	-- anti-mage
-	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_antimage" then
+	if NPC.GetUnitName(orders.npc) == "npc_dota_hero_antimage" then
 		local blink = NPC.GetAbilityByIndex(orders.npc, 1)
 		local level = Ability.GetLevel(blink)
 		local cast_range = 925 + 75*(level-1)
@@ -58,6 +58,22 @@ function AbyssalHelper.OnPrepareUnitOrders(orders)
 			
 			local pos = NPC.GetAbsOrigin(orders.target)
 			Ability.CastPosition(blink, pos)
+
+			return true
+		end
+	end
+
+	-- PA
+	if NPC.GetUnitName(orders.npc) == "npc_dota_hero_phantom_assassin" then
+		local strike = NPC.GetAbilityByIndex(orders.npc, 1)
+		local cast_range = 1000
+		local mana = NPC.GetMana(orders.npc)
+
+		Log.Write("12344214")
+		if NPC.IsEntityInRange(orders.npc, orders.target, cast_range) 
+			and Ability.IsCastable(strike, mana) then
+
+			Ability.CastTarget(strike, orders.target)
 
 			return true
 		end
