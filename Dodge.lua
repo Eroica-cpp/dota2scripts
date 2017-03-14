@@ -313,6 +313,22 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- 35. pudge's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_pudge" then
+		local radius = 250
+		if animation.sequenceName == "pudge_dismember_start" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- shadow fiend's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_nevermore" then
+		local radius = 1000
+		if animation.sequenceName == "cast6_requiem_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 	-- slardar's crush
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
 		local radius = 350
