@@ -69,7 +69,6 @@ function AbyssalHelper.OnPrepareUnitOrders(orders)
 		local cast_range = 1000
 		local mana = NPC.GetMana(orders.npc)
 
-		Log.Write("12344214")
 		if NPC.IsEntityInRange(orders.npc, orders.target, cast_range) 
 			and Ability.IsCastable(strike, mana) then
 
