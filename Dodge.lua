@@ -24,11 +24,35 @@ end
 
 function Dodge.OnUnitAnimation(animation)
 	if not Menu.IsEnabled(Dodge.option) then return end
-	-- Log.Write(animation.sequenceName)
+	if not animation or not animation.unit then return end
+
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+
+	Log.Write(animation.sequenceName)
+
+	-- slardar's crush
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
+		local radius = 350
+		if animation.sequenceName == "crush_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+		
+	-- centaur's stomp
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_centaur" then
+		local radius = 315
+		if animation.sequenceName == "cast_hoofstomp_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 end
 
 function Dodge.Defend(myHero)
 	if not myHero then return end
+	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
+
 	local myMana = NPC.GetMana(myHero)
 
 	-- life stealer's rage
