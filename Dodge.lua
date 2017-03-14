@@ -32,6 +32,27 @@ function Dodge.OnUnitAnimation(animation)
 
 	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
+	-- 1. anti-mage's mana void
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
+		local radius = 600 + 500/2
+		if animation.sequenceName == "basher_cast4_mana_void_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end	
+
+	-- 2. bane's nightmare and fiend's grip
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_bane" then
+		local radius1 = 825
+		if animation.sequenceName == "nightmare" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
+			Dodge.Defend(myHero)
+		end
+
+		local radius2 = 800
+		if animation.sequenceName == "fiends_grip_cast" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
+			Dodge.Defend(myHero)
+		end		
+	end	
+
 	-- slardar's crush
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
 		local radius = 350
