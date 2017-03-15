@@ -16,7 +16,14 @@ AutoStash.dontStashList = {
     item_clarity = true,
     item_tango = true,
     item_tango_single = true,
-    item_enchanted_mango = true
+    item_enchanted_mango = true,
+    item_smoke_of_deceit = true,
+    item_dust = true,
+    item_ward_observer = true,
+    item_ward_sentry = true,
+    item_recipe_ward_dispenser = true,
+    item_ward_dispenser = true,
+    item_gem = true
 }
 
 -- stash items when (1) using soul ring in base; (2) using bottle in base
