@@ -81,6 +81,14 @@ function Axe.PopItems(myHero)
     	end
     end
 
+    -- mjollnir
+    if NPC.HasItem(myHero, "item_mjollnir", true) then
+    	local item = NPC.GetItem(myHero, "item_mjollnir", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastTarget(item, myHero)
+    	end
+    end
+
 end
 
 return Axe
