@@ -19,7 +19,7 @@ AutoStash.dontStashList = {
     item_enchanted_mango = true
 }
 
--- stash items when using soul ring in base
+-- stash items when (1) using soul ring in base; (2) using bottle in base
 function AutoStash.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(AutoStash.optionEnable) then return true end
     if not orders or not orders.ability then return true end
@@ -29,6 +29,13 @@ function AutoStash.OnPrepareUnitOrders(orders)
 
     if Entity.IsAbility(orders.ability) 
         and Ability.GetName(orders.ability) == "item_soul_ring"
+        and NPC.HasModifier(myHero, "modifier_fountain_aura_buff") then
+        
+        inventory2stash(myHero)
+    end
+
+    if Entity.IsAbility(orders.ability) 
+        and Ability.GetName(orders.ability) == "item_bottle"
         and NPC.HasModifier(myHero, "modifier_fountain_aura_buff") then
         
         inventory2stash(myHero)
@@ -49,6 +56,16 @@ function AutoStash.OnUpdate()
 
         local mod = NPC.GetModifier(myHero, "modifier_item_soul_ring_buff")
         if GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.1 then
+            stash2inventory(myHero)
+        end
+    end
+
+    -- move items back to inventory afer using bottle
+    if NPC.HasModifier(myHero, "modifier_fountain_aura_buff") 
+        and NPC.HasModifier(myHero, "modifier_bottle_regeneration") then
+
+        local mod = NPC.GetModifier(myHero, "modifier_bottle_regeneration")
+        if GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.5 then
             stash2inventory(myHero)
         end
     end
