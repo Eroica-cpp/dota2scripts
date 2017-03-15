@@ -14,8 +14,20 @@ function Axe.OnPrepareUnitOrders(orders)
     local myHero = Heroes.GetLocal()
     if not myHero then return true end
 
+    if not NPC.HasItem(myHero, "item_blink", true) then return true end
+    local blink = NPC.GetItem(myHero, "item_blink", true)
+    if not blink or not Ability.IsCastable(blink, 0) then return true end
+
     local call_radius = 300
     local blink_radius = 1200
+
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
+    if not enemyHeroes or #enemyHeroes <= 0 then return true end
+
+    local pos = Axe.BestPosition(enemyHeroes, call_radius)
+    if pos then
+    	Ability.CastPosition(blink, pos)
+    end
 
     return true
 end
@@ -35,6 +47,16 @@ function Axe.OnUpdate()
 
 end
 
+-- return best position to call
+function Axe.BestPosition(enemyHeroes, radius)
+    if not enemyHeroes or #enemyHeroes <= 0 then return nil end
+    local enemyNum = #enemyHeroes
+
+    if enemyNum == 1 then return NPC.GetAbsOrigin(enemyHeroes[1]) end
+
+end
+
+-- pop all useful items
 function Axe.PopItems(myHero)
 	if not myHero then return end
 
