@@ -55,22 +55,37 @@ function Axe.BestPosition(enemyHeroes, radius)
     if not enemyHeroes or #enemyHeroes <= 0 then return nil end
     local enemyNum = #enemyHeroes
 
-    if enemyNum == 1 then return NPC.GetAbsOrigin(enemyHeroes[1]) end
+	if enemyNum == 1 then return NPC.GetAbsOrigin(enemyHeroes[1]) end
 
-	-- local pos1 = NPC.GetAbsOrigin(enemyHeroes[1])
-	-- local pos2 = NPC.GetAbsOrigin(enemyHeroes[2])
+	-- find all mid points of every two enemy heroes, 
+	-- then find out the best position among these.
+	-- O(n^3) complexity
+	local maxNum = 1
+	local bestPos = NPC.GetAbsOrigin(enemyHeroes[1])
+	for i = 1, enemyNum-1 do
+		for j = i+1, enemyNum do
+			if enemyHeroes[i] and enemyHeroes[j] then
+				local pos1 = NPC.GetAbsOrigin(enemyHeroes[i])
+				local pos2 = NPC.GetAbsOrigin(enemyHeroes[j])
+				local mid = pos1:__add(pos2):Scaled(0.5)
+				
+				local heroesNum = 0
+				for k = 1, enemyNum do
+					if NPC.IsPositionInRange(enemyHeroes[k], mid, radius, 0) then
+						heroesNum = heroesNum + 1
+					end
+				end
 
-    -- local midList = {}
-    -- for i in 1, enemyNum-1 do
-    -- 	for j in i+1, enemyNum do
-    -- 		local pos1 = NPC.GetAbsOrigin(enemyHeroes[i])
-    -- 		local pos2 = NPC.GetAbsOrigin(enemyHeroes[j])
-    -- 		local tmp = pos1:__add(pos2)
-    -- 		local mid = tmp:Scaled(0.5)
-    -- 		Log.Write(tostring(pos1) .. " " .. tostring(pos2) .. " " .. tostring(mid))
-    -- 	end
-    -- end
+				if heroesNum > maxNum then
+					maxNum = heroesNum
+					bestPos = mid
+				end
 
+			end
+		end
+	end
+
+	return bestPos
 end
 
 -- pop all useful items
