@@ -1,6 +1,13 @@
+-- =========================================
+-- Author  : Eroica (eroicacmcs@gmail.com)
+-- Desc    : Abyssal Blade Helper
+-- Date    : 2017.3.14
+-- Version : 1.0
+-- =========================================
+
 local AbyssalHelper = {}
 
-AbyssalHelper.option = Menu.AddOption({"Utility", "Abyssal Blade Helper"}, "Use Blink Dagger", "use blink dagger if out of range")
+AbyssalHelper.option = Menu.AddOption({"Utility", "Abyssal Blade Helper"}, "Abyssal Blade Helper", "auto use blink dagger, AM's blink, or PA's strike if out of range")
 
 -- use OnUpdate() to cancel backswing animation
 function AbyssalHelper.OnUpdate()
