@@ -1,10 +1,11 @@
 local Axe = {}
 
 Axe.optionAutoItem = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Use Items", "Auto use items like blademail, lotus when calling")
+Axe.optionBlinkHelper = Menu.AddOption({"Hero Specific", "Axe"}, "Blink Helper", "Auto blink to best position when calling")
 
--- use avaible items before call (blademail, lotus, etc)
+-- blink to best position before call
 function Axe.OnPrepareUnitOrders(orders)
-	if not Menu.IsEnabled(Axe.optionAutoItem) then return true end
+	if not Menu.IsEnabled(Axe.optionBlinkHelper) then return true end
 	if not orders or not orders.ability then return true end
 
 	if not Entity.IsAbility(orders.ability) then return true end
@@ -14,12 +15,24 @@ function Axe.OnPrepareUnitOrders(orders)
     if not myHero then return true end
 
     local call_radius = 300
-    local enemyHeroes = NPC.GetHeroesInRadius(myHero, call_radius, Enum.TeamType.TEAM_ENEMY)
-    if #enemyHeroes <= 0 then return true end
-
-    Axe.PopItems(myHero)
+    local blink_radius = 1200
 
     return true
+end
+
+-- auto use items when calling enemy heroes (blademail, lotus, etc)
+function Axe.OnUpdate()
+	if not Menu.IsEnabled(Axe.optionAutoItem) then return end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero or not NPC.HasModifier(myHero, "modifier_axe_berserkers_call_armor") then return end
+
+    local call_radius = 300
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, call_radius, Enum.TeamType.TEAM_ENEMY)
+    if #enemyHeroes > 0 then
+	    Axe.PopItems(myHero)
+	end
+
 end
 
 function Axe.PopItems(myHero)
