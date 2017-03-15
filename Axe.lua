@@ -39,6 +39,9 @@ function Axe.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero or not NPC.HasModifier(myHero, "modifier_axe_berserkers_call_armor") then return end
 
+    local mod = NPC.GetModifier(myHero, "modifier_axe_berserkers_call_armor")
+    if mod and GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.1 then return end
+
     local call_radius = 300
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, call_radius, Enum.TeamType.TEAM_ENEMY)
     if #enemyHeroes > 0 then
@@ -53,6 +56,20 @@ function Axe.BestPosition(enemyHeroes, radius)
     local enemyNum = #enemyHeroes
 
     if enemyNum == 1 then return NPC.GetAbsOrigin(enemyHeroes[1]) end
+
+	-- local pos1 = NPC.GetAbsOrigin(enemyHeroes[1])
+	-- local pos2 = NPC.GetAbsOrigin(enemyHeroes[2])
+
+    -- local midList = {}
+    -- for i in 1, enemyNum-1 do
+    -- 	for j in i+1, enemyNum do
+    -- 		local pos1 = NPC.GetAbsOrigin(enemyHeroes[i])
+    -- 		local pos2 = NPC.GetAbsOrigin(enemyHeroes[j])
+    -- 		local tmp = pos1:__add(pos2)
+    -- 		local mid = tmp:Scaled(0.5)
+    -- 		Log.Write(tostring(pos1) .. " " .. tostring(pos2) .. " " .. tostring(mid))
+    -- 	end
+    -- end
 
 end
 
