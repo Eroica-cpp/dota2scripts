@@ -18,6 +18,7 @@ function Axe.OnPrepareUnitOrders(orders)
 
     local myHero = Heroes.GetLocal()
     if not myHero then return true end
+    if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
 
     if not NPC.HasItem(myHero, "item_blink", true) then return true end
     local blink = NPC.GetItem(myHero, "item_blink", true)
@@ -43,9 +44,10 @@ function Axe.OnUpdate()
 
     local myHero = Heroes.GetLocal()
     if not myHero or not NPC.HasModifier(myHero, "modifier_axe_berserkers_call_armor") then return end
+    if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return end
 
-    local mod = NPC.GetModifier(myHero, "modifier_axe_berserkers_call_armor")
-    if mod and GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.1 then return end
+    -- local mod = NPC.GetModifier(myHero, "modifier_axe_berserkers_call_armor")
+    -- if mod and GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.1 then return end
 
     local call_radius = 300
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, call_radius, Enum.TeamType.TEAM_ENEMY)
@@ -62,6 +64,7 @@ function Axe.OnDraw()
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_axe" then return end
+    if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 
 	if Menu.IsKeyDownOnce(Axe.key) then
 		shouldAutoInitiate = not shouldAutoInitiate
