@@ -2,6 +2,11 @@ local Axe = {}
 
 Axe.optionAutoItem = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Use Items", "Auto use items like blademail, lotus when calling")
 Axe.optionBlinkHelper = Menu.AddOption({"Hero Specific", "Axe"}, "Blink Helper", "Auto blink to best position when calling")
+Axe.optionAutoInitiate = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Initiate", "Auto initiate once see enemy heroes (can be turn on/off by key)")
+Axe.key = Menu.AddKeyOption({"Hero Specific", "Axe"}, "Auto Initiate Key", Enum.ButtonCode.KEY_E)
+Axe.font = Renderer.LoadFont("Tahoma", 24, Enum.FontWeight.EXTRABOLD)
+
+local shouldAutoInitiate = false
 
 -- blink to best position before call
 function Axe.OnPrepareUnitOrders(orders)
@@ -47,6 +52,47 @@ function Axe.OnUpdate()
     if #enemyHeroes > 0 then
 	    Axe.PopItems(myHero)
 	end
+
+end
+
+-- auto initiate when enemy heroes are near 
+-- (this mode can be turn on/off by pressing key)
+function Axe.OnDraw()
+	if not Menu.IsEnabled(Axe.optionAutoInitiate) then return end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_axe" then return end
+
+	if Menu.IsKeyDownOnce(Axe.key) then
+		shouldAutoInitiate = not shouldAutoInitiate
+	end
+
+	if not shouldAutoInitiate then return end
+
+	-- draw text when auto initiate key is up
+	local pos = NPC.GetAbsOrigin(myHero)
+	local x, y, visible = Renderer.WorldToScreen(pos)
+	Renderer.SetDrawColor(0, 255, 0, 255)
+	Renderer.DrawTextCentered(Axe.font, x, y, "Auto", 1)
+
+	if not NPC.HasItem(myHero, "item_blink", true) then return end
+    local blink = NPC.GetItem(myHero, "item_blink", true)
+    if not blink or not Ability.IsCastable(blink, 0) then return end
+
+    local call = NPC.GetAbilityByIndex(myHero, 0)
+    if not call or not Ability.IsCastable(call, NPC.GetMana(myHero)) then return end
+
+    local call_radius = 300
+    local blink_radius = 1200
+
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
+    if not enemyHeroes or #enemyHeroes <= 0 then return end
+
+    local pos = Axe.BestPosition(enemyHeroes, call_radius)
+    if pos then
+    	Ability.CastPosition(blink, pos)
+    end
+    Ability.CastNoTarget(call)
 
 end
 
