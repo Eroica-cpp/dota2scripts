@@ -113,7 +113,6 @@ function inventory2stash(myHero)
             end
         end
     end
-    hasStashed = true
 end
 
 function stash2inventory(myHero)
@@ -124,7 +123,6 @@ function stash2inventory(myHero)
             moveItemToSlot(myHero, item, i-delta)
         end
     end
-    hasStashed = false
 end
 
 function moveItemToSlot(myHero, item, slot_index)
