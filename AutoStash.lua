@@ -19,32 +19,63 @@ AutoStash.dontStashList = {
     item_enchanted_mango = true
 }
 
-local hasStashed = false
+-- stash items when using soul ring in base
+function AutoStash.OnPrepareUnitOrders(orders)
+    if not Menu.IsEnabled(AutoStash.optionEnable) then return true end
+    if not orders or not orders.ability then return true end
 
-function AutoStash.OnUpdate()
-	if not Menu.IsEnabled(AutoStash.optionEnable) then return end
-	
     local myHero = Heroes.GetLocal()
-    
-    if not isInFountain(myHero) then
-        if NPC.HasModifier(myHero, "modifier_fountain_aura_buff") and hasStashed then
-            stash2inventory(myHero)
-        end
-        return
+    if not myHero then return true end
+
+    if Entity.IsAbility(orders.ability) 
+        and Ability.GetName(orders.ability) == "item_soul_ring"
+        and NPC.HasModifier(myHero, "modifier_fountain_aura_buff") then
+        
+        inventory2stash(myHero)
     end
 
-    local tp = NPC.GetItem(myHero, "item_tpscroll", true)
-    local tp_boot_1 = NPC.GetItem(myHero, "item_travel_boots", true)
-    local tp_boot_2 = NPC.GetItem(myHero, "item_travel_boots_2", true)
+    return true
+end
 
-    local isTping = false
-    isTping = tp and (isTping or Ability.IsChannelling(tp)) or isTping
-    isTping = tp_boot_1 and (isTping or Ability.IsChannelling(tp_boot_1)) or isTping
-    isTping = tp_boot_2 and (isTping or Ability.IsChannelling(tp_boot_2)) or isTping
-    
-    if isTping and hasStashed then stash2inventory(myHero) end
-    if not isTping and not hasStashed then inventory2stash(myHero) end
+function AutoStash.OnUpdate()
+    if not Menu.IsEnabled(AutoStash.optionEnable) then return end
 
+    local myHero = Heroes.GetLocal()
+    if not myHero then return end
+
+    -- move items back to inventory afer using soul ring
+    if NPC.HasModifier(myHero, "modifier_fountain_aura_buff") 
+        and NPC.HasModifier(myHero, "modifier_item_soul_ring_buff") then
+
+        local mod = NPC.GetModifier(myHero, "modifier_item_soul_ring_buff")
+        if GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.1 then
+            stash2inventory(myHero)
+        end
+    end
+
+    -- when healed by shrine
+    if NPC.HasModifier(myHero, "modifier_filler_heal") then
+        local enemyUnits = NPC.GetHeroesInRadius(myHero, 1000, Enum.TeamType.TEAM_ENEMY)
+        local mod = NPC.GetModifier(myHero, "modifier_filler_heal")
+        if #enemyUnits <= 0 and GameRules.GetGameTime()-Modifier.GetCreationTime(mod) < 0.1 then
+            tmpMoveItem2Backpack(myHero)
+        end
+    end
+
+end
+
+function tmpMoveItem2Backpack(myHero)
+    local tmp_slot = 8
+    for i = 0, 5 do
+        local item = NPC.GetItemByIndex(myHero, i)
+        if item then
+            local itemName = Ability.GetName(item)
+            if not AutoStash.dontStashList[itemName] then
+                moveItemToSlot(myHero, item, tmp_slot)
+                moveItemToSlot(myHero, item, i)
+            end
+        end 
+    end
 end
 
 function inventory2stash(myHero)
@@ -74,14 +105,6 @@ end
 
 function moveItemToSlot(myHero, item, slot_index)
     Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_ITEM, slot_index, Vector(0, 0, 0), item, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
-end
-
-function isInFountain(myHero)
-    local radius = 900
-    for i, npc in ipairs(NPC.GetUnitsInRadius(myHero, radius, Enum.TeamType.TEAM_FRIEND)) do
-        if NPC.GetUnitName(npc) == "dota_fountain" then return true end
-    end
-    return false
 end
 
 return AutoStash
