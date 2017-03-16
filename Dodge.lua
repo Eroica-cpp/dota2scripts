@@ -307,6 +307,18 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- 33.5 OD's imprison and ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_obsidian_destroyer" then
+		local radius1 = 450
+		if animation.sequenceName == "castb_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
+			Dodge.Defend(myHero)
+		end
+
+		local radius2 = 700 + 575/2
+		if animation.sequenceName == "cast_ulti_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
+			Dodge.Defend(myHero)
+		end
+	end
 	-- 34. puck's silence
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_puck" then
 		local radius = 450
