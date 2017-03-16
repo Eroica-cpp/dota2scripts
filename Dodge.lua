@@ -381,13 +381,41 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
-	-- slardar's crush
+	-- 44. skywrath mage's silence
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_skywrath_mage" then
+		local radius = 750
+		if animation.sequenceName == "skywrath_mage_seal_cast_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 45. slardar's crush
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
 		local radius = 350
 		if animation.sequenceName == "crush_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Defend(myHero)
 		end
 	end
+
+	-- 46. spirit breaker's ultimate (no animation for charge)
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_spirit_breaker" then
+		local radius = 850
+		if animation.sequenceName == "ultimate_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 47. storm's pull
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_storm_spirit" then
+		local radius = 350
+		if animation.sequenceName == "vortex_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 48. sven's hammer
+	-- implemented in OnProjectile()
+
 
 	-- warlock's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
