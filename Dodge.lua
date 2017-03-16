@@ -350,12 +350,33 @@ function Dodge.OnUnitAnimation(animation)
 	-- 39. Sand King's burrow
 	-- burrow doesn't have animation, it can be dodge in OnLinearProjectile()
 
-	-- 40.
+	-- 40. shadow demon's disruption
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_shadow_demon" then
+		local radius = 700
+		if animation.sequenceName == "ability1_cast" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
 
-	-- shadow fiend's ultimate
+	-- 41. shadow fiend's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_nevermore" then
 		local radius = 1000
 		if animation.sequenceName == "cast6_requiem_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 42. shadow shaman's shackles
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_shadow_shaman" then
+		local radius = 500
+		if animation.sequenceName == "cast_channel_shackles_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 43. silencer's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_silencer" then
+		if animation.sequenceName == "cast_GS_anim" then
 			Dodge.Defend(myHero)
 		end
 	end
