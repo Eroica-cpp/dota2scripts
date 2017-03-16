@@ -1,3 +1,5 @@
+local Utility = require("Utility")
+
 local Dodge = {}
 
 Dodge.option = Menu.AddOption({"Utility", "Dodge Spells and Items"}, "Dodge Projectile", "On/Off")
@@ -574,11 +576,12 @@ function Dodge.Defend(myHero)
 	-- ember's fist (T)
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_ember_spirit" then
 		local fist = NPC.GetAbilityByIndex(myHero, 1)
+		local level = Ability.GetLevel(fist)
 		local cast_range = 700 
+		local radius = level > 0 and 250+100*(level-1) or 0
 		local enemyUnits = NPC.GetUnitsInRadius(myHero, cast_range, Enum.TeamType.TEAM_ENEMY)
 		if fist and Ability.IsCastable(fist, myMana) and #enemyUnits > 0 then
-			local pos = nil
-			for i, enemy in ipairs(enemyUnits) do pos = NPC.GetAbsOrigin(enemy) end
+			local pos = Utility.BestPosition(enemyUnits, radius)
 			
 			if pos and NPC.IsPositionInRange(myHero, pos, cast_range, 0) then 
 				Ability.CastPosition(fist, pos) 
