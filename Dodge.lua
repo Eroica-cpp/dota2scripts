@@ -440,6 +440,47 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- 52. tinker's laser
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_tinker" then
+		local radius = 725 + 220
+		if animation.sequenceName == "laser_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 53. tiny
+	-- tiny's VT combo don't have animation time
+
+	-- 54. treant's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_treant" then
+		local radius = 850
+		if animation.sequenceName == "cast5_Overgrowth_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 55. Tusk
+	-- no animation for tusk's punch
+
+	-- 56. underlord's trap
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_abyssal_underlord" then
+		local radius = 875 + 375/2
+		if animation.sequenceName == "au_cast02_pit_of_malice" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 57. venge's swap
+	-- no animation for venge's swap
+
+	-- 58. visage's birds' stun
+	if NPC.GetUnitName(animation.unit) == "npc_dota_visage_familiar3" then
+		local radius = 350
+		if animation.sequenceName == "cast" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
 	-- warlock's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
 		local radius = 1200 + 600/2
@@ -448,13 +489,6 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
-	-- tinker's laser
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_tinker" then
-		local radius = 725 + 220
-		if animation.sequenceName == "laser_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
-		end
-	end
 
 end
 
