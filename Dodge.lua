@@ -231,10 +231,15 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
-	-- 25. lion's finger
+	-- 25. lion's finger and spike
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lion" then
-		local radius = 900
-		if animation.sequenceName == "finger_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+		local radius1 = 850
+		if animation.sequenceName == "impale_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
+			Dodge.Defend(myHero)
+		end
+
+		local radius2 = 900
+		if animation.sequenceName == "finger_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
 			Dodge.Defend(myHero)
 		end
 	end
