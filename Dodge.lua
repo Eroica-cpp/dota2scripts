@@ -481,7 +481,7 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
-	-- warlock's ultimate
+	-- 59. warlock's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
 		local radius = 1200 + 600/2
 		if animation.sequenceName == "warlock_cast4_rain_chaos_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
@@ -489,6 +489,28 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
+	-- 60. windrunner's shackle
+	-- can be dodged by OnProjectile()
+
+	-- 61. winter wyvern's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_winter_wyvern" then
+		local radius = 800 + 500/2
+		if animation.sequenceName == "cast04_winters_curse_flying_low_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 62. zues's lightning bolt and ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_zuus" then
+		local radius = 900 + 375/2
+		if animation.sequenceName == "zeus_cast2_lightning_bolt" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+
+		if animation.sequenceName == "zeus_cast4_thundergods_wrath" then
+			Dodge.Defend(myHero)
+		end
+	end
 
 end
 
