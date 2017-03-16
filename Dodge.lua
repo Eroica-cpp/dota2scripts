@@ -29,10 +29,9 @@ function Dodge.OnUnitAnimation(animation)
 
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
-	-- enable following code after testing stage
-	-- if Entity.IsSameTeam(myHero, animation.unit) then return end
+	if Entity.IsSameTeam(myHero, animation.unit) then return end
 
-	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
+	-- Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
 	-- 1. anti-mage's mana void
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
