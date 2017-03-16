@@ -416,6 +416,29 @@ function Dodge.OnUnitAnimation(animation)
 	-- 48. sven's hammer
 	-- implemented in OnProjectile()
 
+	-- 49. techies's suicide
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_techies" then
+		local radius = 1200
+		if animation.sequenceName == "cast_blast_off" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 50. tb's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_terrorblade" then
+		local radius = 600
+		if animation.sequenceName == "sunder" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 51. tide's ravage
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_tidehunter" then
+		local radius = 1100
+		if animation.sequenceName == "ravage_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
 
 	-- warlock's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
