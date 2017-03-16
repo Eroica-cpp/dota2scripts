@@ -29,8 +29,10 @@ function Dodge.OnUnitAnimation(animation)
 
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
+	-- enable following code after testing stage
+	-- if Entity.IsSameTeam(myHero, animation.unit) then return end
 
-	-- Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
+	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
 	-- 1. anti-mage's mana void
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
@@ -320,6 +322,35 @@ function Dodge.OnUnitAnimation(animation)
 			Dodge.Defend(myHero)
 		end
 	end
+
+	-- 36. qop's ultimate
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_queenofpain" then
+		local radius = 900
+		if animation.sequenceName == "queen_sonicwave_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 37. riki's smoke
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_riki" then
+		local radius = 550 + 325/2
+		if animation.sequenceName == "cast1_smoke_screen_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 38. rubick's lift
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_rubick" then
+		local radius = 700
+		if animation.sequenceName == "rubick_cast_telekinesis_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Defend(myHero)
+		end
+	end
+
+	-- 39. Sand King's burrow
+	-- burrow doesn't have animation, it can be dodge in OnLinearProjectile()
+
+	-- 40.
 
 	-- shadow fiend's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_nevermore" then
