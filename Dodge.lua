@@ -246,12 +246,14 @@ function Dodge.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lion" then
 		local radius1 = 850
 		if animation.sequenceName == "impale_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
-			Dodge.Defend(myHero)
+			-- Dodge.Defend(myHero)
+			Dodge.DefendWithDelay(0.3-0.1)
 		end
 
 		local radius2 = 900
 		if animation.sequenceName == "finger_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
-			Dodge.Defend(myHero)
+			-- Dodge.Defend(myHero)
+			Dodge.DefendWithDelay(0.3)
 		end
 	end
 
@@ -275,7 +277,8 @@ function Dodge.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_magnataur" then
 		local radius = 410
 		if animation.sequenceName == "polarity_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
+			-- Dodge.Defend(myHero)
+			Dodge.DefendWithDelay(0.1)
 		end
 	end
 
@@ -333,7 +336,8 @@ function Dodge.OnUnitAnimation(animation)
 
 		local radius2 = 700 + 575/2
 		if animation.sequenceName == "cast_ulti_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
-			Dodge.Defend(myHero)
+			-- Dodge.Defend(myHero)
+			Dodge.DefendWithDelay(0.1)
 		end
 	end
 	-- 34. puck's silence
@@ -391,7 +395,8 @@ function Dodge.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_nevermore" then
 		local radius = 1000
 		if animation.sequenceName == "cast6_requiem_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Defend(myHero)
+			-- Dodge.Defend(myHero)
+			Dodge.DefendWithDelay(1.67-0.2)
 		end
 	end
 
@@ -547,7 +552,7 @@ function Dodge.OnUpdate()
 	if not Menu.IsEnabled(Dodge.option) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
-	
+
 	-- task management
 	if queue and #queue > 0 then
 		local timeStamp = table.remove(queue, 1)
@@ -582,7 +587,7 @@ function Dodge.OnUpdate()
 			local call_range = 300
 			if axe_call and Ability.IsInAbilityPhase(axe_call)
 				and NPC.IsEntityInRange(myHero, enemy, call_range) then
-				Dodge.AddDelay(Ability.GetCastPoint(axe_call)/2)
+				Dodge.DefendWithDelay(Ability.GetCastPoint(axe_call)/2)
 			end
 
 			-- shadow fiend's raze
@@ -599,14 +604,14 @@ function Dodge.OnUpdate()
 				or (raze_2 and Ability.IsInAbilityPhase(raze_2) and NPC.IsPositionInRange(myHero, pos_2, radius, 0))
 				or (raze_3 and Ability.IsInAbilityPhase(raze_3) and NPC.IsPositionInRange(myHero, pos_3, radius, 0))
 				then
-				Dodge.AddDelay(Ability.GetCastPoint(raze_1)/2)
+				Dodge.DefendWithDelay(Ability.GetCastPoint(raze_1)/2)
 			end
 
 		end
 	end
 end
 
-function Dodge.AddDelay(delay)
+function Dodge.DefendWithDelay(delay)
 	delay = math.max(delay, 0)
 	table.insert(queue, GameRules.GetGameTime() + delay)
 end
