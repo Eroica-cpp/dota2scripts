@@ -3,7 +3,10 @@ local Utility = require("Utility")
 local Dodge = {}
 
 Dodge.option = Menu.AddOption({"Utility", "Dodge Spells and Items"}, "Dodge Projectile", "On/Off")
-Dodge.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
+
+-- use queue to manage tasks
+local queue = {}
+local delta = 0.05
 
 function Dodge.OnProjectile(projectile)
 	if not Menu.IsEnabled(Dodge.option) then return end
@@ -544,6 +547,17 @@ function Dodge.OnUpdate()
 	if not Menu.IsEnabled(Dodge.option) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
+	
+	-- task management
+	if queue and #queue > 0 then
+		local timeStamp = table.remove(queue, 1)
+		local current = GameRules.GetGameTime()
+		if math.abs(current - timeStamp) <= delta then
+			Dodge.Defend(myHero)
+		elseif timeStamp > current then
+			table.insert(queue, timeStamp)
+		end
+	end
 
 	-- when kunkka's X mark expire
 	if NPC.HasModifier(myHero, "modifier_kunkka_x_marks_the_spot") then
@@ -568,7 +582,7 @@ function Dodge.OnUpdate()
 			local call_range = 300
 			if axe_call and Ability.IsInAbilityPhase(axe_call)
 				and NPC.IsEntityInRange(myHero, enemy, call_range) then
-				Dodge.Defend(myHero)
+				Dodge.AddDelay(Ability.GetCastPoint(axe_call)/2)
 			end
 
 			-- shadow fiend's raze
@@ -585,11 +599,16 @@ function Dodge.OnUpdate()
 				or (raze_2 and Ability.IsInAbilityPhase(raze_2) and NPC.IsPositionInRange(myHero, pos_2, radius, 0))
 				or (raze_3 and Ability.IsInAbilityPhase(raze_3) and NPC.IsPositionInRange(myHero, pos_3, radius, 0))
 				then
-				Dodge.Defend(myHero)
+				Dodge.AddDelay(Ability.GetCastPoint(raze_1)/2)
 			end
 
 		end
 	end
+end
+
+function Dodge.AddDelay(delay)
+	delay = math.max(delay, 0)
+	table.insert(queue, GameRules.GetGameTime() + delay)
 end
 
 function Dodge.Defend(myHero)
