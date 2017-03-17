@@ -4,9 +4,9 @@ local Dodge = {}
 
 Dodge.option = Menu.AddOption({"Utility", "Dodge Spells and Items"}, "Dodge Projectile", "On/Off")
 
--- use queue to manage tasks
-local queue = {}
-local delta = 0.05
+-- use message queue to manage tasks
+Dodge.msg_queue = {}
+Dodge.delta = 0.05
 
 function Dodge.OnProjectile(projectile)
 	if not Menu.IsEnabled(Dodge.option) then return end
@@ -275,7 +275,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 28. magnus's rp
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_magnataur" then
-		local radius = 410
+		local radius = 410 + 50
 		if animation.sequenceName == "polarity_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			-- Dodge.Defend(myHero)
 			Dodge.DefendWithDelay(0.1)
@@ -553,14 +553,16 @@ function Dodge.OnUpdate()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 
+	Dodge.TaskManagement(myHero)
+
 	-- task management
-	if queue and #queue > 0 then
-		local timeStamp = table.remove(queue, 1)
+	if msg_queue and #msg_queue > 0 then
+		local timeStamp = table.remove(msg_queue, 1)
 		local current = GameRules.GetGameTime()
 		if math.abs(current - timeStamp) <= delta then
 			Dodge.Defend(myHero)
 		elseif timeStamp > current then
-			table.insert(queue, timeStamp)
+			table.insert(msg_queue, timeStamp)
 		end
 	end
 
@@ -613,7 +615,37 @@ end
 
 function Dodge.DefendWithDelay(delay)
 	delay = math.max(delay, 0)
-	table.insert(queue, GameRules.GetGameTime() + delay)
+	table.insert(Dodge.msg_queue, GameRules.GetGameTime() + delay)
+end
+
+-- task table contains: {startTime; delay; type}
+function Dodge.AddTask(task)
+	table.insert(Dodge.msg_queue, task)
+end
+
+-- task table contains: {startTime; delay; type}
+function Dodge.TaskManagement(myHero)
+	if not Dodge.msg_queue or #Dodge.msg_queue <= 0 then return end
+
+	local task = table.remove(Dodge.msg_queue, 1)
+	if not task.startTime or not task.delay or not task.type then return end
+
+	local currentTime = GameRules.GetGameTime()
+
+	-- manage message queue
+	if task.startTime + Dodge.delta < currentTime then return end
+	if task.startTime > currentTime + Dodge.delta then Dodge.AddTask(task); return end
+
+	-- for: 
+
+	-- if queue and #queue > 0 then
+	-- 	local timeStamp = table.remove(queue, 1)
+	-- 	if math.abs(current - timeStamp) <= delta then
+	-- 		Dodge.Defend(myHero)
+	-- 	elseif timeStamp > current then
+	-- 		table.insert(queue, timeStamp)
+	-- 	end
+	-- end
 end
 
 function Dodge.Defend(myHero)
