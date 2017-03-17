@@ -3,6 +3,7 @@ local Utility = require("Utility")
 local Dodge = {}
 
 Dodge.option = Menu.AddOption({"Utility", "Dodge Spells and Items"}, "Dodge Projectile", "On/Off")
+Dodge.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 function Dodge.OnProjectile(projectile)
 	if not Menu.IsEnabled(Dodge.option) then return end
@@ -557,7 +558,7 @@ function Dodge.OnUpdate()
 	-- for few cases that fail in OnUnitAnimation()
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
-		if not NPC.IsIllusion(enemy) 
+		if enemy and not NPC.IsIllusion(enemy) 
 			and not Entity.IsSameTeam(myHero, enemy) 
 			and not Entity.IsDormant(enemy) 
 			and Entity.IsAlive(enemy) then
@@ -567,6 +568,23 @@ function Dodge.OnUpdate()
 			local call_range = 300
 			if axe_call and Ability.IsInAbilityPhase(axe_call)
 				and NPC.IsEntityInRange(myHero, enemy, call_range) then
+				Dodge.Defend(myHero)
+			end
+
+			-- shadow fiend's raze
+			local raze_1 = NPC.GetAbility(enemy, "nevermore_shadowraze1")
+			local raze_2 = NPC.GetAbility(enemy, "nevermore_shadowraze2")
+			local raze_3 = NPC.GetAbility(enemy, "nevermore_shadowraze3")
+			local range_1, range_2, range_3 = 200, 450, 700
+			local direction = Entity.GetAbsRotation(enemy):GetForward():Normalized()
+			local pos_1 = Entity.GetAbsOrigin(enemy) + direction:Scaled(range_1)
+			local pos_2 = Entity.GetAbsOrigin(enemy) + direction:Scaled(range_2)
+			local pos_3 = Entity.GetAbsOrigin(enemy) + direction:Scaled(range_3)
+			local radius = 250
+			if (raze_1 and Ability.IsInAbilityPhase(raze_1) and NPC.IsPositionInRange(myHero, pos_1, radius, 0)) 
+				or (raze_2 and Ability.IsInAbilityPhase(raze_2) and NPC.IsPositionInRange(myHero, pos_2, radius, 0))
+				or (raze_3 and Ability.IsInAbilityPhase(raze_3) and NPC.IsPositionInRange(myHero, pos_3, radius, 0))
+				then
 				Dodge.Defend(myHero)
 			end
 
