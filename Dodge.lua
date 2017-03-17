@@ -33,7 +33,7 @@ function Dodge.OnUnitAnimation(animation)
 	if not myHero then return end
 	if Entity.IsSameTeam(myHero, animation.unit) then return end
 
-	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
+	-- Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
 	-- 1. anti-mage's mana void
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
@@ -554,6 +554,24 @@ function Dodge.OnUpdate()
 		end
 	end
 
+	-- for few cases that fail in OnUnitAnimation()
+	for i = 1, Heroes.Count() do
+		local enemy = Heroes.Get(i)
+		if not NPC.IsIllusion(enemy) 
+			and not Entity.IsSameTeam(myHero, enemy) 
+			and not Entity.IsDormant(enemy) 
+			and Entity.IsAlive(enemy) then
+
+			-- axe's call
+			local axe_call = NPC.GetAbility(enemy, "axe_berserkers_call")
+			local call_range = 300
+			if axe_call and Ability.IsInAbilityPhase(axe_call)
+				and NPC.IsEntityInRange(myHero, enemy, call_range) then
+				Dodge.Defend(myHero)
+			end
+
+		end
+	end
 end
 
 function Dodge.Defend(myHero)
