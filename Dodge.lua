@@ -33,7 +33,7 @@ function Dodge.OnUnitAnimation(animation)
 	if not myHero then return end
 	if Entity.IsSameTeam(myHero, animation.unit) then return end
 
-	-- Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
+	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
 	-- 1. anti-mage's mana void
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
@@ -205,6 +205,13 @@ function Dodge.OnUnitAnimation(animation)
 	-- 21. KoL's mana leak
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_keeper_of_the_light" then
 		-- no need to implement this
+	end
+
+	-- 21.5 Kunkka's X mark
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_kunkka" 
+		and NPC.HasModifier(myHero, "modifier_kunkka_x_marks_the_spot") 
+		and animation.sequenceName == "x_mark_anim" then
+			Dodge.Defend(myHero)
 	end
 
 	-- 22. legion's duel
@@ -526,6 +533,23 @@ function Dodge.OnUnitAnimation(animation)
 		end
 
 		if animation.sequenceName == "zeus_cast4_thundergods_wrath" then
+			Dodge.Defend(myHero)
+		end
+	end
+
+end
+
+function Dodge.OnUpdate()
+	if not Menu.IsEnabled(Dodge.option) then return end
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+
+	-- when kunkka's X mark expire
+	if NPC.HasModifier(myHero, "modifier_kunkka_x_marks_the_spot") then
+		local mod = NPC.GetModifier(myHero, "modifier_kunkka_x_marks_the_spot")
+		local timeLeft = Modifier.GetDieTime(mod) - GameRules.GetGameTime()
+		-- make sure not be X_marked by teammate; 0.3s delay works
+		if Modifier.GetDuration(mod) <= 5 and timeLeft <= 0.3 then
 			Dodge.Defend(myHero)
 		end
 	end
