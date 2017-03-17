@@ -9,10 +9,13 @@ local msg_queue = {}
 local DELTA = 0.05
 
 function Manager.OnUpdate()
+	if not next(msg_queue) then return end
+	local info = table.remove(msg_queue, 1)
 end
 
-function Manager.AddTask(task)
-	Log.Write("adding task ..")
+-- add animation information
+function Manager.Update(info)
+	Log.Write("updating info ..")
 end
 
 return Manager
