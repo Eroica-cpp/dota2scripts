@@ -44,7 +44,10 @@ function AutoUseItems.item_iron_talon(myHero)
 	local target = nil
 	for i, npc in ipairs(creeps) do
 		local tmpHp = Entity.GetHealth(npc)
-		if tmpHp > maxHp and NPC.IsCreep(npc) and not NPC.IsAncient(npc) and not NPC.IsRoshan(npc) then
+		local ratio = 0.5
+		if tmpHp > maxHp and NPC.IsCreep(npc) 
+			and (not NPC.IsAncient(npc)) and (not NPC.IsRoshan(npc)) 
+			and tmpHp > ratio*Entity.GetMaxHealth(npc) then
 			maxHp = tmpHp
 			target = npc
 		end
