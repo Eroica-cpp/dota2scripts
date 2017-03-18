@@ -47,6 +47,31 @@ end
 function Ember.LifeSteal(myHero)
 	local fist = NPC.GetAbilityByIndex(myHero, 1)
 	if not fist or not Ability.IsCastable(fist, NPC.GetMana(myHero)) then return end
+
+	local level = Ability.GetLevel(fist)
+	local bonus_damage = 20 * level
+	local cast_range = 700
+	local radius = cast_range + 250 + 100*(level-1)
+
+	for i = 1, Heroes.Count() do
+		local enemy = Heroes.Get(i)
+		if not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) 
+			and not NPC.IsIllusion(enemy) and Entity.IsAlive(enemy) 
+			and NPC.IsEntityInRange(myHero, enemy, radius) then
+
+			local physical_damage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
+			local true_damage = bonus_damage + physical_damage
+
+			if Entity.GetHealth(enemy) <= true_damage then
+				local pos1, pos2 = NPC.GetAbsOrigin(myHero), NPC.GetAbsOrigin(enemy)
+				local dis = (pos2-pos1):Length2D()
+				local pos = pos1 + (pos2-pos1):Scaled(dis/radius)
+				Ability.CastPosition(fist, pos)
+				return
+			end
+		end
+	end -- end of for loop
+
 end
 
 function Ember.Dash(myHero)
