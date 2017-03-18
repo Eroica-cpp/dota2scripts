@@ -579,7 +579,7 @@ function Dodge.OnUpdate()
 		local timeLeft = Modifier.GetDieTime(mod) - GameRules.GetGameTime()
 		-- make sure not be X_marked by teammate; 0.3s delay works
 		if Modifier.GetDuration(mod) <= 5 and timeLeft <= 0.3 then
-			Dodge.Update()
+			Dodge.Update({time = GameRules.GetGameTime(); delay = 0; desc = ""})
 		end
 	end
 
