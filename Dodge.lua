@@ -1,10 +1,15 @@
 local Utility = require("Utility")
-local Manager = require("Manager")
 
-local Monitor = {}
+local Dodge = {}
 
-function Monitor.OnProjectile(projectile)
-	if not Menu.IsEnabled(Manager.optionDodge) then return end
+Dodge.option = Menu.AddOption({"Utility", "Dodge Spells and Items"}, "Dodge Projectile", "On/Off")
+
+local msg_queue = {}
+local DELTA = 0.05 -- maximun gap for equality
+local ERROR = 0.1 -- systematic error
+
+function Dodge.OnProjectile(projectile)
+	if not Menu.IsEnabled(Dodge.option) then return end
 	if not projectile.source or not projectile.target then return end
 	if not projectile.dodgeable then return end
 	if not Entity.IsHero(projectile.source) then return end
@@ -16,16 +21,17 @@ function Monitor.OnProjectile(projectile)
 	if projectile.target ~= myHero then return end
 	if Entity.IsSameTeam(projectile.source, projectile.target) then return end
 
-	Manager.Update()
+	-- delay = 0 for all projectiles
+	Dodge.Update({time = GameRules.GetGameTime(); delay = 0; desc = ""})
 end
 
-function Monitor.OnLinearProjectileCreate(projectile)
-	if not Menu.IsEnabled(Manager.optionDodge) then return end
-	Manager.Update()
+function Dodge.OnLinearProjectileCreate(projectile)
+	if not Menu.IsEnabled(Dodge.option) then return end
+	Dodge.Update()
 end
 
-function Monitor.OnUnitAnimation(animation)
-	if not Menu.IsEnabled(Manager.optionDodge) then return end
+function Dodge.OnUnitAnimation(animation)
+	if not Menu.IsEnabled(Dodge.option) then return end
 	if not animation or not animation.unit then return end
 
 	local myHero = Heroes.GetLocal()
@@ -38,7 +44,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
 		local radius = 600 + 500/2
 		if animation.sequenceName == "basher_cast4_mana_void_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end	
 
@@ -46,7 +52,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_axe" then
 		local radius = 300
 		if animation.sequenceName == "culling_blade_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end	
 
@@ -54,12 +60,12 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_bane" then
 		local radius1 = 825
 		if animation.sequenceName == "nightmare" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
-			Manager.Update()
+			Dodge.Update()
 		end
 
 		local radius2 = 800
 		if animation.sequenceName == "fiends_grip_cast" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
-			Manager.Update()
+			Dodge.Update()
 		end		
 	end	
 
@@ -67,7 +73,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_batrider" then
 		local radius = 200
 		if animation.sequenceName == "lasso_start_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end	
 
@@ -75,7 +81,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_beastmaster" then
 		local radius = 950
 		if animation.sequenceName == "cast4_primal_roar_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end	
 
@@ -83,7 +89,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_bloodseeker" then
 		local radius = 1000
 		if animation.sequenceName == "cast4_rupture_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end	
 
@@ -91,7 +97,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_centaur" then
 		local radius = 315
 		if animation.sequenceName == "cast_hoofstomp_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -99,12 +105,12 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_chaos_knight" then
 		local radius1 = 500
 		if animation.sequenceName == "chaosbolt_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
-			Manager.Update()
+			Dodge.Update()
 		end
 
 		-- local radius2 = 700
 		-- if animation.sequenceName == "chaosbolt_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-		-- 	Manager.Update()
+		-- 	Dodge.Update()
 		-- end		
 	end
 
@@ -117,7 +123,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_crystal_maiden" then
 		local radius = 650
 		if animation.sequenceName == "frostbite_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -125,7 +131,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_death_prophet" then
 		local radius = 1000 + 425/2
 		if animation.sequenceName == "cast2_silence_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -138,7 +144,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_doom_bringer" then
 		local radius = 550
 		if animation.sequenceName == "cast_doom" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -151,7 +157,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_drow_ranger" then
 		local radius = 1000
 		if animation.sequenceName == "cast2_silence_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -163,12 +169,12 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_earthshaker" then
 		local radius1 = 1400
 		if animation.sequenceName == "fissure_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
-			Manager.Update()
+			Dodge.Update()
 		end
 
 		local radius2 = 350
 		if animation.sequenceName == "enchant_totem_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -176,7 +182,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_enigma" then
 		local radius = 275 + 420/2
 		if animation.sequenceName == "cast4_black_hole_chasm" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -184,7 +190,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_faceless_void" then
 		local radius = 600 + 425/2
 		if animation.sequenceName == "chronosphere_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -197,7 +203,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_juggernaut" then
 		local radius = 350 + 425/2
 		if animation.sequenceName == "attack_omni_cast" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -210,14 +216,14 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_kunkka" 
 		and NPC.HasModifier(myHero, "modifier_kunkka_x_marks_the_spot") 
 		and animation.sequenceName == "x_mark_anim" then
-			Manager.Update()
+			Dodge.Update()
 	end
 
 	-- 22. legion's duel
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_legion_commander" then
 		local radius = 300
 		if animation.sequenceName == "dualwield_legion_commander_duel_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -225,7 +231,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lich" then
 		local radius = 1000
 		if animation.sequenceName == "chain_frost" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -233,7 +239,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lina" then
 		local radius = 725
 		if animation.sequenceName == "laguna_blade_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -241,13 +247,13 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lion" then
 		local radius1 = 850
 		if animation.sequenceName == "impale_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
-			Manager.Update()
+			Dodge.Update()
 			-- Dodge.DefendWithDelay(0.3-0.1)
 		end
 
 		local radius2 = 900
 		if animation.sequenceName == "finger_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
-			Manager.Update()
+			Dodge.Update()
 			-- Dodge.DefendWithDelay(0.3)
 		end
 	end
@@ -256,7 +262,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_lone_druid" then
 		local radius = 350
 		if animation.sequenceName == "cast_savage_roar" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -264,7 +270,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_luna" then
 		local radius = 800
 		if animation.sequenceName == "moonfall_cast1_lucent_beam_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -272,7 +278,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_magnataur" then
 		local radius = 410 + 50
 		if animation.sequenceName == "polarity_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 			-- Dodge.DefendWithDelay(0.1)
 		end
 	end
@@ -286,7 +292,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_naga_siren" then
 		local radius = 1250
 		if animation.sequenceName == "cast4_sirenSong_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -294,7 +300,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_necrolyte" then
 		local radius = 650
 		if animation.sequenceName == "cast_ult_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -302,7 +308,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_night_stalker" then
 		local radius = 650
 		if animation.sequenceName == "cast_cripplingfear_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -310,7 +316,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_nyx_assassin" then
 		local radius = 700
 		if animation.sequenceName == "impale_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -318,7 +324,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_ogre_magi" then
 		local radius = 600
 		if animation.sequenceName == "cast1_fireblast_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -326,12 +332,12 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_obsidian_destroyer" then
 		local radius1 = 450
 		if animation.sequenceName == "castb_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius1) then
-			Manager.Update()
+			Dodge.Update()
 		end
 
 		local radius2 = 700 + 575/2
 		if animation.sequenceName == "cast_ulti_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
-			Manager.Update()
+			Dodge.Update()
 			-- Dodge.DefendWithDelay(0.1)
 		end
 	end
@@ -339,7 +345,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_puck" then
 		local radius = 450
 		if animation.sequenceName == "cast2_rift_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -347,7 +353,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_pudge" then
 		local radius = 250
 		if animation.sequenceName == "pudge_dismember_start" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -355,7 +361,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_queenofpain" then
 		local radius = 900
 		if animation.sequenceName == "queen_sonicwave_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -363,7 +369,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_riki" then
 		local radius = 550 + 325/2
 		if animation.sequenceName == "cast1_smoke_screen_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -371,7 +377,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_rubick" then
 		local radius = 700
 		if animation.sequenceName == "rubick_cast_telekinesis_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -382,7 +388,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_shadow_demon" then
 		local radius = 700
 		if animation.sequenceName == "ability1_cast" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -390,7 +396,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_nevermore" then
 		local radius = 1000
 		if animation.sequenceName == "cast6_requiem_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 			-- Dodge.DefendWithDelay(1.67-0.2)
 		end
 	end
@@ -399,14 +405,14 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_shadow_shaman" then
 		local radius = 500
 		if animation.sequenceName == "cast_channel_shackles_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
 	-- 43. silencer's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_silencer" then
 		if animation.sequenceName == "cast_GS_anim" then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -414,7 +420,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_skywrath_mage" then
 		local radius = 750
 		if animation.sequenceName == "skywrath_mage_seal_cast_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -422,7 +428,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_slardar" then
 		local radius = 350
 		if animation.sequenceName == "crush_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -430,7 +436,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_spirit_breaker" then
 		local radius = 850
 		if animation.sequenceName == "ultimate_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -438,7 +444,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_storm_spirit" then
 		local radius = 350
 		if animation.sequenceName == "vortex_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -449,7 +455,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_techies" then
 		local radius = 1200
 		if animation.sequenceName == "cast_blast_off" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -457,7 +463,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_terrorblade" then
 		local radius = 600
 		if animation.sequenceName == "sunder" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -465,7 +471,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_tidehunter" then
 		local radius = 1100
 		if animation.sequenceName == "ravage_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -473,7 +479,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_tinker" then
 		local radius = 725 + 220
 		if animation.sequenceName == "laser_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -484,7 +490,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_treant" then
 		local radius = 850
 		if animation.sequenceName == "cast5_Overgrowth_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -495,7 +501,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_abyssal_underlord" then
 		local radius = 875 + 375/2
 		if animation.sequenceName == "au_cast02_pit_of_malice" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -506,7 +512,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_visage_familiar3" then
 		local radius = 350
 		if animation.sequenceName == "cast" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -514,7 +520,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
 		local radius = 1200 + 600/2
 		if animation.sequenceName == "warlock_cast4_rain_chaos_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -525,7 +531,7 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_winter_wyvern" then
 		local radius = 800 + 500/2
 		if animation.sequenceName == "cast04_winters_curse_flying_low_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -533,20 +539,22 @@ function Monitor.OnUnitAnimation(animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_zuus" then
 		local radius = 900 + 375/2
 		if animation.sequenceName == "zeus_cast2_lightning_bolt" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Manager.Update()
+			Dodge.Update()
 		end
 
 		if animation.sequenceName == "zeus_cast4_thundergods_wrath" then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
 end
 
-function Monitor.OnUpdate()
-	if not Menu.IsEnabled(Manager.optionDodge) then return end
+function Dodge.OnUpdate()
+	if not Menu.IsEnabled(Dodge.option) then return end
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
+
+	Dodge.TaskManagement(myHero)
 
 	-- when kunkka's X mark expire
 	if NPC.HasModifier(myHero, "modifier_kunkka_x_marks_the_spot") then
@@ -554,7 +562,7 @@ function Monitor.OnUpdate()
 		local timeLeft = Modifier.GetDieTime(mod) - GameRules.GetGameTime()
 		-- make sure not be X_marked by teammate; 0.3s delay works
 		if Modifier.GetDuration(mod) <= 5 and timeLeft <= 0.3 then
-			Manager.Update()
+			Dodge.Update()
 		end
 	end
 
@@ -571,7 +579,7 @@ function Monitor.OnUpdate()
 			local call_range = 300
 			if axe_call and Ability.IsInAbilityPhase(axe_call)
 				and NPC.IsEntityInRange(myHero, enemy, call_range) then
-				Manager.Update()
+				Dodge.Update()
 				-- Dodge.DefendWithDelay(Ability.GetCastPoint(axe_call)/2)
 			end
 
@@ -589,47 +597,102 @@ function Monitor.OnUpdate()
 				or (raze_2 and Ability.IsInAbilityPhase(raze_2) and NPC.IsPositionInRange(myHero, pos_2, radius, 0))
 				or (raze_3 and Ability.IsInAbilityPhase(raze_3) and NPC.IsPositionInRange(myHero, pos_3, radius, 0))
 				then
-				Manager.Update()
+				Dodge.Update()
 				-- Dodge.DefendWithDelay(Ability.GetCastPoint(raze_1)/2)
 			end
 
 		end
 	end
+
 end
 
--- function Dodge.DefendWithDelay(delay)
--- 	delay = math.max(delay, 0)
--- 	table.insert(Dodge.msg_queue, GameRules.GetGameTime() + delay)
--- end
+function Dodge.TaskManagement(myHero)
+	if not msg_queue or #msg_queue <= 0 then return end
+	
+	local info = table.remove(msg_queue, 1)
+	if not info then return end
 
--- task table contains: {startTime; delay; type}
--- function Dodge.AddTask(task)
--- 	table.insert(Dodge.msg_queue, task)
--- end
+	local currentTime = GameRules.GetGameTime()
+	local diff = info.delay - ERROR -- should consider backswing for specific hero
+	local executeTime = info.time + math.max(diff, 0)
 
--- task table contains: {startTime; delay; type}
--- function Dodge.TaskManagement(myHero)
--- 	if not Dodge.msg_queue or #Dodge.msg_queue <= 0 then return end
 
--- 	local task = table.remove(Dodge.msg_queue, 1)
--- 	if not task.startTime or not task.delay or not task.type then return end
+	if currentTime > executeTime + DELTA then return end
+	if currentTime < executeTime - DELTA then Dodge.Update(info) return end
 
--- 	local currentTime = GameRules.GetGameTime()
+	-- executeTime - DELTA <= currentTime <= executeTime + DELTA
+	Log.Write(executeTime .. " : " .. (currentTime-info.time) .. " : " .. info.delay - ERROR)
+	Dodge.Defend(myHero)
+end
 
--- 	-- manage message queue
--- 	if task.startTime + Dodge.delta < currentTime then return end
--- 	if task.startTime > currentTime + Dodge.delta then Dodge.AddTask(task); return end
+-- into: {time; delay; desc}
+function Dodge.Update(info)
+	if not info or not info.time or not info.delay or not info.desc then return end
+	table.insert(msg_queue, info)
+end
 
--- 	-- for: 
+function Dodge.Defend(myHero)
+	if not myHero then return end
+	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 
--- 	-- if queue and #queue > 0 then
--- 	-- 	local timeStamp = table.remove(queue, 1)
--- 	-- 	if math.abs(current - timeStamp) <= delta then
--- 	-- 		Manager.Update()
--- 	-- 	elseif timeStamp > current then
--- 	-- 		table.insert(queue, timeStamp)
--- 	-- 	end
--- 	-- end
--- end
+	local myMana = NPC.GetMana(myHero)
 
-return Monitor
+	-- life stealer's rage
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_life_stealer" then
+		local rage = NPC.GetAbilityByIndex(myHero, 0)
+		if rage and Ability.IsCastable(rage, myMana) then
+			Ability.CastNoTarget(rage)
+		end
+	end
+
+	-- juggernaut's spin
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_juggernaut" then
+		local spin = NPC.GetAbilityByIndex(myHero, 0)
+		if spin and Ability.IsCastable(spin, myMana) then
+			Ability.CastNoTarget(spin)
+		end
+	end
+
+	-- weaver's shukuchi
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_weaver" then
+		local shukuchi = NPC.GetAbilityByIndex(myHero, 1)
+		if shukuchi and Ability.IsCastable(shukuchi, myMana) then
+			Ability.CastNoTarget(shukuchi)
+		end
+	end
+
+	-- omni's repel
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_omniknight" then
+		local repel = NPC.GetAbilityByIndex(myHero, 1)
+		if repel and Ability.IsCastable(repel, myMana) then
+			Ability.CastTarget(repel, myHero)
+		end
+	end
+
+	-- slark's dark pact
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_slark" then
+		local pact = NPC.GetAbilityByIndex(myHero, 0)
+		if pact and Ability.IsCastable(pact, myMana) then
+			Ability.CastNoTarget(pact)
+		end
+	end
+
+	-- ember's fist (T)
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_ember_spirit" then
+		local fist = NPC.GetAbilityByIndex(myHero, 1)
+		local level = Ability.GetLevel(fist)
+		local cast_range = 700 
+		local radius = level > 0 and 250+100*(level-1) or 0
+		local enemyUnits = NPC.GetUnitsInRadius(myHero, cast_range, Enum.TeamType.TEAM_ENEMY)
+		if fist and Ability.IsCastable(fist, myMana) and #enemyUnits > 0 then
+			local pos = Utility.BestPosition(enemyUnits, radius)
+			
+			if pos and NPC.IsPositionInRange(myHero, pos, cast_range, 0) then 
+				Ability.CastPosition(fist, pos) 
+			end
+		end
+	end
+
+end
+
+return Dodge
