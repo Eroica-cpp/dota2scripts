@@ -10,10 +10,17 @@ function Block.OnUpdate()
 	if not Menu.IsEnabled(Block.option) then return end
 	if not shouldBlock then return end
 
-	local target = Input.GetNearestUnitToCursor(0, Enum.TeamType.TEAM_BOTH)
-	if target then
-		Log.Write(NPC.GetUnitName(target))
-	end
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+
+	local radius = 300
+	local units = NPC.GetUnitsInRadius(myHero, radius, Enum.TeamType.TEAM_BOTH)
+	local target
+	if units then target = units[1] end
+	if not target then return end
+
+	Log.Write(NPC.GetUnitName(target))
+
 end
 
 function Block.OnDraw()
