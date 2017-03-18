@@ -596,7 +596,7 @@ function Dodge.OnUpdate()
 			local call_range = 300
 			if axe_call and Ability.IsInAbilityPhase(axe_call)
 				and NPC.IsEntityInRange(myHero, enemy, call_range) then
-				Dodge.Update()
+				Dodge.Update({time = GameRules.GetGameTime(); delay = Ability.GetCastPoint(axe_call)/2; desc = ""})
 				-- Dodge.DefendWithDelay(Ability.GetCastPoint(axe_call)/2)
 			end
 
@@ -614,7 +614,7 @@ function Dodge.OnUpdate()
 				or (raze_2 and Ability.IsInAbilityPhase(raze_2) and NPC.IsPositionInRange(myHero, pos_2, radius, 0))
 				or (raze_3 and Ability.IsInAbilityPhase(raze_3) and NPC.IsPositionInRange(myHero, pos_3, radius, 0))
 				then
-				Dodge.Update()
+				Dodge.Update({time = GameRules.GetGameTime(); delay = Ability.GetCastPoint(raze_1)-0.2; desc = ""})
 				-- Dodge.DefendWithDelay(Ability.GetCastPoint(raze_1)/2)
 			end
 
