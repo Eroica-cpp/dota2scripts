@@ -38,7 +38,7 @@ function Dodge.OnUnitAnimation(animation)
 	if not myHero then return end
 	if Entity.IsSameTeam(myHero, animation.unit) then return end
 
-	-- Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
+	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
 	-- 1. anti-mage's mana void
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
@@ -449,7 +449,12 @@ function Dodge.OnUnitAnimation(animation)
 	end
 
 	-- 48. sven's hammer
-	-- implemented in OnProjectile()
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_sven" then
+		local radius = 600
+		if animation.sequenceName == "shield_storm_bolt" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
+		end
+	end
 
 	-- 49. techies's suicide
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_techies" then
@@ -505,8 +510,13 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
-	-- 57. venge's swap
-	-- no animation for venge's swap
+	-- 57. venge's hammer (no animation for venge's swap)
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_vengefulspirit" then
+		local radius = 500
+		if animation.sequenceName == "magic_missile_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
+		end
+	end
 
 	-- 58. visage's birds' stun
 	if NPC.GetUnitName(animation.unit) == "npc_dota_visage_familiar3" then
@@ -535,7 +545,16 @@ function Dodge.OnUnitAnimation(animation)
 		end
 	end
 
-	-- 62. zues's lightning bolt and ultimate
+	-- 62. WK's hammer
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_skeleton_king" then
+		local radius = 525
+		if animation.sequenceName == "cast1_hellfire_blast" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
+			Log.Write("animation time: " .. GameRules.GetGameTime())
+			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
+		end
+	end
+
+	-- 63. zues's lightning bolt and ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_zuus" then
 		local radius = 900 + 375/2
 		if animation.sequenceName == "zeus_cast2_lightning_bolt" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
@@ -621,7 +640,7 @@ function Dodge.TaskManagement(myHero)
 	if currentTime < executeTime - DELTA then Dodge.Update(info) return end
 
 	-- executeTime - DELTA <= currentTime <= executeTime + DELTA
-	Log.Write(executeTime .. " : " .. (currentTime-info.time) .. " : " .. info.delay - ERROR)
+	Log.Write("exec time: " .. GameRules.GetGameTime())
 	Dodge.Defend(myHero)
 end
 
