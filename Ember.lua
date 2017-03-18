@@ -53,24 +53,25 @@ function Ember.LifeSteal(myHero)
 	local cast_range = 700
 	local radius = cast_range + 250 + 100*(level-1)
 
-	for i = 1, Heroes.Count() do
-		local enemy = Heroes.Get(i)
-		if not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) 
-			and not NPC.IsIllusion(enemy) and Entity.IsAlive(enemy) 
-			and NPC.IsEntityInRange(myHero, enemy, radius) then
+	local enemyHeroes = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
+	for i, enemy in ipairs(enemyHeroes) do
+		local physical_damage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
+		local true_damage = bonus_damage + physical_damage
+		
+		if not Entity.IsDormant(enemy) and not NPC.IsIllusion(enemy) and Entity.IsAlive(enemy)
+			and Entity.GetHealth(enemy) <= true_damage then
 
-			local physical_damage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
-			local true_damage = bonus_damage + physical_damage
-
-			if Entity.GetHealth(enemy) <= true_damage then
-				local pos1, pos2 = NPC.GetAbsOrigin(myHero), NPC.GetAbsOrigin(enemy)
-				local dis = (pos2-pos1):Length2D()
-				local pos = pos1 + (pos2-pos1):Scaled(dis/radius)
+			local pos1, pos2 = NPC.GetAbsOrigin(myHero), NPC.GetAbsOrigin(enemy)
+			if NPC.IsEntityInRange(myHero, enemy, cast_range) then
+				Ability.CastPosition(fist, pos2)
+			else
+				local pos = pos1 + (pos2-pos1):Normalized():Scaled(cast_range)
 				Ability.CastPosition(fist, pos)
-				return
 			end
+			
+			return
 		end
-	end -- end of for loop
+	end
 
 end
 
