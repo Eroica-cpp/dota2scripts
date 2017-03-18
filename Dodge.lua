@@ -38,7 +38,7 @@ function Dodge.OnUnitAnimation(animation)
 	if not myHero then return end
 	if Entity.IsSameTeam(myHero, animation.unit) then return end
 
-	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
+	-- Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
 	-- 1. anti-mage's mana void
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
@@ -638,7 +638,7 @@ function Dodge.TaskManagement(myHero)
 	if currentTime < executeTime - DELTA then Dodge.Update(info) return end
 
 	-- executeTime - DELTA <= currentTime <= executeTime + DELTA
-	Log.Write("exec time: " .. GameRules.GetGameTime())
+	-- Log.Write("exec time: " .. GameRules.GetGameTime())
 	Dodge.Defend(myHero)
 end
 

@@ -1,6 +1,7 @@
 local Ember = {}
 
 Ember.fistChainCombo = Menu.AddOption({"Hero Specific", "Ember Spirit"}, "fist & chain combo", "On/Off")
+Ember.optionLifeSteal = Menu.AddOption({"Hero Specific", "Ember Spirit"}, "life steal", "using fist to KS")
 Ember.dashCombo = Menu.AddOption({"Hero Specific", "Ember Spirit"}, "remnant dash combo", "On/Off")
 Ember.dashKey = Menu.AddKeyOption({"Hero Specific", "Ember Spirit" }, "Dash Key", Enum.ButtonCode.KEY_F)
 
@@ -18,6 +19,11 @@ function Ember.OnUpdate()
 		Ember.FistChain(myHero)
 	end
 
+	-- use fist (T) to KS
+	if Menu.IsEnabled(Ember.optionLifeSteal) then
+		Ember.LifeSteal(myHero)
+	end
+
 	-- remnants dash combo
 	if Menu.IsEnabled(Ember.dashCombo) and Menu.IsKeyDown(Ember.dashKey) then
 		Ember.Dash(myHero)
@@ -29,16 +35,18 @@ function Ember.FistChain(myHero)
 	if not NPC.HasModifier(myHero, "modifier_ember_spirit_sleight_of_fist_caster") then return end
 
 	local chain = NPC.GetAbilityByIndex(myHero, 0)
-	local fist = NPC.GetAbilityByIndex(myHero, 1)
-	local myMana = NPC.GetMana(myHero)
-
-	if not Ability.IsCastable(chain, myMana) then return end
+	if not chain or not Ability.IsCastable(chain, NPC.GetMana(myHero)) then return end
 
 	local chain_radius = 400
 	local enemyAround = NPC.GetHeroesInRadius(myHero, chain_radius, Enum.TeamType.TEAM_ENEMY)
 	if #enemyAround > 0 then
 		Ability.CastNoTarget(chain)
 	end
+end
+
+function Ember.LifeSteal(myHero)
+	local fist = NPC.GetAbilityByIndex(myHero, 1)
+	if not fist or not Ability.IsCastable(fist, NPC.GetMana(myHero)) then return end
 end
 
 function Ember.Dash(myHero)
