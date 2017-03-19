@@ -31,19 +31,19 @@ function AutoUseItems.OnUpdate()
     	AutoUseItems.heal(myHero)
     end
 
-    if Menu.IsEnabled(AutoUseItems.optionSheepstick) then
+    if Menu.IsEnabled(AutoUseItems.optionSheepstick) and NPC.IsVisible(myHero) then
     	AutoUseItems.item_sheepstick(myHero)
     end
 
-    if Menu.IsEnabled(AutoUseItems.optionOrchid) then
+    if Menu.IsEnabled(AutoUseItems.optionOrchid) and NPC.IsVisible(myHero) then
     	AutoUseItems.item_orchid(myHero)
     end
 
-    if Menu.IsEnabled(AutoUseItems.optionAtos) then
+    if Menu.IsEnabled(AutoUseItems.optionAtos) and NPC.IsVisible(myHero) then
     	AutoUseItems.item_rod_of_atos(myHero)
     end
 
-    if Menu.IsEnabled(AutoUseItems.optionDagon) then
+    if Menu.IsEnabled(AutoUseItems.optionDagon) and NPC.IsVisible(myHero) then
     	AutoUseItems.item_dagon(myHero)
     end
 end
@@ -75,7 +75,11 @@ function AutoUseItems.item_iron_talon(myHero)
 	local item = NPC.GetItem(myHero, "item_iron_talon", true)
 	if not item or not Ability.IsCastable(item, 0) then return end
 
-	local range = 350
+	local radius = 1200
+	local enemyHeroes = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
+	if enemyHeroes and #enemyHeroes > 0 then return end
+
+	local range = 350 + 200
 	local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 	if not creeps or #creeps <= 0 then return end
 
