@@ -7,6 +7,7 @@ AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
 AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", "Auto use sheepstick on enemy hero once available")
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
+AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -34,6 +35,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionOrchid) then
     	AutoUseItems.item_orchid(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionAtos) then
+    	AutoUseItems.item_rod_of_atos(myHero)
     end
 
 end
@@ -139,5 +144,23 @@ function AutoUseItems.item_orchid(myHero)
 		end
 	end
 end
+
+-- Auto use rod of atos on enemy hero once available
+-- Doesn't use on enemy who is lotus orb protected or AM with aghs.
+function AutoUseItems.item_rod_of_atos(myHero)
+	local item = NPC.GetItem(myHero, "item_rod_of_atos", true)
+	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+	local range = 1150
+	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+	for i, enemy in ipairs(enemyAround) do
+		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy)
+			and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
+			Ability.CastTarget(item, enemy)
+			return
+		end
+	end
+end
+
 
 return AutoUseItems
