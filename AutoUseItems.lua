@@ -2,13 +2,14 @@ local AutoUseItems = {}
 
 AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, or battle fury to deward")
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
+AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero then return end
 
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
-    if NPC.IsChannellingAbility(myHero) then return end
+    if NPC.IsChannellingAbility(myHero) or NPC.IsStunned(myHero) then return end
 
     if Menu.IsEnabled(AutoUseItems.optionDeward) then
     	AutoUseItems.deward(myHero)
@@ -16,6 +17,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionIronTalon) then
     	AutoUseItems.item_iron_talon(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionHeal) then
+    	AutoUseItems.heal(myHero)
     end
 
 end
@@ -66,6 +71,24 @@ function AutoUseItems.item_iron_talon(myHero)
 	end
 
 	if target then Ability.CastTarget(item, target) end
+end
+
+-- Auto use magic wand(stick) or faerie fire if HP is low
+function AutoUseItems.heal(myHero)
+	local item1 = NPC.GetItem(myHero, "item_magic_stick", true)
+	local item2 = NPC.GetItem(myHero, "item_magic_wand", true)
+	local item3 = NPC.GetItem(myHero, "item_faerie_fire", true)
+
+	local item = nil
+	if item1 and Ability.IsCastable(item1, 0) and Item.GetCurrentCharges(item1)>0 then item = item1 end
+	if item2 and Ability.IsCastable(item2, 0) and Item.GetCurrentCharges(item2)>0 then item = item2 end
+	if item3 and Ability.IsCastable(item3, 0) then item = item3 end
+	if not item then return end
+
+	local HpThreshold = 200
+	if Entity.GetHealth(myHero) <= HpThreshold then
+		Ability.CastNoTarget(item)
+	end
 end
 
 return AutoUseItems
