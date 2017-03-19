@@ -30,35 +30,15 @@ function Tinker.OneKey(myHero)
     -- =====================================
     -- Item section
     -- =====================================
-    -- item : hex
-    local hex = NPC.GetItem(myHero, "item_sheepstick", true)
-    if hex and Ability.IsCastable(hex, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(hex)) then 
-        Ability.CastTarget(hex, enemy)
-    end
+    -- item : hex (has been moved to AutoUseItems module)
 
-    -- item : ethereal blade
-    -- local ethereal = NPC.GetItem(myHero, "item_ethereal_blade", true)
-    -- if mutex and ethereal and Ability.IsCastable(ethereal, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(ethereal)) then 
-    --     mutex = false
-    --     Ability.CastTarget(ethereal, enemy)
-    --     mutex = true
-    -- end
+    -- item : dagon (has been moved to AutoUseItems module)
 
     -- item : shivas guard
     local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
     if shiva and Ability.IsCastable(shiva, myMana) then 
         Ability.CastNoTarget(shiva)
     end    
-
-    -- item : dagon
-    local dagon = NPC.GetItem(myHero, "item_dagon", true)
-    for i = 2, 5 do
-        local tmp = NPC.GetItem(myHero, "item_dagon_" .. i, true)
-        if tmp then dagon = tmp end
-    end
-    if dagon and Ability.IsCastable(dagon, myMana) and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(dagon)) then 
-        Ability.CastTarget(dagon, enemy)
-    end
 
     -- =====================================
     -- Spell section
@@ -67,14 +47,14 @@ function Tinker.OneKey(myHero)
 
     -- spell : missile
     local missile = NPC.GetAbilityByIndex(myHero, 1)
-    if Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
+    if missile and Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
         Ability.CastNoTarget(missile)
     end
 
     -- spell : laser (has to cast laser at last because casting laser has animation delay)
     local laser = NPC.GetAbilityByIndex(myHero, 0)
     local target = getLaserCastTarget(myHero, enemy)
-    if target and Ability.IsCastable(laser, myMana) then
+    if target and laser and Ability.IsCastable(laser, myMana) then
         Ability.CastTarget(laser, target)    
     end
     
