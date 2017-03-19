@@ -13,8 +13,8 @@ function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero then return end
 
-    -- if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
-    if not NPC.IsVisible(myHero) then return end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+    -- if not NPC.IsVisible(myHero) then return end
     if NPC.IsChannellingAbility(myHero) then return end
     if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
 
@@ -163,5 +163,18 @@ function AutoUseItems.item_rod_of_atos(myHero)
 	end
 end
 
+-- check if it is safe to cast spell or item on enemy
+-- in case enemy has blademail or lotus.
+-- Caster will take double damage if target has both lotus and blademail
+function AutoUseItems.IsSafeToCast(myHero, enemy, magic_damage)
+	if not myHero or not enemy or not magic_damage then return true end
+	if magic_damage <= 0 then return true end
+
+	local counter = 1 and NPC.HasModifier(enemy, "modifier_item_lotus_orb_active") or 0
+	counter = counter+1 and NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") or counter
+	local reflect_damage = counter * magic_damage * NPC.GetMagicalArmorDamageMultiplier(myHero)
+
+	return Entity.GetHealth(myHero) > reflect_damage
+end
 
 return AutoUseItems
