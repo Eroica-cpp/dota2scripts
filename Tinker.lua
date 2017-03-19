@@ -1,32 +1,32 @@
-local TinkerExtended = {}
+local Tinker = {}
 
-TinkerExtended.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell for KS", "On/Off")
-TinkerExtended.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
-TinkerExtended.oneKeySpell = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Spell Key", Enum.ButtonCode.KEY_D)
-TinkerExtended.autoSoulRing = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Rearm Key", Enum.ButtonCode.KEY_P)
-TinkerExtended.manaThreshold = 75
-TinkerExtended.healthThreshold = 50
+Tinker.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell for KS", "On/Off")
+Tinker.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
+Tinker.oneKeySpell = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Spell Key", Enum.ButtonCode.KEY_D)
+Tinker.autoSoulRing = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Rearm Key", Enum.ButtonCode.KEY_P)
+Tinker.manaThreshold = 75
+Tinker.healthThreshold = 50
 
-function TinkerExtended.OnUpdate()
-	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
+function Tinker.OnUpdate()
+	if not Menu.IsEnabled(Tinker.optionEnable) then return end
 	
-    if Menu.IsKeyDown(TinkerExtended.oneKeySpell) then
-        TinkerExtended.OneKey()
+    if Menu.IsKeyDown(Tinker.oneKeySpell) then
+        Tinker.OneKey()
 	end
     
-    if Menu.IsKeyDown(TinkerExtended.autoSoulRing) then
-        TinkerExtended.Rearm()
+    if Menu.IsKeyDown(Tinker.autoSoulRing) then
+        Tinker.Rearm()
     end
 
 end
 
 -- auto use soul ring when rearm
-function TinkerExtended.Rearm()
+function Tinker.Rearm()
 
     local myHero = Heroes.GetLocal()
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
     if NPC.IsStunned(myHero) then return end
-    if Entity.GetHealth(myHero) <= TinkerExtended.healthThreshold then return end
+    if Entity.GetHealth(myHero) <= Tinker.healthThreshold then return end
 
     local soul_ring = NPC.GetItem(myHero, "item_soul_ring", true)
     if soul_ring and Ability.IsReady(soul_ring) then
@@ -42,13 +42,13 @@ function TinkerExtended.Rearm()
 end
 
 -- using mutex or lastUsedAbility seemingly doesnt work.
-function TinkerExtended.OneKey()
+function Tinker.OneKey()
 
     local myHero = Heroes.GetLocal()
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
     if NPC.IsStunned(myHero) then return end
     local myMana = NPC.GetMana(myHero)
-    if myMana <= TinkerExtended.manaThreshold then return end
+    if myMana <= Tinker.manaThreshold then return end
 
     local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
     if not enemy or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
@@ -108,9 +108,9 @@ end
 
 -- 1. Auto Spell for KS
 -- 2. Killable awareness (laser + missile + dagon)
-function TinkerExtended.OnDraw()
+function Tinker.OnDraw()
 
-	if not Menu.IsEnabled(TinkerExtended.optionEnable) then return end
+	if not Menu.IsEnabled(Tinker.optionEnable) then return end
 	
 	local myHero = Heroes.GetLocal()
 	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
@@ -165,10 +165,10 @@ function TinkerExtended.OnDraw()
             
             if hitsLeft <= 0 or comboLeft <= 0 then
                 Renderer.SetDrawColor(255, 0, 0, 255)
-                Renderer.DrawTextCentered(TinkerExtended.font, x, y, "Kill", 1)
+                Renderer.DrawTextCentered(Tinker.font, x, y, "Kill", 1)
             else
                 Renderer.SetDrawColor(0, 255, 0, 255)
-    			Renderer.DrawTextCentered(TinkerExtended.font, x, y, drawText, 1)
+    			Renderer.DrawTextCentered(Tinker.font, x, y, drawText, 1)
             end
 
             -- auto cast laser for KS
@@ -243,4 +243,4 @@ function sleep(n)  -- seconds
     while clock() - t0 <= n do end
 end
 
-return TinkerExtended
+return Tinker
