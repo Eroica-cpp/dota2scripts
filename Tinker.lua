@@ -95,18 +95,15 @@ function Tinker.OnDraw()
 	local missile = NPC.GetAbilityByIndex(myHero, 1)
     local rearm = NPC.GetAbilityByIndex(myHero, 3)
 
-	local magicDamageFactor = 0.75
-
     local laserLevel = Ability.GetLevel(laser)
     local laserDmg = 80 * laserLevel
-    -- assumes that you add +100 laser damage talent at level 25
-    if NPC.GetCurrentLevel(myHero) == 25 then
+    -- +100 laser damage talent at level 25
+    if NPC.HasAbility(myHero, "special_bonus_unique_tinker") then
         laserDmg = laserDmg + 100
     end
     
     local missileLevel = Ability.GetLevel(missile)
     local missileDmg = (missileLevel > 0) and 125+75*(missileLevel-1) or 0
-    missileDmg = missileDmg * magicDamageFactor
 
     local dagon = NPC.GetItem(myHero, "item_dagon", true)
     local dagonLevel = dagon and 1 or 0
@@ -114,8 +111,7 @@ function Tinker.OnDraw()
         if NPC.GetItem(myHero, "item_dagon_" .. i, true) then dagonLevel = i end
     end
     local dagonDmg = (dagonLevel > 0) and 400+100*(dagonLevel-1) or 0
-    dagonDmg = dagonDmg * magicDamageFactor
-
+    
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if not NPC.IsIllusion(enemy) 
@@ -124,6 +120,8 @@ function Tinker.OnDraw()
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
             and Entity.IsAlive(enemy) then		
 			
+            missileDmg = missileDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            dagonDmg = dagonDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
 			
 			local enemyHealth = Entity.GetHealth(enemy)
