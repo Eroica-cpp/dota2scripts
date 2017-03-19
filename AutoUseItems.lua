@@ -13,7 +13,8 @@ function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero then return end
 
-    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+    -- if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+    if not NPC.IsVisible(myHero) then return end
     if NPC.IsChannellingAbility(myHero) then return end
     if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
 
