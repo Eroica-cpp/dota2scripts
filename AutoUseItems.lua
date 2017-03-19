@@ -190,13 +190,21 @@ function AutoUseItems.item_dagon(myHero)
 	local range = 600 + 50 * (level - 1)
 	local magic_damage = 400 + 100 * (level - 1)
 
+	local target
+	local minHp = 99999
 	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 	for i, enemy in ipairs(enemyAround) do
 		if Utility.IsEligibleEnemy(enemy) and AutoUseItems.IsSafeToCast(myHero, enemy, magic_damage) then
-			Ability.CastTarget(item, enemy)
-			return
+			local enemyHp = Entity.GetHealth(enemy)
+			if enemyHp < minHp then
+				target = enemy
+				minHp = enemyHp
+			end
 		end
 	end
+
+	-- cast dagon on enemy with lowest HP in range
+	if target then Ability.CastTarget(item, target) end
 end
 
 -- check if it is safe to cast spell or item on enemy
