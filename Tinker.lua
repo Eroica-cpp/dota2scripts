@@ -2,16 +2,18 @@ local Tinker = {}
 
 Tinker.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell for KS", "On/Off")
 Tinker.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
-Tinker.oneKeySpell = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Spell Key", Enum.ButtonCode.KEY_D)
+Tinker.optionOneKeySpell = Menu.AddOption({"Hero Specific", "Tinker"}, "One Key Spell", "On/Off")
+Tinker.key = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "One Key Spell Key", Enum.ButtonCode.KEY_D)
 Tinker.autoSoulRing = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Rearm Key", Enum.ButtonCode.KEY_P)
 Tinker.manaThreshold = 75
 Tinker.healthThreshold = 50
 
 function Tinker.OnUpdate()
-	if not Menu.IsEnabled(Tinker.optionEnable) then return end
-	
-    if Menu.IsKeyDown(Tinker.oneKeySpell) then
-        Tinker.OneKey()
+	local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
+
+    if Menu.IsEnabled(Tinker.optionOneKeySpell) and Menu.IsKeyDown(Tinker.key) then
+        Tinker.OneKey(myHero)
 	end
     
     if Menu.IsKeyDown(Tinker.autoSoulRing) then
@@ -42,11 +44,9 @@ function Tinker.Rearm()
 end
 
 -- using mutex or lastUsedAbility seemingly doesnt work.
-function Tinker.OneKey()
+function Tinker.OneKey(myHero)
+    if not myHero or NPC.IsStunned(myHero) then return end
 
-    local myHero = Heroes.GetLocal()
-    if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
-    if NPC.IsStunned(myHero) then return end
     local myMana = NPC.GetMana(myHero)
     if myMana <= Tinker.manaThreshold then return end
 
