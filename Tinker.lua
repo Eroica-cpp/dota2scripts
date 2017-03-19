@@ -5,7 +5,7 @@ Tinker.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 Tinker.optionOneKeySpell = Menu.AddOption({"Hero Specific", "Tinker"}, "One Key Spell", "On/Off")
 Tinker.key = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "One Key Spell Key", Enum.ButtonCode.KEY_D)
 Tinker.optionSoulRing = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Soul Ring", "auto use soul ring when rearm")
--- Tinker.autoSoulRing = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "Rearm Key", Enum.ButtonCode.KEY_P)
+
 Tinker.manaThreshold = 75
 Tinker.healthThreshold = 50
 
@@ -16,11 +16,6 @@ function Tinker.OnUpdate()
     if Menu.IsEnabled(Tinker.optionOneKeySpell) and Menu.IsKeyDown(Tinker.key) then
         Tinker.OneKey(myHero)
 	end
-    
-    -- if Menu.IsKeyDown(Tinker.autoSoulRing) then
-    --     Tinker.Rearm()
-    -- end
-
 end
 
 -- auto use soul ring when rearm
@@ -40,30 +35,9 @@ function Tinker.OnPrepareUnitOrders(orders)
     local HpThreshold = 200
     if Entity.GetHealth(myHero) <= HpThreshold then return true end
 
-    Ability.CastNoTarget(soul_ring)
+    Ability.CastNoTarget(soul_ring, true)
     return true
 end
-
--- auto use soul ring when rearm
--- function Tinker.Rearm()
-
---     local myHero = Heroes.GetLocal()
---     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
---     if NPC.IsStunned(myHero) then return end
---     if Entity.GetHealth(myHero) <= Tinker.healthThreshold then return end
-
---     local soul_ring = NPC.GetItem(myHero, "item_soul_ring", true)
---     if soul_ring and Ability.IsReady(soul_ring) then
---         Ability.CastNoTarget(soul_ring, true)
---     end
-    
---     local rearm = NPC.GetAbilityByIndex(myHero, 3)
---     if Ability.IsCastable(rearm, NPC.GetMana(myHero)) and not Ability.IsInAbilityPhase(rearm) and not Ability.IsChannelling(rearm) then 
---         Ability.CastNoTarget(rearm, true)
---         -- sleep(0.1)
---     end    
-
--- end
 
 -- using mutex or lastUsedAbility seemingly doesnt work.
 function Tinker.OneKey(myHero)
@@ -258,11 +232,5 @@ function getLaserCastTarget(myHero, enemy)
     end
 
 end
-
--- local clock = os.clock
--- function sleep(n)  -- seconds
---     local t0 = clock()
---     while clock() - t0 <= n do end
--- end
 
 return Tinker
