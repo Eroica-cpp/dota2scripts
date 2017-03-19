@@ -1,8 +1,7 @@
 local AutoUseItems = {}
 
 AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, or battle fury to deward")
-AutoUseItems.optionQuellingBlade = Menu.AddOption({"Item Specific"}, "Quelling Blade", "Auto use quelling blade to deward")
-AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove HP and deward")
+AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -15,16 +14,13 @@ function AutoUseItems.OnUpdate()
     	AutoUseItems.deward(myHero)
     end
 
-    -- if Menu.IsEnabled(AutoUseItems.optionQuellingBlade) then
-    -- 	AutoUseItems.item_quelling_blade(myHero)
-    -- end
-
-    -- if Menu.IsEnabled(AutoUseItems.optionIronTalon) then
-    -- 	AutoUseItems.item_iron_talon(myHero)
-    -- end
+    if Menu.IsEnabled(AutoUseItems.optionIronTalon) then
+    	AutoUseItems.item_iron_talon(myHero)
+    end
 
 end
 
+-- Auto use quelling blade, iron talen, or battle fury to deward
 function AutoUseItems.deward(myHero)
 	local item1 = NPC.GetItem(myHero, "item_quelling_blade", true)
 	local item2 = NPC.GetItem(myHero, "item_iron_talon", true)
@@ -47,32 +43,20 @@ function AutoUseItems.deward(myHero)
 
 end
 
--- auto use iron talon to remove HP and deward
+-- Auto use iron talon to remove creep's HP
 function AutoUseItems.item_iron_talon(myHero)
-	if not NPC.HasItem(myHero, "item_iron_talon", true) then return end
 	local item = NPC.GetItem(myHero, "item_iron_talon", true)
-	if not Ability.IsCastable(item, 0) then return end
-	
-	-- deward
-	local castRange_deward = 450
-	local wards = NPC.GetUnitsInRadius(myHero, castRange_deward, Enum.TeamType.TEAM_ENEMY)
-	for i, npc in ipairs(wards) do
-		if NPC.GetUnitName(npc) == "npc_dota_observer_wards" or NPC.GetUnitName(npc) == "npc_dota_sentry_wards" then
-			Ability.CastTarget(item, npc)
-			return
-		end
-	end
+	if not item or not Ability.IsCastable(item, 0) then return end
 
-	-- remove HP
-	local castRange_removeHP = 350
-	local creeps = NPC.GetUnitsInRadius(myHero, castRange_removeHP, Enum.TeamType.TEAM_ENEMY)
+	local range = 350
+	local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 	if not creeps or #creeps <= 0 then return end
 
 	local maxHp = 0
 	local target = nil
+	local ratio = 0.5
 	for i, npc in ipairs(creeps) do
 		local tmpHp = Entity.GetHealth(npc)
-		local ratio = 0.5
 		if tmpHp > maxHp and NPC.IsCreep(npc) 
 			and (not NPC.IsAncient(npc)) and (not NPC.IsRoshan(npc)) 
 			and tmpHp > ratio*Entity.GetMaxHealth(npc) then
@@ -84,20 +68,4 @@ function AutoUseItems.item_iron_talon(myHero)
 	if target then Ability.CastTarget(item, target) end
 end
 
--- auto use quelling_blade to deward
-function AutoUseItems.item_quelling_blade(myHero)
-	if not NPC.HasItem(myHero, "item_quelling_blade", true) then return end
-	local item = NPC.GetItem(myHero, "item_quelling_blade", true)
-	if not Ability.IsCastable(item, 0) then return end
-
-	local cast_range = 450
-	local units = NPC.GetUnitsInRadius(myHero, cast_range, Enum.TeamType.TEAM_ENEMY)
-	for i, npc in ipairs(units) do
-		if NPC.GetUnitName(npc) == "npc_dota_observer_wards" or NPC.GetUnitName(npc) == "npc_dota_sentry_wards" then
-			Ability.CastTarget(item, npc)
-			return
-		end
-	end
-
-end
 return AutoUseItems
