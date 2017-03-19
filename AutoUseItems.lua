@@ -3,13 +3,15 @@ local AutoUseItems = {}
 AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, or battle fury to deward")
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
+AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", "Auto use sheepstick on enemy hero once available")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero then return end
 
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
-    if NPC.IsChannellingAbility(myHero) or NPC.IsStunned(myHero) then return end
+    if NPC.IsChannellingAbility(myHero) then return end
+    if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
 
     if Menu.IsEnabled(AutoUseItems.optionDeward) then
     	AutoUseItems.deward(myHero)
@@ -21,6 +23,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionHeal) then
     	AutoUseItems.heal(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionSheepstick) then
+    	AutoUseItems.item_sheepstick(myHero)
     end
 
 end
@@ -45,7 +51,6 @@ function AutoUseItems.deward(myHero)
 			return
 		end
 	end
-
 end
 
 -- Auto use iron talon to remove creep's HP
@@ -89,6 +94,28 @@ function AutoUseItems.heal(myHero)
 	if Entity.GetHealth(myHero) <= HpThreshold then
 		Ability.CastNoTarget(item)
 	end
+end
+
+-- Auto use sheepstick on enemy hero once available
+-- Doesn't use enemy who is linken or lotus orb protected, or AM with aghs.
+function AutoUseItems.item_sheepstick(myHero)
+
+	local item = NPC.GetItem(myHero, "item_sheepstick", true)
+	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+	local range = 1
+end
+
+-- return true if is protected by lotus orb or AM's aghs
+function AutoUseItems.IsLotusProtected(npc)
+	if NPC.HasModifier(npc, "modifier_item_lotus_orb_active") then return true end
+
+	local shield = NPC.GetAbility(npc, "antimage_spell_shield")
+	if shield and Ability.IsReady(shield) and NPC.HasItem(npc, "item_ultimate_scepter", true) then
+		return true
+	end
+
+	return false
 end
 
 return AutoUseItems
