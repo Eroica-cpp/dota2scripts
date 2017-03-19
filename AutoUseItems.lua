@@ -8,6 +8,7 @@ AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use ma
 AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", "Auto use sheepstick on enemy hero once available")
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
+AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon on enemy hero once available")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -42,6 +43,9 @@ function AutoUseItems.OnUpdate()
     	AutoUseItems.item_rod_of_atos(myHero)
     end
 
+    if Menu.IsEnabled(AutoUseItems.optionDagon) then
+    	AutoUseItems.item_dagon(myHero)
+    end
 end
 
 -- Auto use quelling blade, iron talen, or battle fury to deward
@@ -163,6 +167,34 @@ function AutoUseItems.item_rod_of_atos(myHero)
 	end
 end
 
+function AutoUseItems.item_dagon(myHero)
+	local level, item
+	local item1 = NPC.GetItem(myHero, "item_dagon", true)
+	local item2 = NPC.GetItem(myHero, "item_dagon_2", true)
+	local item3 = NPC.GetItem(myHero, "item_dagon_3", true)
+	local item4 = NPC.GetItem(myHero, "item_dagon_4", true)
+	local item5 = NPC.GetItem(myHero, "item_dagon_5", true)
+
+	if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then item = item1; level = 1 end
+	if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then item = item2; level = 2 end
+	if item3 and Ability.IsCastable(item3, NPC.GetMana(myHero)) then item = item3; level = 3 end
+	if item4 and Ability.IsCastable(item4, NPC.GetMana(myHero)) then item = item4; level = 4 end
+	if item5 and Ability.IsCastable(item5, NPC.GetMana(myHero)) then item = item5; level = 5 end
+
+	if not item then return end
+
+	local range = 600 + 50 * (level - 1)
+	local magic_damage = 400 + 100 * (level - 1)
+
+	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+	for i, enemy in ipairs(enemyAround) do
+		if Utility.IsEligibleEnemy(enemy) and AutoUseItems.IsSafeToCast(myHero, enemy, magic_damage) then
+			Ability.CastTarget(item, enemy)
+			return
+		end
+	end
+end
+
 -- check if it is safe to cast spell or item on enemy
 -- in case enemy has blademail or lotus.
 -- Caster will take double damage if target has both lotus and blademail
@@ -170,10 +202,11 @@ function AutoUseItems.IsSafeToCast(myHero, enemy, magic_damage)
 	if not myHero or not enemy or not magic_damage then return true end
 	if magic_damage <= 0 then return true end
 
-	local counter = 1 and NPC.HasModifier(enemy, "modifier_item_lotus_orb_active") or 0
-	counter = counter+1 and NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") or counter
+	local counter = 0
+	if NPC.HasModifier(enemy, "modifier_item_lotus_orb_active") then counter = counter + 1 end
+	if NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") then counter = counter + 1 end
+	
 	local reflect_damage = counter * magic_damage * NPC.GetMagicalArmorDamageMultiplier(myHero)
-
 	return Entity.GetHealth(myHero) > reflect_damage
 end
 
