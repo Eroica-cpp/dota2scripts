@@ -99,11 +99,18 @@ end
 -- Auto use sheepstick on enemy hero once available
 -- Doesn't use enemy who is linken or lotus orb protected, or AM with aghs.
 function AutoUseItems.item_sheepstick(myHero)
-
 	local item = NPC.GetItem(myHero, "item_sheepstick", true)
 	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-	local range = 1
+	local range = 800
+	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+	for i, enemy in ipairs(enemyAround) do
+		if AutoUseItems.IsEligibleEnemy(enemy) and not AutoUseItems.IsLotusProtected(enemy) then
+			Ability.CastTarget(item, enemy)
+			return
+		end
+	end
+
 end
 
 -- return true if is protected by lotus orb or AM's aghs
@@ -116,6 +123,21 @@ function AutoUseItems.IsLotusProtected(npc)
 	end
 
 	return false
+end
+
+-- situations that can't or no need to cast spell on enemy
+function AutoUseItems.IsEligibleEnemy(npc)
+	-- situations that no need to cast spell
+	if NPC.IsIllusion(npc) or not Entity.IsAlive(npc) then return false end
+	if NPC.IsStunned(npc) then return false end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_HEXED) then return false end
+	
+	-- situations that can't cast spell
+	if Entity.IsDormant(npc) then return false end
+	if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
+	
+	return true
 end
 
 return AutoUseItems
