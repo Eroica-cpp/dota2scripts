@@ -6,6 +6,7 @@ AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto us
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
 AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", "Auto use sheepstick on enemy hero once available")
+AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -29,6 +30,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionSheepstick) then
     	AutoUseItems.item_sheepstick(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionOrchid) then
+    	AutoUseItems.item_orchid(myHero)
     end
 
 end
@@ -99,7 +104,7 @@ function AutoUseItems.heal(myHero)
 end
 
 -- Auto use sheepstick on enemy hero once available
--- Doesn't use enemy who is linken or lotus orb protected, or AM with aghs.
+-- Doesn't use on enemy who is lotus orb protected or AM with aghs.
 function AutoUseItems.item_sheepstick(myHero)
 	local item = NPC.GetItem(myHero, "item_sheepstick", true)
 	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
@@ -112,7 +117,27 @@ function AutoUseItems.item_sheepstick(myHero)
 			return
 		end
 	end
+end
 
+-- Auto use orchid or bloodthorn on enemy hero once available
+-- Doesn't use on enemy who is lotus orb protected or AM with aghs.
+function AutoUseItems.item_orchid(myHero)
+	local item1 = NPC.GetItem(myHero, "item_orchid", true)
+	local item2 = NPC.GetItem(myHero, "item_bloodthorn", true)
+
+	local item = nil
+	if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then item = item1 end
+	if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then item = item2 end
+	if not item then return end
+
+	local range = 900
+	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+	for i, enemy in ipairs(enemyAround) do
+		if Utility.IsEligibleEnemy(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
+			Ability.CastTarget(item, enemy)
+			return
+		end
+	end
 end
 
 return AutoUseItems
