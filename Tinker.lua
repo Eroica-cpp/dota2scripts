@@ -4,7 +4,6 @@ Tinker.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spel
 Tinker.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 Tinker.optionOneKeySpell = Menu.AddOption({"Hero Specific", "Tinker"}, "One Key Spell", "On/Off")
 Tinker.key = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "One Key Spell Key", Enum.ButtonCode.KEY_D)
-Tinker.optionSoulRing = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Soul Ring", "auto use soul ring when rearm")
 
 Tinker.manaThreshold = 75
 Tinker.healthThreshold = 50
@@ -16,27 +15,6 @@ function Tinker.OnUpdate()
     if Menu.IsEnabled(Tinker.optionOneKeySpell) and Menu.IsKeyDown(Tinker.key) then
         Tinker.OneKey(myHero)
 	end
-end
-
--- auto use soul ring when rearm
-function Tinker.OnPrepareUnitOrders(orders)
-    if not Menu.IsEnabled(Tinker.optionSoulRing) then return true end
-    if not orders or not orders.ability then return true end
-
-    if not Entity.IsAbility(orders.ability) then return true end
-    if Ability.GetName(orders.ability) ~= "tinker_rearm" then return true end
-
-    local myHero = Heroes.GetLocal()
-    if not myHero or NPC.IsStunned(myHero) then return true end
-    
-    local soul_ring = NPC.GetItem(myHero, "item_soul_ring", true)
-    if not soul_ring or not Ability.IsCastable(soul_ring, 0) then return true end
-
-    local HpThreshold = 200
-    if Entity.GetHealth(myHero) <= HpThreshold then return true end
-
-    Ability.CastNoTarget(soul_ring, true)
-    return true
 end
 
 -- using mutex or lastUsedAbility seemingly doesnt work.

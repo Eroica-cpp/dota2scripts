@@ -2,6 +2,7 @@ local Utility = require("Utility")
 
 local AutoUseItems = {}
 
+AutoUseItems.optionSoulRing = Menu.AddOption({"Item Specific"}, "Soul Ring", "Auto use soul ring before casting spells or items")
 AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, or battle fury to deward")
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
@@ -46,6 +47,27 @@ function AutoUseItems.OnUpdate()
     if Menu.IsEnabled(AutoUseItems.optionDagon) and NPC.IsVisible(myHero) then
     	AutoUseItems.item_dagon(myHero)
     end
+end
+
+-- auto use soul ring before casting spells or items
+function AutoUseItems.OnPrepareUnitOrders(orders)
+    if not Menu.IsEnabled(AutoUseItems.optionSoulRing) then return true end
+    if not orders or not orders.ability then return true end
+
+    if not Entity.IsAbility(orders.ability) then return true end
+    if Ability.GetManaCost(orders.ability) <= 0 then return true end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.IsStunned(myHero) then return true end
+    
+    local soul_ring = NPC.GetItem(myHero, "item_soul_ring", true)
+    if not soul_ring or not Ability.IsCastable(soul_ring, 0) then return true end
+
+    local HpThreshold = 200
+    if Entity.GetHealth(myHero) <= HpThreshold then return true end
+
+    Ability.CastNoTarget(soul_ring)
+    return true
 end
 
 -- Auto use quelling blade, iron talen, or battle fury to deward
