@@ -1,3 +1,5 @@
+local Utility = require("Utility")
+
 local AutoUseItems = {}
 
 AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, or battle fury to deward")
@@ -105,39 +107,12 @@ function AutoUseItems.item_sheepstick(myHero)
 	local range = 800
 	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 	for i, enemy in ipairs(enemyAround) do
-		if AutoUseItems.IsEligibleEnemy(enemy) and not AutoUseItems.IsLotusProtected(enemy) then
+		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy) then
 			Ability.CastTarget(item, enemy)
 			return
 		end
 	end
 
-end
-
--- return true if is protected by lotus orb or AM's aghs
-function AutoUseItems.IsLotusProtected(npc)
-	if NPC.HasModifier(npc, "modifier_item_lotus_orb_active") then return true end
-
-	local shield = NPC.GetAbility(npc, "antimage_spell_shield")
-	if shield and Ability.IsReady(shield) and NPC.HasItem(npc, "item_ultimate_scepter", true) then
-		return true
-	end
-
-	return false
-end
-
--- situations that can't or no need to cast spell on enemy
-function AutoUseItems.IsEligibleEnemy(npc)
-	-- situations that no need to cast spell
-	if NPC.IsIllusion(npc) or not Entity.IsAlive(npc) then return false end
-	if NPC.IsStunned(npc) then return false end
-	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_HEXED) then return false end
-	
-	-- situations that can't cast spell
-	if Entity.IsDormant(npc) then return false end
-	if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
-	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
-	
-	return true
 end
 
 return AutoUseItems

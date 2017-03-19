@@ -41,4 +41,31 @@ function Utility.BestPosition(unitsAround, radius)
 	return bestPos
 end
 
+-- return true if is protected by lotus orb or AM's aghs
+function Utility.IsLotusProtected(npc)
+	if NPC.HasModifier(npc, "modifier_item_lotus_orb_active") then return true end
+
+	local shield = NPC.GetAbility(npc, "antimage_spell_shield")
+	if shield and Ability.IsReady(shield) and NPC.HasItem(npc, "item_ultimate_scepter", true) then
+		return true
+	end
+
+	return false
+end
+
+-- situations that can't or no need to cast spell on enemy
+function Utility.IsEligibleEnemy(npc)
+	-- situations that no need to cast spell
+	if NPC.IsIllusion(npc) or not Entity.IsAlive(npc) then return false end
+	if NPC.IsStunned(npc) then return false end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_HEXED) then return false end
+	
+	-- situations that can't cast spell
+	if Entity.IsDormant(npc) then return false end
+	if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
+	
+	return true
+end
+
 return Utility
