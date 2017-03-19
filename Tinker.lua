@@ -36,7 +36,7 @@ function Tinker.Rearm()
     local rearm = NPC.GetAbilityByIndex(myHero, 3)
     if Ability.IsCastable(rearm, NPC.GetMana(myHero)) and not Ability.IsInAbilityPhase(rearm) and not Ability.IsChannelling(rearm) then 
         Ability.CastNoTarget(rearm, true)
-        sleep(0.1)
+        -- sleep(0.1)
     end    
 
 end
@@ -237,10 +237,10 @@ function getLaserCastTarget(myHero, enemy)
 
 end
 
-local clock = os.clock
-function sleep(n)  -- seconds
-    local t0 = clock()
-    while clock() - t0 <= n do end
-end
+-- local clock = os.clock
+-- function sleep(n)  -- seconds
+--     local t0 = clock()
+--     while clock() - t0 <= n do end
+-- end
 
 return Tinker
