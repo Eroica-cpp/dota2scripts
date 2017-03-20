@@ -93,7 +93,7 @@ function AutoStash.OnUpdate()
 
 end
 
-function tmpMoveItem2Backpack(myHero)
+function AutoStash.tmpMoveItem2Backpack(myHero)
     local tmp_slot = 8
     for i = 0, 5 do
         local item = NPC.GetItemByIndex(myHero, i)
