@@ -64,7 +64,11 @@ function Dodge.OnUnitAnimation(animation)
 	if not myHero then return end
 	if Entity.IsSameTeam(myHero, animation.unit) then return end
 
-	-- Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
+	local distance = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(animation.unit)):Length()
+	local hero_collision_size = 24
+	distance = distance - hero_collision_size
+
+	Log.Write(animation.sequenceName .. " " .. NPC.GetUnitName(animation.unit))
 
 	-- 1. anti-mage's mana void
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
@@ -302,9 +306,11 @@ function Dodge.OnUnitAnimation(animation)
 	-- 28. magnus's rp
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_magnataur" then
 		local radius = 410 + 50
+		local instant_radius = 150 + 50 -- rp would instantly pull units within 150 range
 		if animation.sequenceName == "polarity_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			-- Dodge.DefendWithDelay(0.1)
-			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
+			local delay = animation.castpoint
+			if distance <= instant_radius then delay = 0 end
+			Dodge.Update({time = GameRules.GetGameTime(); delay = delay; desc = ""})
 		end
 	end
 
@@ -500,8 +506,12 @@ function Dodge.OnUnitAnimation(animation)
 	-- 51. tide's ravage
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_tidehunter" then
 		local radius = 1100
+		local speed = 775
 		if animation.sequenceName == "ravage_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
-			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
+			local delay = distance / (speed+1)
+			-- units get instant stunned within 250 range
+			if distance <= 250 then delay = 0 end
+			Dodge.Update({time = GameRules.GetGameTime(); delay = delay; desc = ""})
 		end
 	end
 
