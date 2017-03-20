@@ -11,11 +11,9 @@ local ERROR = 0.2 -- systematic error
 function Dodge.OnProjectile(projectile)
 	if not Menu.IsEnabled(Dodge.option) then return end
 	if not projectile or not projectile.source or not projectile.target then return end
-	if not projectile.dodgeable then return end
-	if not Entity.IsHero(projectile.source) then return end
+	-- if not projectile.dodgeable then return end
+	-- if not Entity.IsHero(projectile.source) then return end
 	if projectile.isAttack then return end
-
-	Log.Write("on projectile: " .. tostring(NPC.GetUnitName(projectile.source)))
 
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
@@ -23,8 +21,14 @@ function Dodge.OnProjectile(projectile)
 	if projectile.target ~= myHero then return end
 	if Entity.IsSameTeam(projectile.source, projectile.target) then return end
 
-	-- delay = 0 for all projectiles
-	Dodge.Update({time = GameRules.GetGameTime(); delay = 0; desc = ""})
+	local projectile_collision_size = 150
+	local hero_collision_size = 24
+	local vec1 = NPC.GetAbsOrigin(projectile.source)
+	local vec2 = NPC.GetAbsOrigin(projectile.target)
+	local dis = (vec1 - vec2):Length() - projectile_collision_size - hero_collision_size
+	local delay = math.abs(dis) / (projectile.moveSpeed + 1)
+
+	Dodge.Update({time = GameRules.GetGameTime(); delay = delay; desc = ""})
 end
 
 function Dodge.OnLinearProjectileCreate(projectile)
@@ -47,7 +51,7 @@ function Dodge.OnLinearProjectileCreate(projectile)
 	local hero_collision_size = 24
 	local dis = vec1:Length() - projectile_collision_size - hero_collision_size
 	local speed = projectile.velocity:Length()
-	local delay = dis / (speed+1)
+	local delay = math.abs(dis) / (speed+1)
 
 	Dodge.Update({time = GameRules.GetGameTime(); delay = delay; desc = ""})
 end
