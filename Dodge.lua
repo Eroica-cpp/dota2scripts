@@ -15,6 +15,8 @@ function Dodge.OnProjectile(projectile)
 	if not Entity.IsHero(projectile.source) then return end
 	if projectile.isAttack then return end
 
+	Log.Write("on projectile: " .. tostring(NPC.GetUnitName(projectile.source)))
+
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 
@@ -27,8 +29,27 @@ end
 
 function Dodge.OnLinearProjectileCreate(projectile)
 	if not Menu.IsEnabled(Dodge.option) then return end
-	if not projectile then return end
-	Dodge.Update()
+	if not projectile or not projectile.origin or not projectile.velocity then return end
+
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+	if not projectile.source or Entity.IsSameTeam(myHero, projectile.source) then return end
+
+	local pos = NPC.GetAbsOrigin(myHero)
+	local vec1 = pos - projectile.origin
+	local vec2 = projectile.velocity
+	local cos_theta = vec1:Dot(vec2) / (vec1:Length() * vec2:Length())
+
+	-- assume hit when cos(theta) = 1
+	if math.abs(cos_theta - 1) > 0.05 then return end
+
+	local projectile_collision_size = 150
+	local hero_collision_size = 24
+	local dis = vec1:Length() - projectile_collision_size - hero_collision_size
+	local speed = projectile.velocity:Length()
+	local delay = dis / (speed+1)
+
+	Dodge.Update({time = GameRules.GetGameTime(); delay = delay; desc = ""})
 end
 
 function Dodge.OnUnitAnimation(animation)
