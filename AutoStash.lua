@@ -43,14 +43,14 @@ function AutoStash.OnPrepareUnitOrders(orders)
         and Ability.GetName(orders.ability) == "item_soul_ring"
         and NPC.HasModifier(myHero, "modifier_fountain_aura_buff") then
         
-        inventory2stash(myHero)
+        AutoStash.inventory2stash(myHero)
     end
 
     if Entity.IsAbility(orders.ability) 
         and Ability.GetName(orders.ability) == "item_bottle"
         and NPC.HasModifier(myHero, "modifier_fountain_aura_buff") then
         
-        inventory2stash(myHero)
+        AutoStash.inventory2stash(myHero)
     end
 
     return true
@@ -68,7 +68,7 @@ function AutoStash.OnUpdate()
 
         local mod = NPC.GetModifier(myHero, "modifier_item_soul_ring_buff")
         if GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.1 then
-            stash2inventory(myHero)
+            AutoStash.stash2inventory(myHero)
         end
     end
 
@@ -78,7 +78,7 @@ function AutoStash.OnUpdate()
 
         local mod = NPC.GetModifier(myHero, "modifier_bottle_regeneration")
         if GameRules.GetGameTime() - Modifier.GetCreationTime(mod) > 0.5 then
-            stash2inventory(myHero)
+            AutoStash.stash2inventory(myHero)
         end
     end
 
@@ -87,7 +87,7 @@ function AutoStash.OnUpdate()
         local enemyUnits = NPC.GetHeroesInRadius(myHero, 1000, Enum.TeamType.TEAM_ENEMY)
         local mod = NPC.GetModifier(myHero, "modifier_filler_heal")
         if #enemyUnits <= 0 and GameRules.GetGameTime()-Modifier.GetCreationTime(mod) < 0.1 then
-            tmpMoveItem2Backpack(myHero)
+            AutoStash.tmpMoveItem2Backpack(myHero)
         end
     end
 
@@ -100,37 +100,37 @@ function tmpMoveItem2Backpack(myHero)
         if item then
             local itemName = Ability.GetName(item)
             if not AutoStash.dontStashList[itemName] then
-                moveItemToSlot(myHero, item, tmp_slot)
-                moveItemToSlot(myHero, item, i)
+                AutoStash.moveItemToSlot(myHero, item, tmp_slot)
+                AutoStash.moveItemToSlot(myHero, item, i)
             end
         end 
     end
 end
 
-function inventory2stash(myHero)
+function AutoStash.inventory2stash(myHero)
     local delta = 9
     for i = 0, 5 do
         local item = NPC.GetItemByIndex(myHero, i)
         if item and not NPC.GetItemByIndex(myHero, i+delta) then
             local itemName = Ability.GetName(item)
             if not AutoStash.dontStashList[itemName] then
-                moveItemToSlot(myHero, item, i+delta)
+                AutoStash.moveItemToSlot(myHero, item, i+delta)
             end
         end
     end
 end
 
-function stash2inventory(myHero)
+function AutoStash.stash2inventory(myHero)
     local delta = 9
     for i = 9, 14 do
         local item = NPC.GetItemByIndex(myHero, i)
         if item and not NPC.GetItemByIndex(myHero, i-delta) then
-            moveItemToSlot(myHero, item, i-delta)
+            AutoStash.moveItemToSlot(myHero, item, i-delta)
         end
     end
 end
 
-function moveItemToSlot(myHero, item, slot_index)
+function AutoStash.moveItemToSlot(myHero, item, slot_index)
     Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_ITEM, slot_index, Vector(0, 0, 0), item, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
 end
 

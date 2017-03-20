@@ -10,7 +10,7 @@ local ERROR = 0.1 -- systematic error
 
 function Dodge.OnProjectile(projectile)
 	if not Menu.IsEnabled(Dodge.option) then return end
-	if not projectile.source or not projectile.target then return end
+	if not projectile or not projectile.source or not projectile.target then return end
 	if not projectile.dodgeable then return end
 	if not Entity.IsHero(projectile.source) then return end
 	if projectile.isAttack then return end
@@ -27,6 +27,7 @@ end
 
 function Dodge.OnLinearProjectileCreate(projectile)
 	if not Menu.IsEnabled(Dodge.option) then return end
+	if not projectile then return end
 	Dodge.Update()
 end
 
