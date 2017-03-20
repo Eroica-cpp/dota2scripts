@@ -1,4 +1,5 @@
 local Utility = require("Utility")
+local AutoStash = require("AutoStash")
 
 local AutoUseItems = {}
 
@@ -65,6 +66,12 @@ function AutoUseItems.OnPrepareUnitOrders(orders)
 
     local HpThreshold = 200
     if Entity.GetHealth(myHero) <= HpThreshold then return true end
+
+    -- If in base, stash items before using soul ring.
+    -- It has to team with stash2inventory() action in AutoStash.lua
+    if NPC.HasModifier(myHero, "modifier_fountain_aura_buff") then
+    	AutoStash.inventory2stash(myHero)
+    end
 
     Ability.CastNoTarget(soul_ring)
     return true
