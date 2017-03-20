@@ -11,6 +11,7 @@ AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", 
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
 AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon on enemy hero once available")
+AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "Auto use veil once available")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -47,6 +48,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionDagon) and NPC.IsVisible(myHero) then
     	AutoUseItems.item_dagon(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionVeil) and NPC.IsVisible(myHero) then
+    	AutoUseItems.item_veil_of_discord(myHero)
     end
 end
 
@@ -249,6 +254,19 @@ function AutoUseItems.IsSafeToCast(myHero, enemy, magic_damage)
 	
 	local reflect_damage = counter * magic_damage * NPC.GetMagicalArmorDamageMultiplier(myHero)
 	return Entity.GetHealth(myHero) > reflect_damage
+end
+
+function AutoUseItems.item_veil_of_discord(myHero)
+	local item = NPC.GetItem(myHero, "item_veil_of_discord", true)
+	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+	local range = 1000
+	local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+	if not enemyHeroes or #enemyHeroes <= 0 then return end
+
+	local radius = 600
+	local pos = Utility.BestPosition(enemyHeroes, radius)
+    if pos then Ability.CastPosition(item, pos) end
 end
 
 return AutoUseItems
