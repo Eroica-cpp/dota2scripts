@@ -12,8 +12,13 @@ function Spectre.OnUpdate()
 	if Menu.IsEnabled(Spectre.optionDagger) then
 		Spectre.AutoDagger(myHero)
 	end
+
+	if Menu.IsEnabled(Spectre.optionHaunt) then
+		Spectre.AutoHaunt(myHero)
+	end
 end
 
+-- auto dagger for life steal
 function Spectre.AutoDagger(myHero)
 	if not myHero then return end
 	local dagger = NPC.GetAbilityByIndex(myHero, 0)
@@ -25,15 +30,20 @@ function Spectre.AutoDagger(myHero)
 	local range = 2000
 	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 	for i, enemy in ipairs(enemyAround) do
-		if not NPC.IsIllusion(enemy) and NPC.IsKillable(enemy) and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
-			local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+		if not NPC.IsIllusion(enemy) and NPC.IsKillable(enemy) 
+			and Entity.IsAlive(enemy) and not Entity.IsDormant(enemy)
+			and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
 			
+			local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
 			if Entity.GetHealth(enemy) <= true_damage then
 				Ability.CastTarget(dagger, enemy)
 			end
 		end
 	end
+end
 
+-- auto haunt if can kill, then haunt back
+function Spectre.AutoHaunt(myHero)
 end
 
 return Spectre
