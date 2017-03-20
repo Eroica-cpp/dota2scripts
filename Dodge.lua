@@ -671,6 +671,14 @@ function Dodge.Defend(myHero)
 		end
 	end
 
+	-- puck's phase shift
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_puck" then
+		local shift = NPC.GetAbilityByIndex(myHero, 2)
+		if shift and Ability.IsCastable(shift, 0) then
+			Ability.CastNoTarget(shift)
+		end
+	end
+
 	-- weaver's shukuchi
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_weaver" then
 		local shukuchi = NPC.GetAbilityByIndex(myHero, 1)
