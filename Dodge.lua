@@ -6,7 +6,7 @@ Dodge.option = Menu.AddOption({"Utility", "Dodge Spells and Items"}, "Dodge Proj
 
 local msg_queue = {}
 local DELTA = 0.05 -- maximun gap for equality
-local ERROR = 0.1 -- systematic error
+local ERROR = 0.2 -- systematic error
 
 function Dodge.OnProjectile(projectile)
 	if not Menu.IsEnabled(Dodge.option) then return end
