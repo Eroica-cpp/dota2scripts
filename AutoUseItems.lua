@@ -159,12 +159,21 @@ function AutoUseItems.item_sheepstick(myHero)
 
 	local range = 800
 	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+	local minDistance = 99999
+	local target = nil
 	for i, enemy in ipairs(enemyAround) do
 		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy) then
-			Ability.CastTarget(item, enemy)
-			return
+			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
+			if dis < minDistance then
+				minDistance = dis
+				target = enemy
+			end
 		end
 	end
+
+	-- cast sheepstick on nearest enemy in range
+	if target then Ability.CastTarget(item, target) end
 end
 
 -- Auto use orchid or bloodthorn on enemy hero once available
@@ -180,12 +189,21 @@ function AutoUseItems.item_orchid(myHero)
 
 	local range = 900
 	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+	
+	local minDistance = 99999
+	local target = nil
 	for i, enemy in ipairs(enemyAround) do
 		if Utility.IsEligibleEnemy(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
-			Ability.CastTarget(item, enemy)
-			return
+			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
+			if dis < minDistance then
+				minDistance = dis
+				target = enemy
+			end
 		end
 	end
+
+	-- cast orchid/bloodthorn on nearest enemy in range
+	if target then Ability.CastTarget(item, target) end
 end
 
 -- Auto use rod of atos on enemy hero once available
@@ -196,13 +214,22 @@ function AutoUseItems.item_rod_of_atos(myHero)
 
 	local range = 1150
 	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+	local minDistance = 99999
+	local target = nil
 	for i, enemy in ipairs(enemyAround) do
 		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy)
 			and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
-			Ability.CastTarget(item, enemy)
-			return
+			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
+			if dis < minDistance then
+				minDistance = dis
+				target = enemy
+			end
 		end
 	end
+
+	-- cast rod of atos on nearest enemy in range
+	if target then Ability.CastTarget(item, target) end
 end
 
 function AutoUseItems.item_dagon(myHero)
