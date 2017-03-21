@@ -65,14 +65,15 @@ function Phoenix.SunRay(myHero)
 	local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
 	if not enemy then return end
 
-	local vec1 = NPC.GetAbsOrigin(myHero)
-	local vec2 = NPC.GetAbsOrigin(enemy)
+	local pos = NPC.GetAbsOrigin(enemy)
+	local vec1 = Entity.GetRotation(myHero):GetForward()
+	local vec2 = pos - NPC.GetAbsOrigin(myHero)
 	local cos_theta = vec1:Dot(vec2) / (vec1:Length() * vec2:Length())
 
 	-- make sure dont rotate too rapidly
 	if cos_theta <= math.sqrt(2)/2 then return end
 
-	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, enemy, vec2, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
+	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, enemy, pos, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
 end
 
 function Phoenix.FireSpirit(myHero)
