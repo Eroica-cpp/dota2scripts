@@ -4,6 +4,7 @@ local AutoStash = require("AutoStash")
 local AutoUseItems = {}
 
 AutoUseItems.optionSoulRing = Menu.AddOption({"Item Specific"}, "Soul Ring", "Auto use soul ring before casting spells or items")
+AutoUseItems.optionTomeOfKnowledge = Menu.AddOption({"Item Specific"}, "Tome of Knowledge", "Auto purchase tome of knowledge once available")
 AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, or battle fury to deward")
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
@@ -21,6 +22,10 @@ function AutoUseItems.OnUpdate()
     -- if not NPC.IsVisible(myHero) then return end
     if NPC.IsChannellingAbility(myHero) then return end
     if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
+
+    if Menu.IsEnabled(AutoUseItems.optionTomeOfKnowledge) then
+    	AutoUseItems.item_tome_of_knowledge(myHero)
+    end
 
     if Menu.IsEnabled(AutoUseItems.optionDeward) then
     	AutoUseItems.deward(myHero)
@@ -80,6 +85,10 @@ function AutoUseItems.OnPrepareUnitOrders(orders)
 
     Ability.CastNoTarget(soul_ring)
     return true
+end
+
+-- auto purchase tome of knowledge once available
+function AutoUseItems.item_tome_of_knowledge(myHero)
 end
 
 -- Auto use quelling blade, iron talen, or battle fury to deward
