@@ -8,8 +8,7 @@
 local Phoenix = {}
 
 Phoenix.optionFireSpirit = Menu.AddOption({"Hero Specific","Phoenix"},"Auto Fire Spirit", "auto cast fire spirit while diving if enabled")
-
-local msg_queue = {}
+Phoenix.optionSunRay = Menu.AddOption({"Hero Specific","Phoenix"},"Sun Ray Helper", "sun ray sticks to enemy")
 
 function Phoenix.OnPrepareUnitOrders(orders)
 	if not Menu.IsEnabled(Phoenix.optionFireSpirit) then return true end
@@ -51,13 +50,32 @@ function Phoenix.OnUpdate()
 	if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_phoenix" then return end
 
 	if Menu.IsEnabled(Phoenix.optionFireSpirit) then
-		Phoenix.AutoFireSpirit(myHero)
+		Phoenix.FireSpirit(myHero)
+	end
+
+	if Menu.IsEnabled(Phoenix.optionSunRay) then
+		Phoenix.SunRay(myHero)
 	end
 
 end
 
-function Phoenix.AutoFireSpirit(myHero)
-	
+function Phoenix.SunRay(myHero)
+	if not NPC.HasModifier(myHero, "modifier_phoenix_sun_ray") then return end
+
+	local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+	if not enemy then return end
+
+	local vec1 = NPC.GetAbsOrigin(myHero)
+	local vec2 = NPC.GetAbsOrigin(enemy)
+	local cos_theta = vec1:Dot(vec2) / (vec1:Length() * vec2:Length())
+
+	-- make sure dont rotate too rapidly
+	if cos_theta <= 0 then return end
+
+	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, enemy, vec2, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
+end
+
+function Phoenix.FireSpirit(myHero)
 	local dive = NPC.GetAbilityByIndex(myHero, 0)
 	local fireSpirit = NPC.GetAbilityByIndex(myHero, 1)
 
