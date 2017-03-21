@@ -70,7 +70,7 @@ function Phoenix.SunRay(myHero)
 	local cos_theta = vec1:Dot(vec2) / (vec1:Length() * vec2:Length())
 
 	-- make sure dont rotate too rapidly
-	if cos_theta <= 0 then return end
+	if cos_theta <= math.sqrt(2)/2 then return end
 
 	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, enemy, vec2, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
 end
