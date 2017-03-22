@@ -72,7 +72,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 1. anti-mage's mana void
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_antimage" then
-		local radius = 600 + 500/2
+		local radius = 600 + 500
 		if animation.sequenceName == "basher_cast4_mana_void_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -159,7 +159,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 10. death prophet's silence
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_death_prophet" then
-		local radius = 1000 + 425/2
+		local radius = 1000 + 425
 		if animation.sequenceName == "cast2_silence_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -210,7 +210,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 17. engima's black hole
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_enigma" then
-		local radius = 275 + 420/2
+		local radius = 275 + 420
 		if animation.sequenceName == "cast4_black_hole_chasm" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -218,7 +218,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 18. void's chrono
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_faceless_void" then
-		local radius = 600 + 425/2
+		local radius = 600 + 425
 		if animation.sequenceName == "chronosphere_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -231,7 +231,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 20. juggernaut's omnislash
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_juggernaut" then
-		local radius = 350 + 425/2
+		local radius = 350 + 425
 		if animation.sequenceName == "attack_omni_cast" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -366,7 +366,7 @@ function Dodge.OnUnitAnimation(animation)
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
 
-		local radius2 = 700 + 575/2
+		local radius2 = 700 + 575
 		if animation.sequenceName == "cast_ulti_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
 			-- Dodge.DefendWithDelay(0.1)
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
@@ -398,7 +398,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 37. riki's smoke
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_riki" then
-		local radius = 550 + 325/2
+		local radius = 550 + 325
 		if animation.sequenceName == "cast1_smoke_screen_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -539,7 +539,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 56. underlord's trap
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_abyssal_underlord" then
-		local radius = 875 + 375/2
+		local radius = 875 + 375
 		if animation.sequenceName == "au_cast02_pit_of_malice" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -563,7 +563,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 59. warlock's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_warlock" then
-		local radius = 1200 + 600/2
+		local radius = 1200 + 600
 		if animation.sequenceName == "warlock_cast4_rain_chaos_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -574,7 +574,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 61. winter wyvern's ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_winter_wyvern" then
-		local radius = 800 + 500/2
+		local radius = 800 + 500
 		if animation.sequenceName == "cast04_winters_curse_flying_low_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
@@ -590,7 +590,7 @@ function Dodge.OnUnitAnimation(animation)
 
 	-- 63. zues's lightning bolt and ultimate
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_zuus" then
-		local radius = 900 + 375/2
+		local radius = 900 + 375
 		if animation.sequenceName == "zeus_cast2_lightning_bolt" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""})
 		end
