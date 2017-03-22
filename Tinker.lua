@@ -110,14 +110,14 @@ function Tinker.OnDraw()
 			
 			local enemyHealth = Entity.GetHealth(enemy)
 			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg - dagonDmg
-			local hitsLeft = math.ceil(enemyHealthLeft / hitDmg)
-            local comboLeft = math.ceil(enemyHealth / (laserDmg + missileDmg + dagonDmg))
+			local hitsLeft = math.ceil(enemyHealthLeft / (hitDmg + 1))
+            local comboLeft = math.ceil(enemyHealth / (laserDmg + missileDmg + dagonDmg + 1))
 
 			local pos = NPC.GetAbsOrigin(enemy)
 			local x, y, visible = Renderer.WorldToScreen(pos)
 
             local hasRearm = Ability.GetLevel(rearm) > 0
-			local drawText = hasRearm and "x"..comboLeft or hitsLeft
+			local drawText = (hasRearm and comboLeft<20) and "x"..comboLeft or hitsLeft
             
             if hitsLeft <= 0 or comboLeft <= 0 then
                 Renderer.SetDrawColor(255, 0, 0, 255)
