@@ -83,15 +83,19 @@ function Tinker.OnDraw()
     end
     
     local missileLevel = Ability.GetLevel(missile)
-    local missileDmg = (missileLevel > 0) and 125+75*(missileLevel-1) or 0
+    local missileDmg = 125 + 75 * (missileLevel - 1)
 
     local dagon = NPC.GetItem(myHero, "item_dagon", true)
     local dagonLevel = dagon and 1 or 0
     for i = 2, 5 do
         if NPC.GetItem(myHero, "item_dagon_" .. i, true) then dagonLevel = i end
     end
-    local dagonDmg = (dagonLevel > 0) and 400+100*(dagonLevel-1) or 0
+    local dagonDmg = 400 + 100 * (dagonLevel - 1)
     
+    if not laser or not Ability.IsCastable(laser, myMana) then laserDmg = 0 end
+    if not missile or not Ability.IsCastable(missile, myMana) then missileDmg = 0 end
+    if not dagon or not Ability.IsCastable(dagon, myMana) then dagonDmg = 0 end
+
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if not NPC.IsIllusion(enemy) 
@@ -99,7 +103,7 @@ function Tinker.OnDraw()
             and not Entity.IsDormant(enemy)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
             and Entity.IsAlive(enemy) then		
-			
+
             missileDmg = missileDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
             dagonDmg = dagonDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
