@@ -13,14 +13,33 @@ function Legion.OnUpdate()
     if Menu.IsEnabled(Legion.optionOverwhelming) then
     	Legion.OverwhelmingOdds(myHero)
     end
+
+    if Menu.IsEnabled(Legion.optionAutoSave) then
+    	Legion.PressTheAttack(myHero)
+    end
+end
+
+-- Auto cast 'press the attack' to save needed ally
+function Legion.PressTheAttack(myHero)
+	local dispel = NPC.GetAbilityByIndex(myHero, 1)
+	if not dispel or not Ability.IsCastable(dispel, NPC.GetMana(myHero)) then return end
+
+	local range = 800
+	local allies = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
+	if not allies or #allies <= 0 then return end
+
+	for i, ally in ipairs(allies) do
+		if Utility.NeedToBeSaved(ally) then
+			Ability.CastTarget(dispel, ally)
+			return
+		end
+	end
 end
 
 -- auto cast overwhelming odds to best position to KS
 function Legion.OverwhelmingOdds(myHero)
-	if not myHero then return end
-
-    local overwhelming = NPC.GetAbilityByIndex(myHero, 0)
-    if not overwhelming or not Ability.IsCastable(overwhelming, NPC.GetMana(myHero)) then return end
+	local overwhelming = NPC.GetAbilityByIndex(myHero, 0)
+	if not overwhelming or not Ability.IsCastable(overwhelming, NPC.GetMana(myHero)) then return end
 
 	local range = 1000
 	local radius = 330
