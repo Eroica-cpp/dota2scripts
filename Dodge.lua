@@ -685,8 +685,11 @@ function Dodge.Update(info)
 end
 
 function Dodge.Defend(myHero)
-	if not myHero then return end
-	if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
+	if not myHero or NPC.IsStunned(myHero) then return end
+	
+	Utility.PopDefensiveItems(myHero)
+
+	if NPC.IsSilenced(myHero) then return end
 
 	local myMana = NPC.GetMana(myHero)
 
