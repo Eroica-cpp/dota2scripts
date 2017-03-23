@@ -77,8 +77,9 @@ function Tinker.OnDraw()
 
     local laserLevel = Ability.GetLevel(laser)
     local laserDmg = 80 * laserLevel
-    -- +100 laser damage talent at level 25
-    if NPC.HasAbility(myHero, "special_bonus_unique_tinker") then
+
+    local level_25_laser_damage_talent = NPC.GetAbility(myHero, "special_bonus_unique_tinker")
+    if Ability.GetLevel(level_25_laser_damage_talent) > 0 then
         laserDmg = laserDmg + 100
     end
     
