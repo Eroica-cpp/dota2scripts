@@ -25,8 +25,6 @@ function Legion.OverwhelmingOdds(myHero)
 	local enemies = NPC.GetUnitsInRadius(myHero, range+radius, Enum.TeamType.TEAM_ENEMY)
 	if not enemies or #enemies <= 0 then return end
 
-	local maxDamage = 0
-
 	local num = #enemies
 	for i = 1, num do
 		for j = i, num do
@@ -35,16 +33,20 @@ function Legion.OverwhelmingOdds(myHero)
 				local vec2 = NPC.GetAbsOrigin(enemies[j])
 				local mid = (vec1 + vec2):Scaled(0.5)
 
-				local damage = Legion.GetOverwhelmingDamage(myHero, overwhelming, mid)
-				maxDamage = math.max(damage, maxDamage)
+				local damage = Legion.GetOverwhelmingDamage(myHero, overwhelming, mid, radius)
+				local lowestHp = Legion.GetLowestHp(myHero, mid, radius)
+
+				if damage >= lowestHp then
+					Ability.CastPosition(overwhelming, mid)
+					return
+				end
 			end
-		end
-	end
+		end -- end of inner loop
+	end -- end of outer loop
 
-	Log.Write("maxDamage: " .. maxDamage)
-end
+end -- end of function
 
-function Legion.GetOverwhelmingDamage(myHero, overwhelming, pos)
+function Legion.GetOverwhelmingDamage(myHero, overwhelming, pos, radius)
 	if not overwhelming or not pos then return 0 end
 
 	local level = Ability.GetLevel(overwhelming)
@@ -56,7 +58,6 @@ function Legion.GetOverwhelmingDamage(myHero, overwhelming, pos)
 	
 	local res = damage_base
 
-	local radius = 330
 	local enemies = NPCs.InRadius(pos, radius, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
 	for i, enemy in ipairs(enemies) do
 		if NPC.IsHero(enemy) and not NPC.IsIllusion(enemy) then
@@ -67,6 +68,19 @@ function Legion.GetOverwhelmingDamage(myHero, overwhelming, pos)
 	end
 
 	return res
+end
+
+function Legion.GetLowestHp(myHero, pos, radius)
+	if not myHero or not pos or not radius then return 999999 end
+	
+	local lowestHp = 999999
+	local enemies = Heroes.InRadius(pos, radius, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+	for i, enemy in ipairs(enemies) do
+		local trueHp = Entity.GetHealth(enemy) / math.max(0.01, NPC.GetMagicalArmorDamageMultiplier(enemy))
+		lowestHp = math.min(lowestHp, trueHp)
+	end
+
+	return lowestHp
 end
 
 return Legion
