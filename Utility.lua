@@ -68,4 +68,20 @@ function Utility.IsEligibleEnemy(npc)
 	return true
 end
 
+-- situations that ally need to be saved
+function Utility.NeedToBeSaved(npc)
+	if not npc or NPC.IsIllusion(npc) or not Entity.IsAlive(npc) then return false end
+	
+	if NPC.IsStunned(npc) or NPC.IsSilenced(npc) then return true end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) then return true end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_DISARMED) then return true end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_HEXED) then return true end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_PASSIVES_DISABLED) then return true end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_BLIND) then return true end
+
+	if Entity.GetHealth(npc) <= 0.2 * Entity.GetMaxHealth(npc) then return true end
+
+	return false
+end
+
 return Utility
