@@ -84,4 +84,74 @@ function Utility.NeedToBeSaved(npc)
 	return false
 end
 
+-- pop all defensive items
+function Utility.PopDefensiveItems(myHero)
+	if not myHero then return end
+
+    -- blade mail
+    if NPC.HasItem(myHero, "item_blade_mail", true) then
+    	local item = NPC.GetItem(myHero, "item_blade_mail", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastNoTarget(item)
+    	end
+    end
+
+    -- buckler
+    if NPC.HasItem(myHero, "item_buckler", true) then
+    	local item = NPC.GetItem(myHero, "item_buckler", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastNoTarget(item)
+    	end
+    end
+
+    -- hood of defiance
+    if NPC.HasItem(myHero, "item_hood_of_defiance", true) then
+    	local item = NPC.GetItem(myHero, "item_hood_of_defiance", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastNoTarget(item)
+    	end
+    end
+
+    -- pipe of insight
+    if NPC.HasItem(myHero, "item_pipe", true) then
+    	local item = NPC.GetItem(myHero, "item_pipe", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastNoTarget(item)
+    	end
+    end
+
+    -- crimson guard
+    if NPC.HasItem(myHero, "item_crimson_guard", true) then
+    	local item = NPC.GetItem(myHero, "item_crimson_guard", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastNoTarget(item)
+    	end
+    end
+
+    -- shiva's guard
+    if NPC.HasItem(myHero, "item_shivas_guard", true) then
+    	local item = NPC.GetItem(myHero, "item_shivas_guard", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastNoTarget(item)
+    	end
+    end
+
+    -- lotus orb
+    if NPC.HasItem(myHero, "item_lotus_orb", true) then
+    	local item = NPC.GetItem(myHero, "item_lotus_orb", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastTarget(item, myHero)
+    	end
+    end
+
+    -- mjollnir
+    if NPC.HasItem(myHero, "item_mjollnir", true) then
+    	local item = NPC.GetItem(myHero, "item_mjollnir", true)
+    	if Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    		Ability.CastTarget(item, myHero)
+    	end
+    end
+
+end
+
 return Utility
