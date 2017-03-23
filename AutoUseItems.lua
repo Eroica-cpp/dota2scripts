@@ -13,6 +13,7 @@ AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodtho
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
 AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon on enemy hero once available")
 AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "Auto use veil once available")
+AutoUseItems.optionLotus = Menu.AddOption({"Item Specific"}, "Lotus Orb", "(For tinker) auto use lotus orb on self or allies once available")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -23,6 +24,9 @@ function AutoUseItems.OnUpdate()
     if NPC.IsChannellingAbility(myHero) then return end
     if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
 
+    -- ========================
+    -- Defensive items 
+    -- ========================
     if Menu.IsEnabled(AutoUseItems.optionTomeOfKnowledge) then
     	AutoUseItems.item_tome_of_knowledge(myHero)
     end
@@ -39,6 +43,13 @@ function AutoUseItems.OnUpdate()
     	AutoUseItems.heal(myHero)
     end
 
+    if Menu.IsEnabled(AutoUseItems.optionLotus) then
+    	AutoUseItems.item_lotus_orb(myHero)
+    end
+
+    -- ========================
+    -- Aggressive items 
+    -- ========================
     if Menu.IsEnabled(AutoUseItems.optionSheepstick) and NPC.IsVisible(myHero) then
     	AutoUseItems.item_sheepstick(myHero)
     end
@@ -303,6 +314,43 @@ function AutoUseItems.item_veil_of_discord(myHero)
 	local radius = 600
 	local pos = Utility.BestPosition(enemyHeroes, radius)
     if pos then Ability.CastPosition(item, pos) end
+end
+
+-- Auto cast lotus orb to save ally
+-- For tinker, auto use lotus orb on self or allies once available
+function AutoUseItems.item_lotus_orb(myHero)
+	local item = NPC.GetItem(myHero, "item_lotus_orb", true)
+	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+	local range = 900
+	local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
+	if not allyAround or #allyAround <= 0 then return end
+
+	-- save ally who get stunned, silenced, rooted, disarmed, low Hp, etc
+	for i, ally in ipairs(allyAround) do
+		if Utility.NeedToBeSaved(ally) then
+			Ability.CastTarget(item, ally)
+			return
+		end
+	end
+
+	-- for tinker
+	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
+
+	if not NPC.HasModifier(myHero, "modifier_item_lotus_orb_active") then
+		Ability.CastTarget(item, myHero)
+		return
+	end
+
+	-- cast lotus orb once available
+	for i, ally in ipairs(allyAround) do
+		if Entity.IsAlive(ally) and not NPC.IsIllusion(ally) 
+			and not NPC.HasModifier(ally, "modifier_item_lotus_orb_active") then
+			
+			Ability.CastTarget(item, ally)
+			return
+		end
+	end
 end
 
 return AutoUseItems
