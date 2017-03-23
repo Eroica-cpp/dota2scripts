@@ -1,6 +1,9 @@
+local Utility = require("Utility")
+
 local Legion = {}
 
 Legion.optionOverwhelming = Menu.AddOption({"Hero Specific", "Legion Commander"}, "Overwhelming for KS", "Auto cast overwhelming odds for life steal")
+Legion.optionAutoSave = Menu.AddOption({"Hero Specific", "Legion Commander"}, "Auto Save", "Auto cast 'press the attack' to save needed ally")
 
 function Legion.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -76,8 +79,10 @@ function Legion.GetLowestHp(myHero, pos, radius)
 	local lowestHp = 999999
 	local enemies = Heroes.InRadius(pos, radius, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
 	for i, enemy in ipairs(enemies) do
-		local trueHp = Entity.GetHealth(enemy) / math.max(0.01, NPC.GetMagicalArmorDamageMultiplier(enemy))
-		lowestHp = math.min(lowestHp, trueHp)
+		if not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+			local trueHp = Entity.GetHealth(enemy) / math.max(0.01, NPC.GetMagicalArmorDamageMultiplier(enemy))
+			lowestHp = math.min(lowestHp, trueHp)
+		end
 	end
 
 	return lowestHp
