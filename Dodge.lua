@@ -733,6 +733,14 @@ function Dodge.Defend(myHero)
 		end
 	end
 
+	-- nyx's carapace
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_nyx_assassin" then
+		local carapace = NPC.GetAbilityByIndex(myHero, 2)
+		if carapace and Ability.IsCastable(carapace, myMana) then
+			Ability.CastNoTarget(carapace)
+		end
+	end
+
 	-- slark's dark pact
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_slark" then
 		local pact = NPC.GetAbilityByIndex(myHero, 0)
