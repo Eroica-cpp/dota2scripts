@@ -25,13 +25,14 @@ function Troll.OnPrepareUnitOrders(orders)
 
 	-- auto swap between melee and range
 	local melee_attack_range = 150
+	local range = melee_attack_range + 100
 	if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
-		if NPC.IsEntityInRange(myHero, orders.target, melee_attack_range) and not Ability.GetToggleState(swap) then
+		if NPC.IsEntityInRange(myHero, orders.target, range) and not Ability.GetToggleState(swap) then
 			Ability.Toggle(swap, true)
 			return true
 		end
 
-		if not NPC.IsEntityInRange(myHero, orders.target, melee_attack_range) and Ability.GetToggleState(swap) then
+		if not NPC.IsEntityInRange(myHero, orders.target, range) and Ability.GetToggleState(swap) then
 			Ability.Toggle(swap, true)
 			return true
 		end
