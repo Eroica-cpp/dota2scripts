@@ -129,11 +129,9 @@ function AutoUseItems.item_iron_talon(myHero)
 	local item = NPC.GetItem(myHero, "item_iron_talon", true)
 	if not item or not Ability.IsCastable(item, 0) then return end
 
-	local radius = 1200
-	local enemyHeroes = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
-	if enemyHeroes and #enemyHeroes > 0 then return end
+	if NPC.IsRunning(myHero) then return end
 
-	local range = 350 + 200
+	local range = 350
 	local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 	if not creeps or #creeps <= 0 then return end
 
