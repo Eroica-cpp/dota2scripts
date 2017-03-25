@@ -58,7 +58,7 @@ function Legion.OverwhelmingOdds(myHero)
 				local damage = Legion.GetOverwhelmingDamage(myHero, overwhelming, mid, radius)
 				local lowestHp = Legion.GetLowestHp(myHero, mid, radius)
 
-				if damage >= lowestHp then
+				if damage >= lowestHp and NPC.IsPositionInRange(myHero, mid, range, 0) then
 					Ability.CastPosition(overwhelming, mid)
 					return
 				end
