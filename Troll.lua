@@ -17,7 +17,7 @@ function Troll.OnPrepareUnitOrders(orders)
 	if not Ability.GetToggleState(swap) and 
 		(orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION 
 			or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET 
-			or orders.order == DOTA_UNIT_ORDER_ATTACK_MOVE) 
+			or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE) 
 		then
 		Ability.Toggle(swap, true)
 		return true
