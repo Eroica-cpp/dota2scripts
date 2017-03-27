@@ -7,30 +7,7 @@
 
 local AbyssalHelper = {}
 
-AbyssalHelper.option = Menu.AddOption({"Utility", "Abyssal Blade Helper"}, "Abyssal Blade Helper", "auto use blink dagger, AM's blink, or PA's strike if out of range")
-
--- use OnUpdate() to cancel backswing animation
-function AbyssalHelper.OnUpdate()
-	if not Menu.IsEnabled(AbyssalHelper.option) then return end
-
-	local myHero = Heroes.GetLocal()
-	if not myHero or NPC.IsStunned(myHero) then return end
-	
-	if not NPC.HasItem(myHero, "item_abyssal_blade", true) then return end
-	local abyssal = NPC.GetItem(myHero, "item_abyssal_blade", true)
-
-	if not Ability.IsCastable(abyssal, NPC.GetMana(myHero)) then return end
-
-	local abyssal_cast_range = 140
-	local enemies = NPC.GetHeroesInRadius(myHero, abyssal_cast_range, Enum.TeamType.TEAM_ENEMY)
-	if not enemies then return end
-
-	local target = enemies[1]
-	if target and not NPC.IsIllusion(target) and not Entity.IsDormant(target) and Entity.IsAlive(target) and not NPC.IsStunned(target) then
-		Ability.CastTarget(abyssal, target)
-	end
-
-end
+AbyssalHelper.option = Menu.AddOption({"Utility"}, "Abyssal Blade Helper", "auto use blink dagger, AM's blink, or PA's strike if out of range")
 
 function AbyssalHelper.OnPrepareUnitOrders(orders)
 	if not Menu.IsEnabled(AbyssalHelper.option) then return true end

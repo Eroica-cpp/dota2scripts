@@ -11,6 +11,7 @@ AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use ma
 AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", "Auto use sheepstick on enemy hero once available")
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
+AutoUseItems.optionAbyssal = Menu.AddOption({"Item Specific"}, "Abyssal Blade", "Auto use abyssal blade on enemy hero once available")
 AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon on enemy hero once available")
 AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "Auto use veil once available")
 AutoUseItems.optionLotus = Menu.AddOption({"Item Specific"}, "Lotus Orb", "(For tinker) auto use lotus orb on self or allies once available")
@@ -60,6 +61,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionAtos) and NPC.IsVisible(myHero) then
     	AutoUseItems.item_rod_of_atos(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionAbyssal) and NPC.IsVisible(myHero) then
+    	AutoUseItems.item_abyssal_blade(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionDagon) and NPC.IsVisible(myHero) then
@@ -238,6 +243,31 @@ function AutoUseItems.item_rod_of_atos(myHero)
 	for i, enemy in ipairs(enemyAround) do
 		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy)
 			and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
+			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
+			if dis < minDistance then
+				minDistance = dis
+				target = enemy
+			end
+		end
+	end
+
+	-- cast rod of atos on nearest enemy in range
+	if target then Ability.CastTarget(item, target) end
+end
+
+-- Auto use abyssal blade on enemy hero once available
+-- Doesn't use on enemy who is lotus orb protected or AM with aghs.
+function AutoUseItems.item_abyssal_blade(myHero)
+	local item = NPC.GetItem(myHero, "item_abyssal_blade", true)
+	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+	local range = 140
+	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+	local minDistance = 99999
+	local target = nil
+	for i, enemy in ipairs(enemyAround) do
+		if not NPC.IsIllusion(enemy) and not NPC.IsStunned(enemy) and not Utility.IsLotusProtected(enemy) then
 			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
 			if dis < minDistance then
 				minDistance = dis
