@@ -21,6 +21,10 @@ function Magnus.AutoEmpower(myHero)
 	local empower = NPC.GetAbilityByIndex(myHero, 1)
 	if not empower or not Ability.IsCastable(empower, NPC.GetMana(myHero)) then return end
 
+	-- avoid casting empower right before ultimate
+	local enemiesAround = NPC.GetHeroesInRadius(myHero, 450, Enum.TeamType.TEAM_ENEMY)
+	if enemiesAround and #enemiesAround > 0 then return end
+
 	if not NPC.HasModifier(myHero, "modifier_magnataur_empower") then
 		Ability.CastTarget(empower, myHero)
 		return
