@@ -1,6 +1,39 @@
+local Utility = require("Utility")
+
 local Magnus = {}
 
 Magnus.optionEmpower = Menu.AddOption({"Hero Specific", "Magnus"}, "Auto Empower", "auto cast empower on allies or magnus himself")
+Magnus.optionBlinkHelper = Menu.AddOption({"Hero Specific", "Magnus"}, "Blink Helper", "Auto blink to best position before casting RP")
+
+-- blink to best position before RP
+function Magnus.OnPrepareUnitOrders(orders)
+	if not Menu.IsEnabled(Magnus.optionBlinkHelper) then return true end
+	if not orders or not orders.ability then return true end
+
+	if not Entity.IsAbility(orders.ability) then return true end
+	if Ability.GetName(orders.ability) ~= "magnataur_reverse_polarity" then return true end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero then return true end
+    if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
+
+    if not NPC.HasItem(myHero, "item_blink", true) then return true end
+    local blink = NPC.GetItem(myHero, "item_blink", true)
+    if not blink or not Ability.IsCastable(blink, 0) then return true end
+
+    local RP_radius = 410
+    local blink_radius = 1200
+
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
+    if not enemyHeroes or #enemyHeroes <= 0 then return true end
+
+    local pos = Utility.BestPosition(enemyHeroes, RP_radius)
+    if pos then
+    	Ability.CastPosition(blink, pos)
+    end
+
+    return true
+end
 
 function Magnus.OnUpdate()
 	local myHero = Heroes.GetLocal()
