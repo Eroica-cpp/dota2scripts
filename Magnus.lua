@@ -20,7 +20,7 @@ function Magnus.OnPrepareUnitOrders(orders)
     if not myHero then return true end
     if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
 
-    local dir =  NPC.GetAbsOrigin(myHero) - Entity.GetRotation(myHero):GetForward():Normalized()
+    local dir = Input.GetWorldCursorPos()
 
     local blink = NPC.GetItem(myHero, "item_blink", true)
     if blink and Ability.IsCastable(blink, 0) then
