@@ -3,11 +3,14 @@ local Utility = require("Utility")
 local Magnus = {}
 
 Magnus.optionEmpower = Menu.AddOption({"Hero Specific", "Magnus"}, "Auto Empower", "auto cast empower on allies or magnus himself")
-Magnus.optionBlinkHelper = Menu.AddOption({"Hero Specific", "Magnus"}, "Blink Helper", "Auto blink to best position before casting RP")
+Magnus.optionRPHelper = Menu.AddOption({"Hero Specific", "Magnus"}, "Blink Helper", "Auto blink to best position before casting RP")
 
--- blink to best position before RP
+local RP_timer
+local ERROR = 0.05
+
+-- blink to best position and turn around before RP
 function Magnus.OnPrepareUnitOrders(orders)
-	if not Menu.IsEnabled(Magnus.optionBlinkHelper) then return true end
+	if not Menu.IsEnabled(Magnus.optionRPHelper) then return true end
 	if not orders or not orders.ability then return true end
 
 	if not Entity.IsAbility(orders.ability) then return true end
@@ -21,6 +24,8 @@ function Magnus.OnPrepareUnitOrders(orders)
     local blink = NPC.GetItem(myHero, "item_blink", true)
     if not blink or not Ability.IsCastable(blink, 0) then return true end
 
+    local origin =  NPC.GetAbsOrigin(myHero)
+
     local RP_radius = 410
     local blink_radius = 1200
 
@@ -30,9 +35,15 @@ function Magnus.OnPrepareUnitOrders(orders)
     local pos = Utility.BestPosition(enemyHeroes, RP_radius)
     if pos then
     	Ability.CastPosition(blink, pos)
+    	-- turn around
+    	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION, nil, origin, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY , myHero)
     end
 
-    return true
+    -- magnus's turn rate is 0.8, 0.2s delay works well in practice.
+    local delay = 0.2
+    RP_timer = GameRules.GetGameTime() + delay
+
+    return false
 end
 
 function Magnus.OnUpdate()
@@ -45,6 +56,10 @@ function Magnus.OnUpdate()
 
 	if Menu.IsEnabled(Magnus.optionEmpower) then
 		Magnus.AutoEmpower(myHero)
+	end
+
+	if Menu.IsEnabled(Magnus.optionRPHelper) then
+		Magnus.RPHelper(myHero)
 	end
 end
 
@@ -83,6 +98,15 @@ function Magnus.AutoEmpower(myHero)
 			return
 		end
 	end
+end
+
+function Magnus.RPHelper(myHero)
+	local RP = NPC.GetAbilityByIndex(myHero, 3)
+	if not RP or not Ability.IsCastable(RP, NPC.GetMana(myHero)) then return end
+
+	if not RP_timer or math.abs(GameRules.GetGameTime()-RP_timer) > ERROR then return end
+
+	Ability.CastNoTarget(RP)
 end
 
 return Magnus
