@@ -3,7 +3,7 @@ local Utility = require("Utility")
 local Magnus = {}
 
 Magnus.optionEmpower = Menu.AddOption({"Hero Specific", "Magnus"}, "Auto Empower", "auto cast empower on allies or magnus himself")
-Magnus.optionRPHelper = Menu.AddOption({"Hero Specific", "Magnus"}, "Blink Helper", "Auto blink to best position before casting RP")
+Magnus.optionRPHelper = Menu.AddOption({"Hero Specific", "Magnus"}, "RP Helper", "Auto blink to best position for RP, auto turn around before RP")
 
 local RP_timer
 local ERROR = 0.05
@@ -20,29 +20,22 @@ function Magnus.OnPrepareUnitOrders(orders)
     if not myHero then return true end
     if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
 
-    if not NPC.HasItem(myHero, "item_blink", true) then return true end
+    local dir =  NPC.GetAbsOrigin(myHero) - Entity.GetRotation(myHero):GetForward():Normalized()
+
     local blink = NPC.GetItem(myHero, "item_blink", true)
-    if not blink or not Ability.IsCastable(blink, 0) then return true end
-
-    local origin =  NPC.GetAbsOrigin(myHero)
-
-    local RP_radius = 410
-    local blink_radius = 1200
-
-    local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
-    if not enemyHeroes or #enemyHeroes <= 0 then return true end
-
-    local pos = Utility.BestPosition(enemyHeroes, RP_radius)
-    if pos then
-    	Ability.CastPosition(blink, pos)
-    	-- turn around
-    	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION, nil, origin, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY , myHero)
+    if blink and Ability.IsCastable(blink, 0) then
+	    local RP_radius = 410
+	    local blink_radius = 1200
+	    local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
+	    local pos = Utility.BestPosition(enemyHeroes, RP_radius)
+    	if pos then 
+    		Ability.CastPosition(blink, pos) 
+    	end
     end
 
-    -- magnus's turn rate is 0.8, 0.2s delay works well in practice.
-    local delay = 0.2
-    RP_timer = GameRules.GetGameTime() + delay
-
+	-- turn around
+	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION, nil, dir, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY , myHero)
+    RP_timer = GameRules.GetGameTime()
     return false
 end
 
@@ -104,9 +97,13 @@ function Magnus.RPHelper(myHero)
 	local RP = NPC.GetAbilityByIndex(myHero, 3)
 	if not RP or not Ability.IsCastable(RP, NPC.GetMana(myHero)) then return end
 
-	if not RP_timer or math.abs(GameRules.GetGameTime()-RP_timer) > ERROR then return end
+	if not RP_timer then return end
 
-	Ability.CastNoTarget(RP)
+    -- magnus's turn rate is 0.8, 0.2s delay works well in practice.
+    local delay = 0.2
+	if math.abs(GameRules.GetGameTime()-(RP_timer+delay)) <= ERROR then
+		Ability.CastNoTarget(RP)
+	end
 end
 
 return Magnus
