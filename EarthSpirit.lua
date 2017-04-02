@@ -71,6 +71,8 @@ function EarthSpirit.RollHelper(myHero, pos)
     local default_distance = 600
     if dis <= default_distance then return end
 
+    if EarthSpirit.HasStoneBetween(myHero, origin, pos) then return end
+
     local place_pos = origin + (pos - origin):Normalized():Scaled(100)
     Ability.CastPosition(stone, place_pos)
 end
@@ -80,7 +82,7 @@ function EarthSpirit.PullHelper(myHero, pos)
 
     local radius = 180
     if EarthSpirit.HasStoneInRadius(myHero, pos, radius) then return end
-    
+
     local stone = NPC.GetAbility(myHero, "earth_spirit_stone_caller")
     if not stone or not Ability.IsCastable(stone, 0) then return end
 
@@ -97,6 +99,24 @@ function EarthSpirit.HasStoneInRadius(myHero, pos, radius)
     local unitsAround = NPCs.InRadius(pos, radius, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
     for i, npc in ipairs(unitsAround) do
         if npc and NPC.GetUnitName(npc) == "npc_dota_earth_spirit_stone" then
+            return true
+        end
+    end
+
+    return false
+end
+
+function EarthSpirit.HasStoneBetween(myHero, pos1, pos2)
+    if not myHero or not pos1 or not pos2 then return false end
+
+    local radius = 150
+    local dir = (pos2 - pos1):Normalized():Scaled(radius)
+    local dis = (pos2 - pos1):Length()
+    local num = math.floor(dis/radius)
+
+    for i = 1, num do
+        local mid = pos1 + dir:Scaled(i)
+        if EarthSpirit.HasStoneInRadius(myHero, mid, radius) then
             return true
         end
     end
