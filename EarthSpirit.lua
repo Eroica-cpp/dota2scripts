@@ -2,6 +2,8 @@ local EarthSpirit = {}
 
 EarthSpirit.optionKick = Menu.AddOption({"Hero Specific", "Earth Spirit"}, "Kick Helper", "auto place stone before kick if needed")
 EarthSpirit.optionRoll = Menu.AddOption({"Hero Specific", "Earth Spirit"}, "Roll Helper", "auto place stone before roll if needed")
+EarthSpirit.optionPull = Menu.AddOption({"Hero Specific", "Earth Spirit"}, "Pull Helper", "auto place stone before pull to silence enemy")
+
 
 function EarthSpirit.OnPrepareUnitOrders(orders)
     if not orders or not orders.ability then return true end
@@ -19,6 +21,11 @@ function EarthSpirit.OnPrepareUnitOrders(orders)
 
     if Menu.IsEnabled(EarthSpirit.optionRoll) and Ability.GetName(orders.ability) == "earth_spirit_rolling_boulder" then
         EarthSpirit.RollHelper(myHero, orders.position)
+        return true
+    end
+
+    if Menu.IsEnabled(EarthSpirit.optionPull) and Ability.GetName(orders.ability) == "earth_spirit_geomagnetic_grip" then
+        EarthSpirit.PullHelper(myHero, orders.position)
         return true
     end
 
@@ -66,6 +73,35 @@ function EarthSpirit.RollHelper(myHero, pos)
 
     local place_pos = origin + (pos - origin):Normalized():Scaled(100)
     Ability.CastPosition(stone, place_pos)
+end
+
+function EarthSpirit.PullHelper(myHero, pos)
+    if not myHero or not pos then return end
+
+    local radius = 180
+    if EarthSpirit.HasStoneInRadius(myHero, pos, radius) then return end
+    
+    local stone = NPC.GetAbility(myHero, "earth_spirit_stone_caller")
+    if not stone or not Ability.IsCastable(stone, 0) then return end
+
+    local range = 1100
+    local dis = (NPC.GetAbsOrigin(myHero) - pos):Length()
+    if dis > range then return end
+
+    Ability.CastPosition(stone, pos)
+end
+
+function EarthSpirit.HasStoneInRadius(myHero, pos, radius)
+    if not pos or not radius then return false end
+
+    local unitsAround = NPCs.InRadius(pos, radius, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
+    for i, npc in ipairs(unitsAround) do
+        if npc and NPC.GetUnitName(npc) == "npc_dota_earth_spirit_stone" then
+            return true
+        end
+    end
+
+    return false
 end
 
 return EarthSpirit
