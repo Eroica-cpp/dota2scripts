@@ -7,13 +7,12 @@ AutoFarm.font = Renderer.LoadFont("Tahoma", 24, Enum.FontWeight.EXTRABOLD)
 local shouldGoFarm = false
 
 function AutoFarm.OnUpdate()
-	if Menu.IsEnabled(AutoFarm.optionEnabled) and Menu.IsKeyDownOnce(AutoFarm.key) then
+	if not Menu.IsEnabled(AutoFarm.optionEnabled) then return end
+
+	if Menu.IsKeyDownOnce(AutoFarm.key) then
 		shouldGoFarm = not shouldGoFarm
 	end
-end
 
-function AutoFarm.OnDraw()
-	if not Menu.IsEnabled(AutoFarm.optionEnabled) then return end
 	if not shouldGoFarm then return end
 
 	local myHero = Heroes.GetLocal()
@@ -23,20 +22,21 @@ function AutoFarm.OnDraw()
 		local npc = NPCs.Get(i)
 		-- Log.Write(tostring(NPC.GetUnitName(npc)) .. " " .. tostring(Entity.GetOwner(npc)) .. " " .. tostring(Entity.OwnedBy(npc, myHero)))
 		if npc and npc ~= myHero and (Entity.GetOwner(myHero) == Entity.GetOwner(npc) or Entity.OwnedBy(npc, myHero)) then
-			goFarm(npc)
+			AutoFarm.Farm(npc)
 		end
 	end
 
 end
 
-function goFarm(npc)
+function AutoFarm.Farm(npc)
 	if not npc or not Entity.IsAlive(npc) then return end
+	if NPC.IsRunning(npc) or NPC.IsAttacking(npc) then return end
 
 	-- draw when farming key up
-	local pos = NPC.GetAbsOrigin(npc)
-	local x, y, visible = Renderer.WorldToScreen(pos)
-	Renderer.SetDrawColor(0, 255, 0, 255)
-	Renderer.DrawTextCentered(AutoFarm.font, x, y, "Auto", 1)
+	-- local pos = NPC.GetAbsOrigin(npc)
+	-- local x, y, visible = Renderer.WorldToScreen(pos)
+	-- Renderer.SetDrawColor(0, 255, 0, 255)
+	-- Renderer.DrawTextCentered(AutoFarm.font, x, y, "Auto", 1)
 
 	local myPlayer = Players.GetLocal()
 	if not myPlayer then return end
@@ -94,18 +94,11 @@ function goFarm(npc)
 			and (NPC.IsCreep(creep) or NPC.IsHero(creep))
 			and creep ~= Heroes.GetLocal() 
 			then
-			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET, creep, Vector(0,0,0), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, npc)
+			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET, creep, Vector(), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, npc)
 			return
 		end
 	end
 
-end
-
--- 0.02s delay works good for me
-local clock = os.clock
-function sleep(n)  -- seconds
-    local t0 = clock()
-    while clock() - t0 <= n do end
 end
 
 return AutoFarm
