@@ -26,7 +26,14 @@ function EarthSpirit.RollHelper(myHero, pos)
 	local mod = NPC.GetModifier(myHero, "modifier_earth_spirit_stone_caller_charge_counter")
 	if not mod or Modifier.GetStackCount(mod) <= 0 then return end
 
-	Log.Write("test!!")
+	local origin = NPC.GetAbsOrigin(myHero)
+	local dis = (origin - pos):Length()
+
+	local default_distance = 600
+	if dis <= default_distance then return end
+
+	local place_pos = origin + (pos - origin):Normalized():Scaled(100)
+	Ability.CastPosition(stone, place_pos)
 end
 
 return EarthSpirit
