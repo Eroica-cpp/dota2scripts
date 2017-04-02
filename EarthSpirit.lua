@@ -4,7 +4,6 @@ EarthSpirit.optionKick = Menu.AddOption({"Hero Specific", "Earth Spirit"}, "Kick
 EarthSpirit.optionRoll = Menu.AddOption({"Hero Specific", "Earth Spirit"}, "Roll Helper", "auto place stone before roll if needed")
 EarthSpirit.optionPull = Menu.AddOption({"Hero Specific", "Earth Spirit"}, "Pull Helper", "auto place stone before pull to silence enemy")
 
-
 function EarthSpirit.OnPrepareUnitOrders(orders)
     if not orders or not orders.ability then return true end
     if not Entity.IsAbility(orders.ability) then return true end
@@ -15,8 +14,7 @@ function EarthSpirit.OnPrepareUnitOrders(orders)
 
     if Menu.IsEnabled(EarthSpirit.optionKick) and Ability.GetName(orders.ability) == "earth_spirit_boulder_smash" then
         EarthSpirit.KickHelper(myHero, orders.position, orders.target)
-        return true
-        -- return false
+        return false
     end
 
     if Menu.IsEnabled(EarthSpirit.optionRoll) and Ability.GetName(orders.ability) == "earth_spirit_rolling_boulder" then
@@ -33,27 +31,29 @@ function EarthSpirit.OnPrepareUnitOrders(orders)
 end
 
 function EarthSpirit.KickHelper(myHero, pos, target)
-    Log.Write("yoyoyo!!!")
-    -- if not myHero then return end
+    if not myHero then return end
 
-    -- local kick = NPC.GetAbility(myHero, "earth_spirit_boulder_smash")
-    -- if not kick or not Ability.IsCastable(kick, NPC.GetMana(myHero)) then return end
+    local kick = NPC.GetAbility(myHero, "earth_spirit_boulder_smash")
+    if not kick or not Ability.IsCastable(kick, NPC.GetMana(myHero)) then return end
 
-    -- if target then
-    --     Ability.CastTarget(kick, target)
-    --     return
-    -- end
+    if target and (NPC.IsCreep(target) or NPC.IsHero(target)) then
+        Ability.CastTarget(kick, target)
+        return
+    end
 
-    -- local stone = NPC.GetAbility(myHero, "earth_spirit_stone_caller")
-    -- if not stone or not Ability.IsCastable(stone, 0) then return end
+    if not pos then return end
 
-    -- if not pos then return end
-
-    -- local origin = NPC.GetAbsOrigin(myHero)
-    -- local place_pos = origin + (pos - origin):Normalized():Scaled(100)
+    local origin = NPC.GetAbsOrigin(myHero)
+    local kick_pos = origin + (pos - origin):Normalized():Scaled(100)
     
-    -- Ability.CastPosition(stone, place_pos)
-    -- Ability.CastPosition(kick, place_pos)
+    if not EarthSpirit.HasStoneInRadius(myHero, kick_pos, 160) and not EarthSpirit.HasStoneInRadius(myHero, origin, 200) then
+        local stone = NPC.GetAbility(myHero, "earth_spirit_stone_caller")
+        if stone and Ability.IsCastable(stone, 0) then
+            Ability.CastPosition(stone, kick_pos)
+        end
+    end
+    
+    Ability.CastPosition(kick, kick_pos)
 end
 
 function EarthSpirit.RollHelper(myHero, pos)
