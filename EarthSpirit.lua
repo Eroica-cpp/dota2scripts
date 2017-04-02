@@ -23,7 +23,7 @@ function EarthSpirit.OnPrepareUnitOrders(orders)
     end
 
     if Menu.IsEnabled(EarthSpirit.optionPull) and Ability.GetName(orders.ability) == "earth_spirit_geomagnetic_grip" then
-        EarthSpirit.PullHelper(myHero, orders.position)
+        EarthSpirit.PullHelper(myHero, orders.position, orders.target)
         return true
     end
 
@@ -77,8 +77,11 @@ function EarthSpirit.RollHelper(myHero, pos)
     Ability.CastPosition(stone, place_pos)
 end
 
-function EarthSpirit.PullHelper(myHero, pos)
-    if not myHero or not pos then return end
+function EarthSpirit.PullHelper(myHero, pos, target)
+    if not myHero or not pos or not target then return end
+
+    -- earth spirit can pull ally if has aghs scepter
+    if NPC.HasItem(myHero, "item_ultimate_scepter", true) and Entity.IsSameTeam(myHero, target) then return end
 
     local radius = 180
     if EarthSpirit.HasStoneInRadius(myHero, pos, radius) then return end
