@@ -8,6 +8,7 @@ Enigma.optionMidnightPulse = Menu.AddOption({"Hero Specific", "Enigma"}, "Auto M
 function Enigma.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(Enigma.optionMidnightPulse) then return true end
     if not orders or not orders.ability then return true end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
 
     if not Entity.IsAbility(orders.ability) then return true end
     if Ability.GetName(orders.ability) ~= "enigma_black_hole" then return true end

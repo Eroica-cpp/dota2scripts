@@ -12,6 +12,7 @@ local ERROR = 0.05
 function Magnus.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(Magnus.optionRPHelper) then return true end
     if not orders or not orders.ability then return true end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
 
     if not Entity.IsAbility(orders.ability) then return true end
     if Ability.GetName(orders.ability) ~= "magnataur_reverse_polarity" then return true end

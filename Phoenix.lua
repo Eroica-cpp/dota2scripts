@@ -13,6 +13,7 @@ Phoenix.optionSunRay = Menu.AddOption({"Hero Specific","Phoenix"},"Sun Ray Helpe
 function Phoenix.OnPrepareUnitOrders(orders)
 	if not Menu.IsEnabled(Phoenix.optionFireSpirit) then return true end
 	if not orders or not orders.ability then return true end
+	if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
 
 	if not Entity.IsAbility(orders.ability) then return true end
 	if Ability.GetName(orders.ability) ~= "phoenix_supernova" then return true end

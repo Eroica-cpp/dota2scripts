@@ -7,6 +7,7 @@ EarthSpirit.optionPull = Menu.AddOption({"Hero Specific", "Earth Spirit"}, "Pull
 function EarthSpirit.OnPrepareUnitOrders(orders)
     if not orders or not orders.ability then return true end
     if not Entity.IsAbility(orders.ability) then return true end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
 
     local myHero = Heroes.GetLocal()
     if not myHero then return true end

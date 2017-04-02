@@ -14,6 +14,7 @@ local shouldAutoInitiate = false
 function Axe.OnPrepareUnitOrders(orders)
 	if not Menu.IsEnabled(Axe.optionBlinkHelper) then return true end
 	if not orders or not orders.ability then return true end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
 
 	if not Entity.IsAbility(orders.ability) then return true end
 	if Ability.GetName(orders.ability) ~= "axe_berserkers_call" then return true end
