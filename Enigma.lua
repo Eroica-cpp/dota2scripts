@@ -17,7 +17,7 @@ function Enigma.OnPrepareUnitOrders(orders)
     if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
 
     local pulse = NPC.GetAbilityByIndex(myHero, 2)
-    if not pulse or not Ability.IsCastable(pulse, NPC.GetMana(myHero)) then return true end
+    if not pulse or not Ability.IsCastable(pulse, NPC.GetMana(myHero)-Ability.GetManaCost(orders.ability)) then return true end
 
     if not orders.position then return true end
     Ability.CastPosition(pulse, orders.position)
