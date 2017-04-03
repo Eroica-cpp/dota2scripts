@@ -1,8 +1,9 @@
 local Invoker = {}
 
 Invoker.autoSunStrikeOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Sun Strike", "On/Off")
-Invoker.autoAlacrityOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Alacrity", "On/Off")
-Invoker.autoSwitchInstanceOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Switch Instance", "On/Off")
+-- Invoker.autoAlacrityOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Alacrity", "On/Off")
+
+Invoker.optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -20,29 +21,36 @@ function Invoker.OnUpdate()
 end
 
 function Invoker.OnPrepareUnitOrders(orders)
-    if not orders then return true end
+    if not orders or not orders.ability then return true end
+    if not Entity.IsAbility(orders.ability) then return true end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return true end
+    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return true end
 
     local Q = NPC.GetAbilityByIndex(myHero, 0)
     local W = NPC.GetAbilityByIndex(myHero, 1)
     local E = NPC.GetAbilityByIndex(myHero, 2)
     local R = NPC.GetAbilityByIndex(myHero, 5)
     
-    if Menu.IsEnabled(Invoker.autoAlacrityOption) 
-    and orders.ability
-    and Entity.IsAbility(orders.ability) 
-    and Ability.GetName(orders.ability) == "invoker_cold_snap" 
-    then
-        castAlacrity(myHero, Q, W, E, R)
+    if Menu.IsEnabled(Invoker.optionColdSnapCombo) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
+        Invoker.ColdSnapCombo(myHero, Q, W, E, R, orders.target)
+        return true
     end
 
-    if Menu.IsEnabled(Invoker.autoSwitchInstanceOption) then
-        Invoker.AutoSwitchInstance(myHero, orders, Q, W, E, R)
-    end    
-
     return true
+end
+
+-- use alacrity and urn of shadow before casting cold snap
+function Invoker.ColdSnapCombo(myHero, Q, W, E, R, target)
+    if not myHero or not target then return end
+
+    local urn = NPC.GetItem(myHero, "item_urn_of_shadows", true)
+    if urn and Ability.IsCastable(urn, 0) and Item.GetCurrentCharges(urn) > 0 then
+        Ability.CastTarget(urn, target)
+    end
+
 end
 
 -- auto cast alacrity after cold snap
@@ -54,7 +62,7 @@ function castAlacrity(myHero, Q, W, E, R)
     local invokeManaCost = NPC.HasItem(myHero, "item_ultimate_scepter", true) and 0 or 60
 
     if alacrity and Ability.IsCastable(W, 0) and Ability.IsCastable(E, 0) and Ability.IsCastable(R, invokeManaCost) and Ability.IsCastable(alacrity, myMana-invokeManaCost) then
-        if not hasInvoked(myHero, alacrity) then
+        if not Invoker.HasInvoked(myHero, alacrity) then
             Ability.CastNoTarget(W)
             Ability.CastNoTarget(W)
             Ability.CastNoTarget(E)
@@ -85,14 +93,14 @@ function Invoker.AutoSunStrike(myHero, Q, W, E, R)
 
             -- auto cast sunstrike when enemy is in a fixed position
             if inFixedPosition(enemy) then
-                if not hasInvoked(myHero, sunstrike) and Ability.IsCastable(sunstrike, myMana-invokeManaCost) and Ability.IsCastable(R, myMana) then
+                if not Invoker.HasInvoked(myHero, sunstrike) and Ability.IsCastable(sunstrike, myMana-invokeManaCost) and Ability.IsCastable(R, myMana) then
                     Ability.CastNoTarget(E)
                     Ability.CastNoTarget(E)
                     Ability.CastNoTarget(E)
                     Ability.CastNoTarget(R)
                     Ability.CastPosition(sunstrike, pos)
                 end
-                if hasInvoked(myHero, sunstrike)and Ability.IsCastable(sunstrike, myMana) then
+                if Invoker.HasInvoked(myHero, sunstrike)and Ability.IsCastable(sunstrike, myMana) then
                     Ability.CastPosition(sunstrike, pos)
                 end
             end
@@ -152,7 +160,7 @@ function getQWEState(myHero)
 end
 
 -- return whether a spell has been invoked.
-function hasInvoked(myHero, spell)
+function Invoker.HasInvoked(myHero, spell)
     if not myHero or not spell then return false end
     local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
     local spell_2 = NPC.GetAbilityByIndex(myHero, 4)
