@@ -42,7 +42,8 @@ function Invoker.OnPrepareUnitOrders(orders)
     return true
 end
 
--- use alacrity and urn of shadow before casting cold snap
+-- combo: cold snap -> urn
+-- combo: cold snap -> alacrity
 function Invoker.ColdSnapCombo(myHero, Q, W, E, R, target)
     if not myHero or not target then return end
 
@@ -51,29 +52,28 @@ function Invoker.ColdSnapCombo(myHero, Q, W, E, R, target)
         Ability.CastTarget(urn, target)
     end
 
-end
-
--- auto cast alacrity after cold snap
-function castAlacrity(myHero, Q, W, E, R)
-    if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
-    local myMana = NPC.GetMana(myHero)
-
-    local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
-    local invokeManaCost = NPC.HasItem(myHero, "item_ultimate_scepter", true) and 0 or 60
-
-    if alacrity and Ability.IsCastable(W, 0) and Ability.IsCastable(E, 0) and Ability.IsCastable(R, invokeManaCost) and Ability.IsCastable(alacrity, myMana-invokeManaCost) then
-        if not Invoker.HasInvoked(myHero, alacrity) then
-            Ability.CastNoTarget(W)
-            Ability.CastNoTarget(W)
-            Ability.CastNoTarget(E)
-            Ability.CastNoTarget(R)
-        end
-        Ability.CastTarget(alacrity, myHero, true)
-        Ability.CastNoTarget(E)
-        Ability.CastNoTarget(E)
-        Ability.CastNoTarget(E)
+    -- pop cold snap to first slot
+    local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
+    if coldSnap ~= NPC.GetAbilityByIndex(myHero, 3) and Ability.IsCastable(R, NPC.GetMana(myHero)) then
+    	-- QQQ R
+        Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(R)
     end
 
+    local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
+    if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(R)) then return end
+
+    if not Invoker.HasInvoked(myHero, alacrity) then
+        if not Ability.IsCastable(R, NPC.GetMana(myHero)) then 
+            return
+        else
+        	-- WWE R
+            Ability.CastNoTarget(W); Ability.CastNoTarget(W); Ability.CastNoTarget(E); Ability.CastNoTarget(R)
+        end
+    end
+
+    Ability.CastTarget(alacrity, myHero)
+    -- EEE
+    Ability.CastNoTarget(E); Ability.CastNoTarget(E); Ability.CastNoTarget(E)
 end
 
 -- To be done
