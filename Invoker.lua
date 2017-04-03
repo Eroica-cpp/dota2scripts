@@ -3,7 +3,6 @@ local Invoker = {}
 Invoker.autoSunStrikeOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Sun Strike", "On/Off")
 Invoker.autoAlacrityOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Alacrity", "On/Off")
 Invoker.autoSwitchInstanceOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Switch Instance", "On/Off")
-Invoker.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -91,7 +90,6 @@ function Invoker.AutoSunStrike(myHero, Q, W, E, R)
                     Ability.CastNoTarget(E)
                     Ability.CastNoTarget(E)
                     Ability.CastNoTarget(R)
-                    sleep(0.02)
                     Ability.CastPosition(sunstrike, pos)
                 end
                 if hasInvoked(myHero, sunstrike)and Ability.IsCastable(sunstrike, myMana) then
@@ -169,13 +167,6 @@ function inFixedPosition(npc)
     or NPC.HasModifier(npc, "modifier_axe_berserkers_call")
     or NPC.HasModifier(npc, "modifier_faceless_void_chronosphere")
     or NPC.HasModifier(npc, "modifier_enigma_black_hole_pull")
-end
-
--- 0.02s delay works good for me
-local clock = os.clock
-function sleep(n)  -- seconds
-    local t0 = clock()
-    while clock() - t0 <= n do end
 end
 
 return Invoker
