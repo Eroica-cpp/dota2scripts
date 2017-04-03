@@ -1,3 +1,10 @@
+-- ==================================
+-- File Name : EarthSpirit.lua
+-- Author    : Eroica
+-- Version   : 1.0
+-- Date      : 2017.4.2
+-- ==================================
+
 local EarthSpirit = {}
 
 EarthSpirit.optionKick = Menu.AddOption({"Hero Specific", "Earth Spirit"}, "Kick Helper", "auto place stone before kick if needed")
@@ -38,8 +45,12 @@ function EarthSpirit.KickHelper(myHero, pos, target)
     if not kick or not Ability.IsCastable(kick, NPC.GetMana(myHero)) then return end
 
     if target and (NPC.IsCreep(target) or NPC.IsHero(target)) then
-        Ability.CastTarget(kick, target)
-        return
+        local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(target)):Length()
+        local range = 150
+        if dis <= range then
+            Ability.CastTarget(kick, target)
+            return
+        end
     end
 
     if not pos then return end
