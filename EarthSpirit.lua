@@ -1,8 +1,8 @@
 -- ==================================
 -- File Name : EarthSpirit.lua
 -- Author    : Eroica
--- Version   : 1.0
--- Date      : 2017.4.2
+-- Version   : 1.1
+-- Date      : 2017.4.3
 -- ==================================
 
 local EarthSpirit = {}
@@ -51,13 +51,14 @@ function EarthSpirit.KickHelper(myHero, pos, target)
             Ability.CastTarget(kick, target)
             return
         end
-    end
 
-    if not pos then return end
+        -- if targeting a unit, pos will be vector(0.0, 0.0, 0.0)
+        pos = NPC.GetAbsOrigin(target)
+    end
 
     local origin = NPC.GetAbsOrigin(myHero)
     local kick_pos = origin + (pos - origin):Normalized():Scaled(100)
-    
+
     if not EarthSpirit.HasStoneInRadius(myHero, kick_pos, 160) and not EarthSpirit.HasStoneInRadius(myHero, origin, 200) then
         local stone = NPC.GetAbility(myHero, "earth_spirit_stone_caller")
         if stone and Ability.IsCastable(stone, 0) then
