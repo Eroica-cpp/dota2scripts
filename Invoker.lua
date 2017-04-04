@@ -5,6 +5,7 @@ Invoker.autoSunStrikeOption = Menu.AddOption({"Hero Specific", "Invoker Extended
 Invoker.optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
 Invoker.optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
 Invoker.optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
+Invoker.optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -26,12 +27,10 @@ function Invoker.OnUpdate()
     if Menu.IsEnabled(Invoker.optionMeteorBlastCombo) then
         Invoker.MeteorBlastCombo(myHero, Q, W, E, R)
     end
-
 end
 
 function Invoker.OnPrepareUnitOrders(orders)
     if not orders or not orders.ability then return true end
-    if not Entity.IsAbility(orders.ability) then return true end
     if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
 
     local myHero = Heroes.GetLocal()
@@ -43,12 +42,12 @@ function Invoker.OnPrepareUnitOrders(orders)
     local E = NPC.GetAbilityByIndex(myHero, 2)
     local R = NPC.GetAbilityByIndex(myHero, 5)
     
-    if Menu.IsEnabled(Invoker.optionColdSnapCombo) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
+    if Menu.IsEnabled(Invoker.optionColdSnapCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
         Invoker.ColdSnapCombo(myHero, Q, W, E, R, orders.target)
         return true
     end
 
-    if Menu.IsEnabled(Invoker.optionIceWallEMPCombo) and Ability.GetName(orders.ability) == "invoker_ice_wall" then
+    if Menu.IsEnabled(Invoker.optionIceWallEMPCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_ice_wall" then
         Invoker.IceWallEMPCombo(myHero, Q, W, E, R)
         return true
     end
@@ -196,8 +195,8 @@ function Invoker.AutoSunStrike(myHero, Q, W, E, R)
 
 end
 
--- return current state of QWE ("QWE", "QQQ", "EEE", etc)
-function getQWEState(myHero)
+-- return current instances ("QWE", "QQQ", "EEE", etc)
+function Invoker.GetInstances(myHero)
     local modTable = NPC.GetModifiers(myHero)
     local Q_num, W_num, E_num = 0, 0, 0
     
