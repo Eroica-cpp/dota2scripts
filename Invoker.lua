@@ -66,10 +66,13 @@ function Invoker.ColdSnapCombo(myHero, Q, W, E, R, target)
         Ability.CastTarget(urn, target)
     end
 
+    if not Q or not W or not E then return end
+    if not Ability.IsCastable(Q, 0) or not Ability.IsCastable(W, 0) or not Ability.IsCastable(E, 0) then return end
+    
     local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
     local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
     if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(R) - Ability.GetManaCost(coldSnap)) then return end
-    
+
     -- pop cold snap to first slot
     if coldSnap ~= NPC.GetAbilityByIndex(myHero, 3) and Ability.IsCastable(R, NPC.GetMana(myHero)) then
     	-- QQQ R
@@ -92,6 +95,9 @@ end
 
 -- combo: ice wall -> EMP
 function Invoker.IceWallEMPCombo(myHero, Q, W, E, R)
+    if not Q or not W or not E then return end
+    if not Ability.IsCastable(Q, 0) or not Ability.IsCastable(W, 0) or not Ability.IsCastable(E, 0) then return end
+
 	local iceWall = NPC.GetAbility(myHero, "invoker_ice_wall")
 	local emp = NPC.GetAbility(myHero, "invoker_emp")
 	if not emp or not Ability.IsCastable(emp, NPC.GetMana(myHero) - Ability.GetManaCost(R) - Ability.GetManaCost(iceWall)) then return end
@@ -118,6 +124,9 @@ end
 
 -- combo: meteor -> blast
 function Invoker.MeteorBlastCombo(myHero, Q, W, E, R)
+    if not Q or not W or not E then return end
+    if not Ability.IsCastable(Q, 0) or not Ability.IsCastable(W, 0) or not Ability.IsCastable(E, 0) then return end
+
 	-- check nearby enemy who is affected by chaos meteor
 	local pos
 	local radius = 1000
