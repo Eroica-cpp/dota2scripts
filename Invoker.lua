@@ -1,13 +1,17 @@
 local Invoker = {}
 
 Invoker.autoSunStrikeOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Sun Strike", "On/Off")
--- Invoker.autoAlacrityOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Alacrity", "On/Off")
 
 Invoker.optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
+Invoker.optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
+	if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
+    if NPC.IsChannellingAbility(myHero) then return end
 
     local Q = NPC.GetAbilityByIndex(myHero, 0)
     local W = NPC.GetAbilityByIndex(myHero, 1)
@@ -17,6 +21,10 @@ function Invoker.OnUpdate()
     if Menu.IsEnabled(Invoker.autoSunStrikeOption) then
         Invoker.AutoSunStrike(myHero, Q, W, E, R)
     end    
+
+    if Menu.IsEnabled(Invoker.optionMeteorBlastCombo) then
+        Invoker.MeteorBlastCombo(myHero, Q, W, E, R)
+    end
 
 end
 
@@ -74,6 +82,42 @@ function Invoker.ColdSnapCombo(myHero, Q, W, E, R, target)
     Ability.CastTarget(alacrity, myHero)
     -- EEE
     Ability.CastNoTarget(E); Ability.CastNoTarget(E); Ability.CastNoTarget(E)
+end
+
+-- combo: meteor -> blast
+function Invoker.MeteorBlastCombo(myHero, Q, W, E, R)
+	-- check nearby enemy who is affected by chaos meteor
+	local pos
+	local radius = 1000
+	local enemyAround = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
+	for i, enemy in ipairs(enemyAround) do
+		if NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
+			pos = NPC.GetAbsOrigin(enemy)
+		end
+	end
+
+	if not pos then return end
+
+    local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
+    local blast = NPC.GetAbility(myHero, "invoker_deafening_blast")
+    if not blast or not Ability.IsCastable(blast, NPC.GetMana(myHero) - Ability.GetManaCost(R) - Ability.GetManaCost(meteor)) then return end
+
+    -- pop chaos meteor to first slot
+    if meteor ~= NPC.GetAbilityByIndex(myHero, 3) and Ability.IsCastable(R, NPC.GetMana(myHero)) then
+    	-- WEE R
+        Ability.CastNoTarget(W); Ability.CastNoTarget(E); Ability.CastNoTarget(E); Ability.CastNoTarget(R)
+    end
+
+    if not Invoker.HasInvoked(myHero, blast) then
+        if not Ability.IsCastable(R, NPC.GetMana(myHero)) then 
+            return
+        else
+        	-- QWE R
+            Ability.CastNoTarget(Q); Ability.CastNoTarget(W); Ability.CastNoTarget(E); Ability.CastNoTarget(R)
+        end
+    end
+
+    Ability.CastPosition(blast, pos)
 end
 
 -- To be done
