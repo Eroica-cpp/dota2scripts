@@ -67,7 +67,7 @@ function Invoker.InstanceHelper(myHero, order)
 	if not myHero or not order then return end
 
 	-- if about to move
-	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
+	if not NPC.IsRunning(myHero) and (order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET) then
 		if Entity.GetHealth(myHero) < Entity.GetMaxHealth(myHero) then
 			Invoker.PressKey(myHero, "QQQ")
 		else
@@ -76,7 +76,7 @@ function Invoker.InstanceHelper(myHero, order)
 	end
 
 	-- if about to attack
-	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
+	if not NPC.IsAttacking(myHero) and (order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET) then
 		Invoker.PressKey(myHero, "EEE")
 	end
 end
