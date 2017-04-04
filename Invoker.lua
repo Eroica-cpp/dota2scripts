@@ -56,37 +56,28 @@ function Invoker.OnPrepareUnitOrders(orders)
     end
 
     if Menu.IsEnabled(Invoker.optionInstanceHelper) then
-        Invoker.InstanceHelper(myHero, Q, W, E, R, orders.order)
+        Invoker.InstanceHelper(myHero, orders.order)
         return true
     end
 
     return true
 end
 
-function Invoker.InstanceHelper(myHero, Q, W, E, R, order)
+function Invoker.InstanceHelper(myHero, order)
 	if not myHero or not order then return end
-	local instance = Invoker.GetInstances(myHero)
-	if instance == "" then return end
 
 	-- if about to move
 	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
-		if W and Ability.IsCastable(W, 0) then
-			if instance ~= "WWW" then
-				Ability.CastNoTarget(W); Ability.CastNoTarget(W); Ability.CastNoTarget(W)
-			end
-		-- switch too QQQ if haven't leveled up W
-		elseif Q and Ability.IsCastable(Q, 0) then
-			if instance ~= "QQQ" then
-				Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(Q)
-			end
+		if Entity.GetHealth(myHero) < Entity.GetMaxHealth(myHero) then
+			Invoker.PressKey(myHero, "QQQ")
+		else
+			Invoker.PressKey(myHero, "WWW")
 		end
 	end
 
 	-- if about to attack
 	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
-		if E and Ability.IsCastable(E, 0) and instance ~= "EEE" then
-			Ability.CastNoTarget(E); Ability.CastNoTarget(E); Ability.CastNoTarget(E)
-		end
+		Invoker.PressKey(myHero, "EEE")
 	end
 end
 
@@ -259,6 +250,24 @@ function Invoker.HasInvoked(myHero, spell)
     local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
     local spell_2 = NPC.GetAbilityByIndex(myHero, 4)
     return (spell == spell_1) or (spell == spell_2)
+end
+
+function Invoker.PressKey(myHero, keys)
+	if not myHero or not keys then return end
+	if Invoker.GetInstances(myHero) == keys then return end
+
+    local Q = NPC.GetAbility(myHero, "invoker_quas")
+    local W = NPC.GetAbility(myHero, "invoker_wex")
+    local E = NPC.GetAbility(myHero, "invoker_exort")
+    local R = NPC.GetAbility(myHero, "invoker_invoke")
+
+    for i = 1, #keys do
+    	local key = keys:sub(i,i)	
+    	if key == "Q" and Q and Ability.IsCastable(Q, 0) then Ability.CastNoTarget(Q) end
+    	if key == "W" and W and Ability.IsCastable(W, 0) then Ability.CastNoTarget(W) end
+    	if key == "E" and E and Ability.IsCastable(E, 0) then Ability.CastNoTarget(E) end
+    	if key == "R" and R and Ability.IsCastable(R, NPC.GetMana(myHero)) then Ability.CastNoTarget(R) end
+    end
 end
 
 -- return true if npc is stunned, rooted, duel by LC, etc
