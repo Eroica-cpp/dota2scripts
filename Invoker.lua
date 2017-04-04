@@ -160,7 +160,9 @@ function Invoker.MeteorBlastCombo(myHero)
     	Invoker.PressKey(myHero, "QWER")
     end
 
-    Ability.CastPosition(blast, pos)
+    if Ability.IsCastable(blast, NPC.GetMana(myHero)) then
+	    Ability.CastPosition(blast, pos)
+	end
 end
 
 -- To be done
