@@ -25,7 +25,7 @@ function Invoker.OnUpdate()
     end    
 
     if Menu.IsEnabled(Invoker.optionMeteorBlastCombo) then
-        Invoker.MeteorBlastCombo(myHero, Q, W, E, R)
+        Invoker.MeteorBlastCombo(myHero)
     end
 end
 
@@ -46,12 +46,12 @@ function Invoker.OnPrepareUnitOrders(orders)
     local R = NPC.GetAbilityByIndex(myHero, 5)
     
     if Menu.IsEnabled(Invoker.optionColdSnapCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
-        Invoker.ColdSnapCombo(myHero, Q, W, E, R, orders.target)
+        Invoker.ColdSnapCombo(myHero, orders.target)
         return true
     end
 
     if Menu.IsEnabled(Invoker.optionIceWallEMPCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_ice_wall" then
-        Invoker.IceWallEMPCombo(myHero, Q, W, E, R)
+        Invoker.IceWallEMPCombo(myHero)
         return true
     end
 
@@ -83,63 +83,48 @@ end
 
 -- combo: cold snap -> urn
 -- combo: cold snap -> alacrity
-function Invoker.ColdSnapCombo(myHero, Q, W, E, R, target)
+function Invoker.ColdSnapCombo(myHero, target)
     if not myHero or not target then return end
 
     local urn = NPC.GetItem(myHero, "item_urn_of_shadows", true)
     if urn and Ability.IsCastable(urn, 0) and Item.GetCurrentCharges(urn) > 0 then
         Ability.CastTarget(urn, target)
     end
-
-    if not Q or not W or not E then return end
-    if not Ability.IsCastable(Q, 0) or not Ability.IsCastable(W, 0) or not Ability.IsCastable(E, 0) then return end
-    
+   
     local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
     local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
-    if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(R) - Ability.GetManaCost(coldSnap)) then return end
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not alacrity or not coldSnap or not invoke then return end
+    if not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke) - Ability.GetManaCost(coldSnap)) then return end
 
     -- pop cold snap to first slot
-    if coldSnap ~= NPC.GetAbilityByIndex(myHero, 3) and Ability.IsCastable(R, NPC.GetMana(myHero)) then
-    	-- QQQ R
-        Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(R)
+    if coldSnap ~= NPC.GetAbilityByIndex(myHero, 3) then
+    	Invoker.PressKey(myHero, "QQQR")
     end
 
     if not Invoker.HasInvoked(myHero, alacrity) then
-        if not Ability.IsCastable(R, NPC.GetMana(myHero)) then 
-            return
-        else
-        	-- WWE R
-            Ability.CastNoTarget(W); Ability.CastNoTarget(W); Ability.CastNoTarget(E); Ability.CastNoTarget(R)
-        end
+    	Invoker.PressKey(myHero, "WWER")
     end
 
-    Ability.CastTarget(alacrity, myHero)
-    -- EEE
-    Ability.CastNoTarget(E); Ability.CastNoTarget(E); Ability.CastNoTarget(E)
+	Ability.CastTarget(alacrity, myHero)
+    Invoker.PressKey(myHero, "EEE")
 end
 
 -- combo: ice wall -> EMP
-function Invoker.IceWallEMPCombo(myHero, Q, W, E, R)
-    if not Q or not W or not E then return end
-    if not Ability.IsCastable(Q, 0) or not Ability.IsCastable(W, 0) or not Ability.IsCastable(E, 0) then return end
-
+function Invoker.IceWallEMPCombo(myHero)
 	local iceWall = NPC.GetAbility(myHero, "invoker_ice_wall")
 	local emp = NPC.GetAbility(myHero, "invoker_emp")
-	if not emp or not Ability.IsCastable(emp, NPC.GetMana(myHero) - Ability.GetManaCost(R) - Ability.GetManaCost(iceWall)) then return end
+	local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+	if not iceWall or not emp or not invoke then return end
+	if not Ability.IsCastable(emp, NPC.GetMana(myHero) - Ability.GetManaCost(invoke) - Ability.GetManaCost(iceWall)) then return end
 
 	-- pop ice wall to first slot
-    if iceWall ~= NPC.GetAbilityByIndex(myHero, 3) and Ability.IsCastable(R, NPC.GetMana(myHero)) then
-    	-- QQE R
-        Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(E); Ability.CastNoTarget(R)
+    if iceWall ~= NPC.GetAbilityByIndex(myHero, 3) then
+    	Invoker.PressKey(myHero, "QQER")
     end
 
     if not Invoker.HasInvoked(myHero, emp) then
-        if not Ability.IsCastable(R, NPC.GetMana(myHero)) then 
-            return
-        else
-            -- WWW R
-            Ability.CastNoTarget(W); Ability.CastNoTarget(W); Ability.CastNoTarget(W); Ability.CastNoTarget(R)
-        end
+    	Invoker.PressKey(myHero, "WWWR")
     end
 
     local cursorPos = Input.GetWorldCursorPos()
@@ -148,9 +133,12 @@ function Invoker.IceWallEMPCombo(myHero, Q, W, E, R)
 end
 
 -- combo: meteor -> blast
-function Invoker.MeteorBlastCombo(myHero, Q, W, E, R)
-    if not Q or not W or not E then return end
-    if not Ability.IsCastable(Q, 0) or not Ability.IsCastable(W, 0) or not Ability.IsCastable(E, 0) then return end
+function Invoker.MeteorBlastCombo(myHero)
+    local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
+    local blast = NPC.GetAbility(myHero, "invoker_deafening_blast")
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not meteor or not blast or not invoke then return end
+    if not Ability.IsCastable(blast, NPC.GetMana(myHero) - Ability.GetManaCost(invoke) - Ability.GetManaCost(meteor)) then return end
 
 	-- check nearby enemy who is affected by chaos meteor
 	local pos
@@ -161,26 +149,15 @@ function Invoker.MeteorBlastCombo(myHero, Q, W, E, R)
 			pos = NPC.GetAbsOrigin(enemy)
 		end
 	end
-
 	if not pos then return end
 
-    local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
-    local blast = NPC.GetAbility(myHero, "invoker_deafening_blast")
-    if not blast or not Ability.IsCastable(blast, NPC.GetMana(myHero) - Ability.GetManaCost(R) - Ability.GetManaCost(meteor)) then return end
-
     -- pop chaos meteor to first slot
-    if meteor ~= NPC.GetAbilityByIndex(myHero, 3) and Ability.IsCastable(R, NPC.GetMana(myHero)) then
-    	-- WEE R
-        Ability.CastNoTarget(W); Ability.CastNoTarget(E); Ability.CastNoTarget(E); Ability.CastNoTarget(R)
+    if meteor ~= NPC.GetAbilityByIndex(myHero, 3) then
+    	Invoker.PressKey(myHero, "WEER")
     end
 
     if not Invoker.HasInvoked(myHero, blast) then
-        if not Ability.IsCastable(R, NPC.GetMana(myHero)) then 
-            return
-        else
-        	-- QWE R
-            Ability.CastNoTarget(Q); Ability.CastNoTarget(W); Ability.CastNoTarget(E); Ability.CastNoTarget(R)
-        end
+    	Invoker.PressKey(myHero, "QWER")
     end
 
     Ability.CastPosition(blast, pos)
