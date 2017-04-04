@@ -155,31 +155,6 @@ function Invoker.AutoSunStrike(myHero, Q, W, E, R)
 
 end
 
--- switch EEE when attacking
--- switch QQQ when hold position (pressing S/H)
-function Invoker.AutoSwitchInstance(myHero, orders, Q, W, E, R)
-    if not myHero or not orders then return end
-    if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
-
-    local QWEState = getQWEState(myHero)
-    local switchManaCost = 0
-    
-    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
-        if QWEState ~= "EEE" and Ability.IsCastable(E, switchManaCost) then
-            Ability.CastNoTarget(E, true)
-            Ability.CastNoTarget(E, true)
-            Ability.CastNoTarget(E, true)
-        end
-    elseif orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_HOLD_POSITION then
-        if QWEState ~= "QQQ" and Ability.IsCastable(Q, switchManaCost) then
-            Ability.CastNoTarget(Q, true)
-            Ability.CastNoTarget(Q, true)
-            Ability.CastNoTarget(Q, true)
-        end
-    end
-
-end
-
 -- return current state of QWE ("QWE", "QQQ", "EEE", etc)
 function getQWEState(myHero)
     local modTable = NPC.GetModifiers(myHero)
