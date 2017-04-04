@@ -36,6 +36,9 @@ function Invoker.OnPrepareUnitOrders(orders)
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return true end
     if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return true end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return true end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return true end
+    if NPC.IsChannellingAbility(myHero) then return true end
 
     local Q = NPC.GetAbilityByIndex(myHero, 0)
     local W = NPC.GetAbilityByIndex(myHero, 1)
