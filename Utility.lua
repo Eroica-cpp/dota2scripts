@@ -41,6 +41,17 @@ function Utility.BestPosition(unitsAround, radius)
 	return bestPos
 end
 
+-- return predicted position
+function Utility.GetPredictedPosition(npc, delay)
+    local pos = NPC.GetAbsOrigin(npc)
+    if not NPC.IsRunning(npc) or not delay then return pos end
+
+    local dir = Entity.GetRotation(npc):GetForward():Normalized()
+    local speed = NPC.GetMoveSpeed(npc)
+
+    return pos + dir:Scaled(speed * delay)
+end
+
 -- return true if is protected by lotus orb or AM's aghs
 function Utility.IsLotusProtected(npc)
 	if NPC.HasModifier(npc, "modifier_item_lotus_orb_active") then return true end
