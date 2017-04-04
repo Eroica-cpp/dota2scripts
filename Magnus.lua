@@ -48,6 +48,7 @@ function Magnus.OnUpdate()
     
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
     if NPC.IsChannellingAbility(myHero) then return end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
     if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 
     if Menu.IsEnabled(Magnus.optionEmpower) then
