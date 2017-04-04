@@ -52,7 +52,39 @@ function Invoker.OnPrepareUnitOrders(orders)
         return true
     end
 
+    if Menu.IsEnabled(Invoker.optionInstanceHelper) then
+        Invoker.InstanceHelper(myHero, Q, W, E, R, orders.order)
+        return true
+    end
+
     return true
+end
+
+function Invoker.InstanceHelper(myHero, Q, W, E, R, order)
+	if not myHero or not order then return end
+	local instance = Invoker.GetInstances(myHero)
+	if instance == "" then return end
+
+	-- if about to move
+	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
+		if W and Ability.IsCastable(W, 0) then
+			if instance ~= "WWW" then
+				Ability.CastNoTarget(W); Ability.CastNoTarget(W); Ability.CastNoTarget(W)
+			end
+		-- switch too QQQ if haven't leveled up W
+		elseif Q and Ability.IsCastable(Q, 0) then
+			if instance ~= "QQQ" then
+				Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(Q)
+			end
+		end
+	end
+
+	-- if about to attack
+	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
+		if E and Ability.IsCastable(E, 0) and instance ~= "EEE" then
+			Ability.CastNoTarget(E); Ability.CastNoTarget(E); Ability.CastNoTarget(E)
+		end
+	end
 end
 
 -- combo: cold snap -> urn
