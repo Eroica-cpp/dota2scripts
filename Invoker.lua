@@ -4,6 +4,7 @@ Invoker.autoSunStrikeOption = Menu.AddOption({"Hero Specific", "Invoker Extended
 
 Invoker.optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
 Invoker.optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
+Invoker.optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -47,6 +48,11 @@ function Invoker.OnPrepareUnitOrders(orders)
         return true
     end
 
+    if Menu.IsEnabled(Invoker.optionIceWallEMPCombo) and Ability.GetName(orders.ability) == "invoker_ice_wall" then
+        Invoker.IceWallEMPCombo(myHero, Q, W, E, R)
+        return true
+    end
+
     return true
 end
 
@@ -60,15 +66,15 @@ function Invoker.ColdSnapCombo(myHero, Q, W, E, R, target)
         Ability.CastTarget(urn, target)
     end
 
-    -- pop cold snap to first slot
     local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
+    local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
+    if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(R) - Ability.GetManaCost(coldSnap)) then return end
+    
+    -- pop cold snap to first slot
     if coldSnap ~= NPC.GetAbilityByIndex(myHero, 3) and Ability.IsCastable(R, NPC.GetMana(myHero)) then
     	-- QQQ R
         Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(R)
     end
-
-    local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
-    if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(R)) then return end
 
     if not Invoker.HasInvoked(myHero, alacrity) then
         if not Ability.IsCastable(R, NPC.GetMana(myHero)) then 
@@ -82,6 +88,32 @@ function Invoker.ColdSnapCombo(myHero, Q, W, E, R, target)
     Ability.CastTarget(alacrity, myHero)
     -- EEE
     Ability.CastNoTarget(E); Ability.CastNoTarget(E); Ability.CastNoTarget(E)
+end
+
+-- combo: ice wall -> EMP
+function Invoker.IceWallEMPCombo(myHero, Q, W, E, R)
+	local iceWall = NPC.GetAbility(myHero, "invoker_ice_wall")
+	local emp = NPC.GetAbility(myHero, "invoker_emp")
+	if not emp or not Ability.IsCastable(emp, NPC.GetMana(myHero) - Ability.GetManaCost(R) - Ability.GetManaCost(iceWall)) then return end
+
+	-- pop ice wall to first slot
+    if iceWall ~= NPC.GetAbilityByIndex(myHero, 3) and Ability.IsCastable(R, NPC.GetMana(myHero)) then
+    	-- QQE R
+        Ability.CastNoTarget(Q); Ability.CastNoTarget(Q); Ability.CastNoTarget(E); Ability.CastNoTarget(R)
+    end
+
+    if not Invoker.HasInvoked(myHero, emp) then
+        if not Ability.IsCastable(R, NPC.GetMana(myHero)) then 
+            return
+        else
+            -- WWW R
+            Ability.CastNoTarget(W); Ability.CastNoTarget(W); Ability.CastNoTarget(W); Ability.CastNoTarget(R)
+        end
+    end
+
+    local cursorPos = Input.GetWorldCursorPos()
+    local pos = (NPC.GetAbsOrigin(myHero) + cursorPos):Scaled(0.5)
+    Ability.CastPosition(emp, pos)
 end
 
 -- combo: meteor -> blast
