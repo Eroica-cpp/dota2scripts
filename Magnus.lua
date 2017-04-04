@@ -3,6 +3,7 @@ local Utility = require("Utility")
 local Magnus = {}
 
 Magnus.optionAwareness = Menu.AddOption({"Hero Specific", "Magnus"}, "Killable Awareness", "show how many hits left (with the damage of shockwave) to kill an enemy")
+Magnus.optionKillSteal = Menu.AddOption({"Hero Specific", "Magnus"}, "Kill Steal", "auto cast shockwave to KS")
 Magnus.optionEmpower = Menu.AddOption({"Hero Specific", "Magnus"}, "Auto Empower", "auto cast empower on allies or magnus himself")
 Magnus.optionRPHelper = Menu.AddOption({"Hero Specific", "Magnus"}, "RP Helper", "Auto blink to best position for RP, auto turn around before RP")
 Magnus.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
@@ -89,12 +90,45 @@ function Magnus.OnUpdate()
     if NPC.HasModifier(myHero, "modifier_teleporting") then return end
     if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 
+    if Menu.IsEnabled(Magnus.optionKillSteal) then
+        Magnus.KillSteal(myHero)
+    end
+
     if Menu.IsEnabled(Magnus.optionEmpower) then
         Magnus.AutoEmpower(myHero)
     end
 
     if Menu.IsEnabled(Magnus.optionRPHelper) then
         Magnus.RPHelper(myHero)
+    end
+end
+
+-- auto cast shockwave to KS
+function Magnus.KillSteal(myHero)
+    local wave = NPC.GetAbility(myHero, "magnataur_shockwave")
+    if not wave or not Ability.IsCastable(wave, NPC.GetMana(myHero)) then return end
+
+    local level = Ability.GetLevel(wave)
+    local wave_damage = 75 * level
+
+    local range = 1150
+    local enemiesAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+    for i, enemy in ipairs(enemiesAround) do
+        local magicalDamage = wave_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+        if Entity.GetHealth(enemy) <= magicalDamage and not NPC.IsIllusion(enemy) and Entity.IsAlive(enemy)
+            and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) 
+            and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
+
+            local dis = (NPC.GetAbsOrigin(enemy) - NPC.GetAbsOrigin(myHero)):Length()
+            local speed = 1150
+            local travel_time = dis / (speed + 1)
+            local castpoint = 0.3
+            local delay = travel_time + castpoint
+
+            local pos = Utility.GetPredictedPosition(enemy, delay)
+            Ability.CastPosition(wave, pos)
+        end
     end
 end
 
