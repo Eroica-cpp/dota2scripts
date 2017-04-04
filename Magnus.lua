@@ -2,11 +2,49 @@ local Utility = require("Utility")
 
 local Magnus = {}
 
+Magnus.optionAwareness = Menu.AddOption({"Hero Specific", "Magnus"}, "Killable Awareness", "show how many hits left (with the damage of shockwave) to kill an enemy")
 Magnus.optionEmpower = Menu.AddOption({"Hero Specific", "Magnus"}, "Auto Empower", "auto cast empower on allies or magnus himself")
 Magnus.optionRPHelper = Menu.AddOption({"Hero Specific", "Magnus"}, "RP Helper", "Auto blink to best position for RP, auto turn around before RP")
+Magnus.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 local RP_timer
 local ERROR = 0.05
+
+-- show how many hits left (with the damage of shockwave) to kill an enemy
+function Magnus.OnDraw()
+    if not Menu.IsEnabled(Magnus.optionAwareness) then return end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_magnataur" then return end
+
+    local wave = NPC.GetAbility(myHero, "magnataur_shockwave")
+    local level = Ability.GetLevel(wave)
+    local wave_damage = 75 * level
+    if not Ability.IsCastable(wave, NPC.GetMana(myHero)) then wave_damage = 0 end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
+            local enemyHp = Entity.GetHealth(enemy)
+            local physicalDamage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
+            local magicalDamage = wave_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            local hitsLeft = math.ceil((enemyHp - magicalDamage) / (physicalDamage + 1))
+        
+            -- draw
+            local pos = NPC.GetAbsOrigin(enemy)
+            local x, y, visible = Renderer.WorldToScreen(pos)
+
+            -- red : can kill; green : cant kill
+            if enemyHp - magicalDamage <= 0 then
+                Renderer.SetDrawColor(255, 0, 0, 255)
+                Renderer.DrawTextCentered(Magnus.font, x, y, "Kill", 1)
+            else
+                Renderer.SetDrawColor(0, 255, 0, 255)
+                Renderer.DrawTextCentered(Magnus.font, x, y, hitsLeft, 1)
+            end
+        end
+    end
+end
 
 -- blink to best position and turn around before RP
 function Magnus.OnPrepareUnitOrders(orders)
