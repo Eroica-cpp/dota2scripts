@@ -127,7 +127,10 @@ function Magnus.KillSteal(myHero)
             local delay = travel_time + castpoint
 
             local pos = Utility.GetPredictedPosition(enemy, delay)
-            Ability.CastPosition(wave, pos)
+            if (pos - NPC.GetAbsOrigin(myHero)):Length() <= range then
+                Ability.CastPosition(wave, pos)
+                return
+            end
         end
     end
 end
@@ -137,6 +140,9 @@ end
 function Magnus.AutoEmpower(myHero)
     local empower = NPC.GetAbilityByIndex(myHero, 1)
     if not empower or not Ability.IsCastable(empower, NPC.GetMana(myHero)) then return end
+
+    -- avoid cancel right click when farming
+    if NPC.IsAttacking(myHero) then return end
 
     -- avoid casting empower right before ultimate
     local enemiesAround = NPC.GetHeroesInRadius(myHero, 450, Enum.TeamType.TEAM_ENEMY)
