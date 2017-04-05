@@ -125,6 +125,7 @@ function AutoUseItems.item_hand_of_midas(myHero)
 		local XP = NPC.GetBountyXP(npc)
 		if NPC.IsCreep(npc) and not Utility.IsAncientCreep(npc) and XP >= XP_threshold then
 			Ability.CastTarget(item, npc)
+			return
 		end
 	end
 end
@@ -156,26 +157,16 @@ function AutoUseItems.item_iron_talon(myHero)
 	local item = NPC.GetItem(myHero, "item_iron_talon", true)
 	if not item or not Ability.IsCastable(item, 0) then return end
 
-	if NPC.IsRunning(myHero) then return end
-
+	local HpThreshold = 550
 	local range = 350
 	local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-	if not creeps or #creeps <= 0 then return end
 
-	local maxHp = 0
-	local target = nil
-	local ratio = 0.5
 	for i, npc in ipairs(creeps) do
-		local tmpHp = Entity.GetHealth(npc)
-		if tmpHp > maxHp and NPC.IsCreep(npc) 
-			and (not NPC.IsAncient(npc)) and (not NPC.IsRoshan(npc)) 
-			and tmpHp > ratio*Entity.GetMaxHealth(npc) then
-			maxHp = tmpHp
-			target = npc
+		if npc and NPC.IsCreep(npc) and Entity.GetHealth(npc) >= HpThreshold and not Utility.IsAncientCreep(npc) then
+			Ability.CastTarget(item, npc)
+			return
 		end
 	end
-
-	if target then Ability.CastTarget(item, target) end
 end
 
 -- Auto use magic wand(stick) or faerie fire if HP is low
