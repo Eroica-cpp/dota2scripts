@@ -1,5 +1,7 @@
 local Utility = {}
 
+Utility.AncientCreepNameList = {"npc_dota_neutral_black_dragon", "npc_dota_neutral_black_drake", "npc_dota_neutral_granite_golem", "npc_dota_neutral_rock_golem", "npc_dota_neutral_thunderhide", "npc_dota_neutral_rumblehide", "npc_dota_neutral_prowler_shaman", "npc_dota_neutral_prowler_acolyte"}
+
 -- return best position to cast certain spells 
 -- eg. axe's call, void's chrono, enigma's black hole
 -- input  : unitsAround, radius 
@@ -164,5 +166,26 @@ function Utility.PopDefensiveItems(myHero)
     end
 
 end
+
+function Utility.IsAncientCreep(npc)
+    if not npc then return false end
+
+    for i, name in ipairs(Utility.AncientCreepNameList) do
+        if name and NPC.GetUnitName(npc) == name then return true end
+    end
+
+    return false
+end
+
+-- -- for test only
+-- function Utility.OnUpdate()
+--     local myHero = Heroes.GetLocal()
+--     if not myHero then return end
+
+--     local npc = Input.GetNearestUnitToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_BOTH)
+--     if not npc then return end
+
+--     Log.Write(NPC.GetUnitName(npc) .. " " .. tostring(Utility.IsAncientCreep(npc)))
+-- end
 
 return Utility
