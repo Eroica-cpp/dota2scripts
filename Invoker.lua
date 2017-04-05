@@ -8,6 +8,9 @@ Invoker.optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ic
 Invoker.optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
 Invoker.optionSunStrike = Menu.AddOption({"Hero Specific", "Invoker"}, "Sun Strike for KS", "auto cast sun strike on predicted position if can kill an enemy")
 
+local isInvokingSpell = false
+local lastInvokeTime = 0
+
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
@@ -15,6 +18,8 @@ function Invoker.OnUpdate()
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
     if NPC.HasModifier(myHero, "modifier_teleporting") then return end
     if NPC.IsChannellingAbility(myHero) then return end
+
+    Invoker.UpdateInvokingStatus(myHero)
 
     if Menu.IsEnabled(Invoker.optionSunStrike) then
         Invoker.SunStrike(myHero)
@@ -54,11 +59,27 @@ function Invoker.OnPrepareUnitOrders(orders)
     return true
 end
 
+-- update invoking status
+-- check whether is invoking spell to avoid miss switch instance.
+function Invoker.UpdateInvokingStatus(myHero)
+    local elapse_time = 1
+    if math.abs(GameRules.GetGameTime() - lastInvokeTime) > elapse_time then
+        isInvokingSpell = false
+    end
+
+    -- if one of Q, W, E, R keys is pressed
+    if Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) then
+        isInvokingSpell = true
+        lastInvokeTime = GameRules.GetGameTime()
+    end
+end
+
 function Invoker.InstanceHelper(myHero, order)
 	if not myHero or not order then return end
+    if isInvokingSpell then return end
 
 	-- if about to move
-	if not NPC.IsRunning(myHero) and (order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET) then
+	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
 		if Entity.GetHealth(myHero) < Entity.GetMaxHealth(myHero) then
 			Invoker.PressKey(myHero, "QQQ")
 		else
@@ -67,7 +88,7 @@ function Invoker.InstanceHelper(myHero, order)
 	end
 
 	-- if about to attack
-	if not NPC.IsAttacking(myHero) and (order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET) then
+	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
 		local E = NPC.GetAbility(myHero, "invoker_exort")
         if E and Ability.IsCastable(E, 0) then
             Invoker.PressKey(myHero, "EEE")
