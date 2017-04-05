@@ -32,7 +32,7 @@ function Magnus.OnDraw()
             local hitsLeft = math.ceil((enemyHp - magicalDamage) / (physicalDamage + 1))
         
             -- draw
-            local pos = NPC.GetAbsOrigin(enemy)
+            local pos = Entity.GetAbsOrigin(enemy)
             local x, y, visible = Renderer.WorldToScreen(pos)
 
             -- red : can kill; green : cant kill
@@ -120,14 +120,14 @@ function Magnus.KillSteal(myHero)
             and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) 
             and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
 
-            local dis = (NPC.GetAbsOrigin(enemy) - NPC.GetAbsOrigin(myHero)):Length()
+            local dis = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Length()
             local speed = 1150
             local travel_time = dis / (speed + 1)
             local castpoint = 0.3
             local delay = travel_time + castpoint
 
             local pos = Utility.GetPredictedPosition(enemy, delay)
-            if (pos - NPC.GetAbsOrigin(myHero)):Length() <= range then
+            if (pos - Entity.GetAbsOrigin(myHero)):Length() <= range then
                 Ability.CastPosition(wave, pos)
                 return
             end

@@ -32,7 +32,7 @@ function AutoFarm.Farm(npc)
 	if not npc or not Entity.IsAlive(npc) then return end
 
 	-- draw when farming key up
-	local pos = NPC.GetAbsOrigin(npc)
+	local pos = Entity.GetAbsOrigin(npc)
 	local x, y, visible = Renderer.WorldToScreen(pos)
 	Renderer.SetDrawColor(0, 255, 0, 255)
 	Renderer.DrawTextCentered(AutoFarm.font, x, y, "Auto", 1)

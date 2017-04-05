@@ -119,7 +119,7 @@ function Invoker.IceWallEMPCombo(myHero)
     end
 
     local cursorPos = Input.GetWorldCursorPos()
-    local pos = (NPC.GetAbsOrigin(myHero) + cursorPos):Scaled(0.5)
+    local pos = (Entity.GetAbsOrigin(myHero) + cursorPos):Scaled(0.5)
     Ability.CastPosition(emp, pos)
 end
 
@@ -137,7 +137,7 @@ function Invoker.MeteorBlastCombo(myHero)
 	local enemyAround = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
 	for i, enemy in ipairs(enemyAround) do
 		if NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
-			pos = NPC.GetAbsOrigin(enemy)
+			pos = Entity.GetAbsOrigin(enemy)
 		end
 	end
 	if not pos then return end

@@ -25,7 +25,7 @@ function AbyssalHelper.OnPrepareUnitOrders(orders)
 		and NPC.IsEntityInRange(orders.npc, orders.target, blink_cast_range) then
 
 		local blink = NPC.GetItem(orders.npc, "item_blink", true)
-		local pos = NPC.GetAbsOrigin(orders.target)
+		local pos = Entity.GetAbsOrigin(orders.target)
 		Ability.CastPosition(blink, pos)
 		return true
 	end
@@ -40,7 +40,7 @@ function AbyssalHelper.OnPrepareUnitOrders(orders)
 		if NPC.IsEntityInRange(orders.npc, orders.target, cast_range) 
 			and Ability.IsCastable(blink, mana) then
 			
-			local pos = NPC.GetAbsOrigin(orders.target)
+			local pos = Entity.GetAbsOrigin(orders.target)
 			Ability.CastPosition(blink, pos)
 
 			return true

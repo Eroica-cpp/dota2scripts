@@ -39,7 +39,7 @@ function Phoenix.OnPrepareUnitOrders(orders)
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, enemy in ipairs(enemyHeroes) do
     	if Ability.IsCastable(launch_fire_spirit, myMana) then
-    		Ability.CastPosition(launch_fire_spirit, NPC.GetAbsOrigin(enemy))
+    		Ability.CastPosition(launch_fire_spirit, Entity.GetAbsOrigin(enemy))
     	end
     end
 
@@ -66,9 +66,9 @@ function Phoenix.SunRay(myHero)
 	local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
 	if not enemy then return end
 
-	local pos = NPC.GetAbsOrigin(enemy)
+	local pos = Entity.GetAbsOrigin(enemy)
 	local vec1 = Entity.GetRotation(myHero):GetForward()
-	local vec2 = pos - NPC.GetAbsOrigin(myHero)
+	local vec2 = pos - Entity.GetAbsOrigin(myHero)
 	local cos_theta = vec1:Dot(vec2) / (vec1:Length() * vec2:Length())
 
 	-- make sure dont rotate too rapidly
@@ -87,7 +87,7 @@ function Phoenix.FireSpirit(myHero)
 		local npc = Heroes.Get(i)
 		if not NPC.IsIllusion(npc) and not Entity.IsSameTeam(npc, myHero) then
 			
-			local enemyPos = NPC.GetAbsOrigin(npc)
+			local enemyPos = Entity.GetAbsOrigin(npc)
 			if not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(npc, myHero, Ability.GetCastRange(fireSpirit)) then
 				Ability.CastPosition(fireSpirit, enemyPos)
 				sleep(0.01)

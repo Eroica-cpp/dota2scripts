@@ -35,7 +35,7 @@ function Block.OnDraw()
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
 
-	local pos = NPC.GetAbsOrigin(myHero)
+	local pos = Entity.GetAbsOrigin(myHero)
 	local x, y, visible = Renderer.WorldToScreen(pos)
 	local delta = 30
 	Renderer.SetDrawColor(0, 255, 0, 255)

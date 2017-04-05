@@ -23,7 +23,7 @@ function ForceStaff.OnUpdate()
     local npc = Input.GetNearestUnitToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_BOTH)
     local cursorPos = Input.GetWorldCursorPos()
 
-    if not npc or (NPC.GetAbsOrigin(npc) - cursorPos):Length() > range then
+    if not npc or (Entity.GetAbsOrigin(npc) - cursorPos):Length() > range then
     	Ability.CastTarget(item, myHero)
     	return
     end

@@ -82,7 +82,7 @@ function ItemCooldown.DrawDisplay(hero)
 
 	local slotNum = 9
 	-- draw para
-	local pos = NPC.GetAbsOrigin(hero)
+	local pos = Entity.GetAbsOrigin(hero)
 	local x, y, visible = Renderer.WorldToScreen(pos)
 	local gapX = 50
 	local gapY = 20

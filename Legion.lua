@@ -51,8 +51,8 @@ function Legion.OverwhelmingOdds(myHero)
 	for i = 1, num do
 		for j = i, num do
 			if enemies[i] and enemies[j] then
-				local vec1 = NPC.GetAbsOrigin(enemies[i])
-				local vec2 = NPC.GetAbsOrigin(enemies[j])
+				local vec1 = Entity.GetAbsOrigin(enemies[i])
+				local vec2 = Entity.GetAbsOrigin(enemies[j])
 				local mid = (vec1 + vec2):Scaled(0.5)
 
 				local damage = Legion.GetOverwhelmingDamage(myHero, overwhelming, mid, radius)

@@ -19,7 +19,7 @@ function Nyx.OnPrepareUnitOrders(orders)
 
 	if not orders.target then return true end
 	-- Player.AttackTarget(Players.GetLocal(), myHero, orders.target)
-	-- Ability.CastPosition(impale, NPC.GetAbsOrigin(orders.target))
+	-- Ability.CastPosition(impale, Entity.GetAbsOrigin(orders.target))
 	return true
 end
 

@@ -23,8 +23,8 @@ function Dodge.OnProjectile(projectile)
 
 	local projectile_collision_size = 150
 	local hero_collision_size = 24
-	local vec1 = NPC.GetAbsOrigin(projectile.source)
-	local vec2 = NPC.GetAbsOrigin(projectile.target)
+	local vec1 = Entity.GetAbsOrigin(projectile.source)
+	local vec2 = Entity.GetAbsOrigin(projectile.target)
 	local dis = (vec1 - vec2):Length() - projectile_collision_size - hero_collision_size
 	local delay = math.abs(dis) / (projectile.moveSpeed + 1)
 
@@ -39,7 +39,7 @@ function Dodge.OnLinearProjectileCreate(projectile)
 	if not myHero then return end
 	if not projectile.source or Entity.IsSameTeam(myHero, projectile.source) then return end
 
-	local pos = NPC.GetAbsOrigin(myHero)
+	local pos = Entity.GetAbsOrigin(myHero)
 	local vec1 = pos - projectile.origin
 	local vec2 = projectile.velocity
 	local cos_theta = vec1:Dot(vec2) / (vec1:Length() * vec2:Length())
@@ -64,7 +64,7 @@ function Dodge.OnUnitAnimation(animation)
 	if not myHero then return end
 	if Entity.IsSameTeam(myHero, animation.unit) then return end
 
-	local distance = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(animation.unit)):Length()
+	local distance = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(animation.unit)):Length()
 	local hero_collision_size = 24
 	distance = distance - hero_collision_size
 

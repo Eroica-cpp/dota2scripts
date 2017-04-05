@@ -200,7 +200,7 @@ function AutoUseItems.item_sheepstick(myHero)
 	local target = nil
 	for i, enemy in ipairs(enemyAround) do
 		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy) then
-			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
+			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
 			if dis < minDistance then
 				minDistance = dis
 				target = enemy
@@ -230,7 +230,7 @@ function AutoUseItems.item_orchid(myHero)
 	local target = nil
 	for i, enemy in ipairs(enemyAround) do
 		if Utility.IsEligibleEnemy(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
-			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
+			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
 			if dis < minDistance then
 				minDistance = dis
 				target = enemy
@@ -256,7 +256,7 @@ function AutoUseItems.item_rod_of_atos(myHero)
 	for i, enemy in ipairs(enemyAround) do
 		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy)
 			and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
-			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
+			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
 			if dis < minDistance then
 				minDistance = dis
 				target = enemy
@@ -281,7 +281,7 @@ function AutoUseItems.item_abyssal_blade(myHero)
 	local target = nil
 	for i, enemy in ipairs(enemyAround) do
 		if not NPC.IsIllusion(enemy) and not NPC.IsStunned(enemy) and not Utility.IsLotusProtected(enemy) then
-			local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(enemy)):Length()
+			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
 			if dis < minDistance then
 				minDistance = dis
 				target = enemy

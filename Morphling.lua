@@ -19,7 +19,7 @@ function Morphling.OnPrepareUnitOrders(orders)
 	local castRange = Ability.GetCastRange(orders.ability)
 	if NPC.IsPositionInRange(orders.npc, orders.position, castRange, 0) then return true end
 	
-    local origin = NPC.GetAbsOrigin(orders.npc)
+    local origin = Entity.GetAbsOrigin(orders.npc)
     local dir = orders.position - origin
 
     dir:SetZ(0)
@@ -100,7 +100,7 @@ function Morphling.AutoKill(myHero)
 			local enemyHpLeft = enemyHp - trueStrikeDamage - trueEtherealDamage - trueWaveDamage
 			local hitsLeft = math.ceil(enemyHpLeft / physicalDamage)
 
-			local pos = NPC.GetAbsOrigin(enemy)
+			local pos = Entity.GetAbsOrigin(enemy)
 			local x, y, visible = Renderer.WorldToScreen(pos)
 
 			-- red : can kill; green : cant kill

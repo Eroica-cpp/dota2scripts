@@ -168,7 +168,7 @@ function OutworldDevourer.Awareness(myHero, orb, imprison, ultimate)
 			end
 
 			-- draw
-			local pos = NPC.GetAbsOrigin(enemy)
+			local pos = Entity.GetAbsOrigin(enemy)
 			local x, y, visible = Renderer.WorldToScreen(pos)
 
 			-- red : can kill; green : cant kill

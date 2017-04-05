@@ -76,7 +76,7 @@ function Axe.OnDraw()
 	if not shouldAutoInitiate then return end
 
 	-- draw text when auto initiate key is up
-	local pos = NPC.GetAbsOrigin(myHero)
+	local pos = Entity.GetAbsOrigin(myHero)
 	local x, y, visible = Renderer.WorldToScreen(pos)
 	Renderer.SetDrawColor(0, 255, 0, 255)
 	Renderer.DrawTextCentered(Axe.font, x, y, "Auto", 1)

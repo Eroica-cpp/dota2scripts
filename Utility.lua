@@ -24,18 +24,18 @@ function Utility.BestPosition(unitsAround, radius)
     if not unitsAround or #unitsAround <= 0 then return nil end
     local enemyNum = #unitsAround
 
-	if enemyNum == 1 then return NPC.GetAbsOrigin(unitsAround[1]) end
+	if enemyNum == 1 then return Entity.GetAbsOrigin(unitsAround[1]) end
 
 	-- find all mid points of every two enemy heroes, 
 	-- then find out the best position among these.
 	-- O(n^3) complexity
 	local maxNum = 1
-	local bestPos = NPC.GetAbsOrigin(unitsAround[1])
+	local bestPos = Entity.GetAbsOrigin(unitsAround[1])
 	for i = 1, enemyNum-1 do
 		for j = i+1, enemyNum do
 			if unitsAround[i] and unitsAround[j] then
-				local pos1 = NPC.GetAbsOrigin(unitsAround[i])
-				local pos2 = NPC.GetAbsOrigin(unitsAround[j])
+				local pos1 = Entity.GetAbsOrigin(unitsAround[i])
+				local pos2 = Entity.GetAbsOrigin(unitsAround[j])
 				local mid = pos1:__add(pos2):Scaled(0.5)
 				
 				local heroesNum = 0
@@ -59,7 +59,7 @@ end
 
 -- return predicted position
 function Utility.GetPredictedPosition(npc, delay)
-    local pos = NPC.GetAbsOrigin(npc)
+    local pos = Entity.GetAbsOrigin(npc)
     if not NPC.IsRunning(npc) or not delay then return pos end
 
     local dir = Entity.GetRotation(npc):GetForward():Normalized()

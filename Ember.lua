@@ -61,7 +61,7 @@ function Ember.LifeSteal(myHero)
 		if not Entity.IsDormant(enemy) and not NPC.IsIllusion(enemy) and Entity.IsAlive(enemy)
 			and Entity.GetHealth(enemy) <= true_damage then
 
-			local pos1, pos2 = NPC.GetAbsOrigin(myHero), NPC.GetAbsOrigin(enemy)
+			local pos1, pos2 = Entity.GetAbsOrigin(myHero), Entity.GetAbsOrigin(enemy)
 			if NPC.IsEntityInRange(myHero, enemy, cast_range) then
 				Ability.CastPosition(fist, pos2)
 			else
@@ -90,7 +90,7 @@ function Ember.Dash(myHero)
 	if counter <= 1 then return end
 
 	local pos1 = Input.GetWorldCursorPos()
-	local origin = NPC.GetAbsOrigin(myHero)
+	local origin = Entity.GetAbsOrigin(myHero)
 	local diff = pos1 - origin
 	local pos2 = origin - diff -- fail back position
 	local distance = diff:Length2D()

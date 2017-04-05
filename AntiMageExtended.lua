@@ -50,7 +50,7 @@ function AntiMageExtended.OnDraw()
 			end
 
 			-- draw
-			local pos = NPC.GetAbsOrigin(enemy)
+			local pos = Entity.GetAbsOrigin(enemy)
 			local x, y, visible = Renderer.WorldToScreen(pos)
 
 			-- red : can kill; green : cant kill
@@ -94,7 +94,7 @@ end
 -- 		damage = damageManaVoid * maxManaDiff * magicBlockFactor
 -- 		local hitDamage = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
 -- 		local hitsLeft = math.ceil((enemyHealth - damage) / hitDamage)
--- 		local pos = NPC.GetAbsOrigin(enemy)
+-- 		local pos = Entity.GetAbsOrigin(enemy)
 -- 		local x, y, visible = Renderer.WorldToScreen(pos)
 -- 		Renderer.SetDrawColor(255, 255, 0, 255)
 -- 		Renderer.DrawTextCentered(AntiMageExtended.font, x, y, hitsLeft, 1)	

@@ -114,7 +114,7 @@ function Tinker.OnDraw()
 			local hitsLeft = math.ceil(enemyHealthLeft / (hitDmg + 1))
             local comboLeft = math.ceil(enemyHealth / (laserDmg + missileDmg + dagonDmg + 1))
 
-			local pos = NPC.GetAbsOrigin(enemy)
+			local pos = Entity.GetAbsOrigin(enemy)
 			local x, y, visible = Renderer.WorldToScreen(pos)
 
             local hasRearm = Ability.GetLevel(rearm) > 0
