@@ -1,6 +1,20 @@
 local Utility = {}
 
-Utility.AncientCreepNameList = {"npc_dota_neutral_black_dragon", "npc_dota_neutral_black_drake", "npc_dota_neutral_granite_golem", "npc_dota_neutral_rock_golem", "npc_dota_neutral_thunderhide", "npc_dota_neutral_rumblehide", "npc_dota_neutral_prowler_shaman", "npc_dota_neutral_prowler_acolyte"}
+Utility.AncientCreepNameList = {
+    "npc_dota_neutral_black_drake",
+    "npc_dota_neutral_black_dragon",
+    "npc_dota_neutral_blue_dragonspawn_sorcerer",
+    "npc_dota_neutral_blue_dragonspawn_overseer",
+    "npc_dota_neutral_granite_golem",
+    "npc_dota_neutral_elder_jungle_stalker",
+    "npc_dota_neutral_prowler_acolyte",
+    "npc_dota_neutral_prowler_shaman",
+    "npc_dota_neutral_rock_golem",
+    "npc_dota_neutral_small_thunder_lizard",
+    "npc_dota_neutral_jungle_stalker",
+    "npc_dota_neutral_big_thunder_lizard",
+    "npc_dota_roshan"
+}
 
 -- return best position to cast certain spells 
 -- eg. axe's call, void's chrono, enigma's black hole
@@ -176,16 +190,5 @@ function Utility.IsAncientCreep(npc)
 
     return false
 end
-
--- -- for test only
--- function Utility.OnUpdate()
---     local myHero = Heroes.GetLocal()
---     if not myHero then return end
-
---     local npc = Input.GetNearestUnitToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_BOTH)
---     if not npc then return end
-
---     Log.Write(NPC.GetUnitName(npc) .. " " .. tostring(Utility.IsAncientCreep(npc)))
--- end
 
 return Utility
