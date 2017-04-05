@@ -1,11 +1,12 @@
-local Invoker = {}
+local Utility = require("Utility")
 
-Invoker.autoSunStrikeOption = Menu.AddOption({"Hero Specific", "Invoker Extended"}, "Auto Sun Strike", "On/Off")
+local Invoker = {}
 
 Invoker.optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
 Invoker.optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
 Invoker.optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
 Invoker.optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
+Invoker.optionSunStrike = Menu.AddOption({"Hero Specific", "Invoker"}, "Sun Strike for KS", "auto cast sun strike on predicted position if can kill an enemy")
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -15,13 +16,8 @@ function Invoker.OnUpdate()
     if NPC.HasModifier(myHero, "modifier_teleporting") then return end
     if NPC.IsChannellingAbility(myHero) then return end
 
-    local Q = NPC.GetAbilityByIndex(myHero, 0)
-    local W = NPC.GetAbilityByIndex(myHero, 1)
-    local E = NPC.GetAbilityByIndex(myHero, 2)
-    local R = NPC.GetAbilityByIndex(myHero, 5)
-
-    if Menu.IsEnabled(Invoker.autoSunStrikeOption) then
-        Invoker.AutoSunStrike(myHero, Q, W, E, R)
+    if Menu.IsEnabled(Invoker.optionSunStrike) then
+        Invoker.SunStrike(myHero)
     end    
 
     if Menu.IsEnabled(Invoker.optionMeteorBlastCombo) then
@@ -39,11 +35,6 @@ function Invoker.OnPrepareUnitOrders(orders)
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return true end
     if NPC.HasModifier(myHero, "modifier_teleporting") then return true end
     if NPC.IsChannellingAbility(myHero) then return true end
-
-    local Q = NPC.GetAbilityByIndex(myHero, 0)
-    local W = NPC.GetAbilityByIndex(myHero, 1)
-    local E = NPC.GetAbilityByIndex(myHero, 2)
-    local R = NPC.GetAbilityByIndex(myHero, 5)
     
     if Menu.IsEnabled(Invoker.optionColdSnapCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
         Invoker.ColdSnapCombo(myHero, orders.target)
@@ -165,36 +156,17 @@ function Invoker.MeteorBlastCombo(myHero)
 	end
 end
 
--- To be done
-function Invoker.AutoSunStrike(myHero, Q, W, E, R)
-    if NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
-    
-    local myMana = NPC.GetMana(myHero)
-    local invokeManaCost = NPC.HasItem(myHero, "item_ultimate_scepter", true) and 0 or 60
+-- auto cast sun strike for kill steal
+function Invoker.SunStrike(myHero)
+    local E = NPC.GetAbility(myHero, "invoker_exort")
     local sunstrike = NPC.GetAbility(myHero, "invoker_sun_strike")
-    if not sunstrike then return end
-    
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not E or not sunstrike or not invoke then return end
+    if not Ability.IsCastable(E, 0) or not Ability.IsCastable(sunstrike, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return end
+
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
-
-            local pos = NPC.GetAbsOrigin(enemy)
-
-            -- auto cast sunstrike when enemy is in a fixed position
-            if inFixedPosition(enemy) then
-                if not Invoker.HasInvoked(myHero, sunstrike) and Ability.IsCastable(sunstrike, myMana-invokeManaCost) and Ability.IsCastable(R, myMana) then
-                    Ability.CastNoTarget(E)
-                    Ability.CastNoTarget(E)
-                    Ability.CastNoTarget(E)
-                    Ability.CastNoTarget(R)
-                    Ability.CastPosition(sunstrike, pos)
-                end
-                if Invoker.HasInvoked(myHero, sunstrike)and Ability.IsCastable(sunstrike, myMana) then
-                    Ability.CastPosition(sunstrike, pos)
-                end
-            end
-
-
         end
     end
 
