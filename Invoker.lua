@@ -161,15 +161,30 @@ function Invoker.SunStrike(myHero)
     local E = NPC.GetAbility(myHero, "invoker_exort")
     local sunstrike = NPC.GetAbility(myHero, "invoker_sun_strike")
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    
     if not E or not sunstrike or not invoke then return end
     if not Ability.IsCastable(E, 0) or not Ability.IsCastable(sunstrike, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return end
 
+    local exort_level = Ability.GetLevel(E)
+    if NPC.HasItem(myHero, "item_ultimate_scepter", true) then exort_level = exort_level + 1 end
+    local sunstrike_damage = 100 + 62.5 * (exort_level - 1)
+
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
+    	local enemyHp = Entity.GetHealth(enemy)
+        if enemyHp <= sunstrike_damage and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
+        	
+        	local delay = 1.7 -- sun strike has 1.7s delay
+        	local pos = Utility.GetPredictedPosition(enemy, delay)
+
+		    if not Invoker.HasInvoked(myHero, sunstrike) then
+		    	Invoker.PressKey(myHero, "EEER")
+		    end
+
+        	Ability.CastPosition(sunstrike, pos)
+        	return
         end
     end
-
 end
 
 -- return current instances ("QWE", "QQQ", "EEE", etc)
