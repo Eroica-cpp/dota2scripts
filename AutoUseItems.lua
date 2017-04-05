@@ -5,6 +5,7 @@ local AutoUseItems = {}
 
 AutoUseItems.optionSoulRing = Menu.AddOption({"Item Specific"}, "Soul Ring", "Auto use soul ring before casting spells or items")
 AutoUseItems.optionTomeOfKnowledge = Menu.AddOption({"Item Specific"}, "Tome of Knowledge", "Auto purchase tome of knowledge once available")
+AutoUseItems.optionMidas = Menu.AddOption({"Item Specific"}, "Hand of Midas", "Auto use midas on high XP creeps once available")
 AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, or battle fury to deward")
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
@@ -31,6 +32,10 @@ function AutoUseItems.OnUpdate()
     -- ========================
     if Menu.IsEnabled(AutoUseItems.optionTomeOfKnowledge) then
     	AutoUseItems.item_tome_of_knowledge(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionMidas) then
+    	AutoUseItems.item_hand_of_midas(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionDeward) then
@@ -106,6 +111,22 @@ end
 
 -- auto purchase tome of knowledge once available
 function AutoUseItems.item_tome_of_knowledge(myHero)
+end
+
+-- auto use midas on high XP creeps once available
+function AutoUseItems.item_hand_of_midas(myHero)
+	local item = NPC.GetItem(myHero, "item_hand_of_midas", true)
+	if not item or not Ability.IsCastable(item, 0) then return end
+
+	local range = 600
+	local XP_threshold = 88
+	local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+	for i, npc in ipairs(creeps) do
+		local XP = NPC.GetBountyXP(npc)
+		if NPC.IsCreep(npc) and not Utility.IsAncientCreep(npc) and XP >= XP_threshold then
+			Ability.CastTarget(item, npc)
+		end
+	end
 end
 
 -- Auto use quelling blade, iron talen, or battle fury to deward
