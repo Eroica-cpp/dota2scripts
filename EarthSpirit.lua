@@ -1,8 +1,8 @@
 -- ==================================
 -- File Name : EarthSpirit.lua
 -- Author    : Eroica
--- Version   : 1.1
--- Date      : 2017.4.3
+-- Version   : 1.2
+-- Date      : 2017.4.5
 -- ==================================
 
 local EarthSpirit = {}
@@ -21,24 +21,24 @@ function EarthSpirit.OnPrepareUnitOrders(orders)
     if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return true end
 
     if Menu.IsEnabled(EarthSpirit.optionKick) and Ability.GetName(orders.ability) == "earth_spirit_boulder_smash" then
-        EarthSpirit.KickHelper(myHero, orders.position, orders.target)
+        EarthSpirit.KickHelper(myHero, orders.target)
         return false
     end
 
     if Menu.IsEnabled(EarthSpirit.optionRoll) and Ability.GetName(orders.ability) == "earth_spirit_rolling_boulder" then
-        EarthSpirit.RollHelper(myHero, orders.position)
+        EarthSpirit.RollHelper(myHero)
         return true
     end
 
     if Menu.IsEnabled(EarthSpirit.optionPull) and Ability.GetName(orders.ability) == "earth_spirit_geomagnetic_grip" then
-        EarthSpirit.PullHelper(myHero, orders.position, orders.target)
+        EarthSpirit.PullHelper(myHero, orders.target)
         return true
     end
 
     return true
 end
 
-function EarthSpirit.KickHelper(myHero, pos, target)
+function EarthSpirit.KickHelper(myHero, target)
     if not myHero then return end
 
     local kick = NPC.GetAbility(myHero, "earth_spirit_boulder_smash")
@@ -51,11 +51,9 @@ function EarthSpirit.KickHelper(myHero, pos, target)
             Ability.CastTarget(kick, target)
             return
         end
-
-        -- if targeting a unit, pos will be vector(0.0, 0.0, 0.0)
-        pos = NPC.GetAbsOrigin(target)
     end
 
+    local pos = Input.GetWorldCursorPos()
     local origin = NPC.GetAbsOrigin(myHero)
     local kick_pos = origin + (pos - origin):Normalized():Scaled(100)
 
@@ -69,8 +67,8 @@ function EarthSpirit.KickHelper(myHero, pos, target)
     Ability.CastPosition(kick, kick_pos)
 end
 
-function EarthSpirit.RollHelper(myHero, pos)
-    if not myHero or not pos then return end
+function EarthSpirit.RollHelper(myHero)
+    if not myHero then return end
 
     local stone = NPC.GetAbility(myHero, "earth_spirit_stone_caller")
     if not stone or not Ability.IsCastable(stone, 0) then return end
@@ -78,6 +76,7 @@ function EarthSpirit.RollHelper(myHero, pos)
     -- local mod = NPC.GetModifier(myHero, "modifier_earth_spirit_stone_caller_charge_counter")
     -- if not mod or Modifier.GetStackCount(mod) <= 0 then return end
 
+    local pos = Input.GetWorldCursorPos()
     local origin = NPC.GetAbsOrigin(myHero)
     local dis = (origin - pos):Length()
 
@@ -90,11 +89,13 @@ function EarthSpirit.RollHelper(myHero, pos)
     Ability.CastPosition(stone, place_pos)
 end
 
-function EarthSpirit.PullHelper(myHero, pos, target)
-    if not myHero or not pos or not target then return end
+function EarthSpirit.PullHelper(myHero, target)
+    if not myHero or not target then return end
 
     -- earth spirit can pull ally if has aghs scepter
     if NPC.HasItem(myHero, "item_ultimate_scepter", true) and Entity.IsSameTeam(myHero, target) then return end
+
+    local pos = Input.GetWorldCursorPos()
 
     local radius = 180
     if EarthSpirit.HasStoneInRadius(myHero, pos, radius) then return end
