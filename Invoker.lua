@@ -68,7 +68,12 @@ function Invoker.InstanceHelper(myHero, order)
 
 	-- if about to attack
 	if not NPC.IsAttacking(myHero) and (order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET) then
-		Invoker.PressKey(myHero, "EEE")
+		local E = NPC.GetAbility(myHero, "invoker_exort")
+        if E and Ability.IsCastable(E, 0) then
+            Invoker.PressKey(myHero, "EEE")
+        else
+            Invoker.PressKey(myHero, "WWW")
+        end
 	end
 end
 
