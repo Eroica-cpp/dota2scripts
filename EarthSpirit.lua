@@ -45,7 +45,7 @@ function EarthSpirit.KickHelper(myHero, target)
     if not kick or not Ability.IsCastable(kick, NPC.GetMana(myHero)) then return end
 
     if target and (NPC.IsCreep(target) or NPC.IsHero(target)) then
-        local dis = (NPC.GetAbsOrigin(myHero) - NPC.GetAbsOrigin(target)):Length()
+        local dis = (Entity.GetOrigin(myHero) - Entity.GetOrigin(target)):Length()
         local range = 150
         if dis <= range then
             Ability.CastTarget(kick, target)
@@ -54,7 +54,7 @@ function EarthSpirit.KickHelper(myHero, target)
     end
 
     local pos = Input.GetWorldCursorPos()
-    local origin = NPC.GetAbsOrigin(myHero)
+    local origin = Entity.GetOrigin(myHero)
     local kick_pos = origin + (pos - origin):Normalized():Scaled(100)
 
     if not EarthSpirit.HasStoneInRadius(myHero, kick_pos, 160) and not EarthSpirit.HasStoneInRadius(myHero, origin, 200) then
@@ -77,7 +77,7 @@ function EarthSpirit.RollHelper(myHero)
     -- if not mod or Modifier.GetStackCount(mod) <= 0 then return end
 
     local pos = Input.GetWorldCursorPos()
-    local origin = NPC.GetAbsOrigin(myHero)
+    local origin = Entity.GetOrigin(myHero)
     local dis = (origin - pos):Length()
 
     local default_distance = 600
@@ -104,7 +104,7 @@ function EarthSpirit.PullHelper(myHero, target)
     if not stone or not Ability.IsCastable(stone, 0) then return end
 
     local range = 1100
-    local dis = (NPC.GetAbsOrigin(myHero) - pos):Length()
+    local dis = (Entity.GetOrigin(myHero) - pos):Length()
     if dis > range then return end
 
     Ability.CastPosition(stone, pos)
