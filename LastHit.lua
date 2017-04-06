@@ -31,6 +31,7 @@ function LastHit.OnDraw()
 
 	local myHero = Heroes.GetLocal()
 	if not myHero then return end
+	if not NPC.IsVisible(myHero) then return end
 
 	local radius = 1000
 	local creeps = NPC.GetUnitsInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)

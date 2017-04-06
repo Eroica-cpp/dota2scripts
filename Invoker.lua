@@ -74,8 +74,8 @@ function Invoker.UpdateInvokingStatus(myHero)
         isInvokingSpell = false
     end
 
-    -- if one of Q, W, E, R keys is pressed
-    if Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) then
+    -- if one of Q, W, E, R or F5(ghost walk) is pressed
+    if Input.IsKeyDown(Enum.ButtonCode.KEY_F5) or Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) then
         isInvokingSpell = true
         lastInvokeTime = GameRules.GetGameTime()
     end
