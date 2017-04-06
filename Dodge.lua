@@ -1,4 +1,5 @@
 local Utility = require("Utility")
+local Invoker = require("Invoker")
 
 local Dodge = {}
 
@@ -632,7 +633,7 @@ function Dodge.OnUpdate()
 			local call_range = 300
 			if axe_call and Ability.IsInAbilityPhase(axe_call)
 				and NPC.IsEntityInRange(myHero, enemy, call_range) then
-				Dodge.Update({time = GameRules.GetGameTime(); delay = Ability.GetCastPoint(axe_call)/2; desc = ""})
+				Dodge.Update({time = GameRules.GetGameTime(); delay = Ability.GetCastPoint(axe_call)/2; desc = ""; source = enemy})
 				-- Dodge.DefendWithDelay(Ability.GetCastPoint(axe_call)/2)
 			end
 
@@ -650,7 +651,7 @@ function Dodge.OnUpdate()
 				or (raze_2 and Ability.IsInAbilityPhase(raze_2) and NPC.IsPositionInRange(myHero, pos_2, radius, 0))
 				or (raze_3 and Ability.IsInAbilityPhase(raze_3) and NPC.IsPositionInRange(myHero, pos_3, radius, 0))
 				then
-				Dodge.Update({time = GameRules.GetGameTime(); delay = Ability.GetCastPoint(raze_1)-0.2; desc = ""})
+				Dodge.Update({time = GameRules.GetGameTime(); delay = Ability.GetCastPoint(raze_1)-0.2; desc = ""; source = enemy})
 				-- Dodge.DefendWithDelay(Ability.GetCastPoint(raze_1)/2)
 			end
 
@@ -675,7 +676,7 @@ function Dodge.TaskManagement(myHero)
 
 	-- executeTime - DELTA <= currentTime <= executeTime + DELTA
 	-- Log.Write("exec time: " .. GameRules.GetGameTime())
-	Dodge.Defend(myHero)
+	Dodge.Defend(myHero, info.source)
 end
 
 -- into: {time; delay; desc}
@@ -684,7 +685,7 @@ function Dodge.Update(info)
 	table.insert(msg_queue, info)
 end
 
-function Dodge.Defend(myHero)
+function Dodge.Defend(myHero, source)
 	if not myHero or NPC.IsStunned(myHero) then return end
 	
 	Utility.PopDefensiveItems(myHero)
@@ -765,6 +766,10 @@ function Dodge.Defend(myHero)
 		end
 	end
 
+	-- invoker's spell: tornado -> blast -> cold snap -> etc ...
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
+		Invoker.Defend(myHero, source)
+	end
 end
 
 return Dodge
