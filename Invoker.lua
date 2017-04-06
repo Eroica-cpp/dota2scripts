@@ -51,22 +51,18 @@ function Invoker.OnPrepareUnitOrders(orders)
 
     if Menu.IsEnabled(optionRightClickCombo) and orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
         Invoker.RightClickCombo(myHero, orders.target)
-        return true
     end
     
     if Menu.IsEnabled(optionColdSnapCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
         Invoker.ColdSnapCombo(myHero, orders.target)
-        return true
     end
 
     if Menu.IsEnabled(optionIceWallEMPCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_ice_wall" then
         Invoker.IceWallEMPCombo(myHero)
-        return true
     end
 
     if Menu.IsEnabled(optionInstanceHelper) then
         Invoker.InstanceHelper(myHero, orders.order)
-        return true
     end
 
     return true
@@ -118,7 +114,7 @@ end
 function Invoker.RightClickCombo(myHero, target)
     if not myHero or not target then return end
     if Entity.IsSameTeam(myHero, target) then return end
-    if not NPC.IsHero(target) and not NPC.IsStructure(target) and not NPC.IsRoshan(target) then return end
+    if not NPC.IsHero(target) and not NPC.IsStructure(target) and not NPC.IsRoshan(target) and not Utility.IsAncientCreep(target) then return end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return end
