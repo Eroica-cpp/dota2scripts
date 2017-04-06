@@ -2,6 +2,7 @@ local Utility = require("Utility")
 
 local Invoker = {}
 
+local optionRightClickCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Right Click Combo", "cast cold snap, alacrity or forge spirit when right click enemy hero or building")
 local optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
 local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
 local optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
@@ -47,6 +48,11 @@ function Invoker.OnPrepareUnitOrders(orders)
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return true end
     if NPC.HasModifier(myHero, "modifier_teleporting") then return true end
     if NPC.IsChannellingAbility(myHero) then return true end
+
+    if Menu.IsEnabled(optionRightClickCombo) and orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
+        Invoker.RightClickCombo(myHero, orders.target)
+        return true
+    end
     
     if Menu.IsEnabled(optionColdSnapCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
         Invoker.ColdSnapCombo(myHero, orders.target)
@@ -103,6 +109,49 @@ function Invoker.InstanceHelper(myHero, order)
             Invoker.PressKey(myHero, "WWW")
         end
 	end
+end
+
+-- when attack enemy hero, enemy building, or roshan
+-- combo: right click -> cold snap
+-- combo: right click -> alacrity
+-- combo: right click -> forge spirit
+function Invoker.RightClickCombo(myHero, target)
+    if not myHero or not target then return end
+    if Entity.IsSameTeam(myHero, target) then return end
+    if not NPC.IsHero(target) and not NPC.IsStructure(target) and not NPC.IsRoshan(target) then return end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return end
+
+    -- combo: right click -> cold snap
+    local cold_snap = NPC.GetAbility(myHero, "invoker_cold_snap")
+    if cold_snap and NPC.IsHero(target) and Ability.IsCastable(cold_snap, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
+        if not Invoker.HasInvoked(myHero, cold_snap) then
+            Invoker.PressKey(myHero, "QQQR")
+        end
+        Ability.CastTarget(cold_snap, target)
+        return
+    end
+
+    -- combo: right click -> alacrity
+    local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
+    if alacrity and Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
+        if not Invoker.HasInvoked(myHero, alacrity) then
+            Invoker.PressKey(myHero, "WWER")
+        end
+        Ability.CastTarget(alacrity, myHero)
+        return
+    end
+
+    -- combo: right click -> forge spirit
+    local forge_spirit = NPC.GetAbility(myHero, "invoker_forge_spirit")
+    if forge_spirit and Ability.IsCastable(forge_spirit, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
+        if not Invoker.HasInvoked(myHero, forge_spirit) then
+            Invoker.PressKey(myHero, "QEER")
+        end
+        Ability.CastNoTarget(forge_spirit)
+        return
+    end
 end
 
 -- combo: cold snap -> urn
