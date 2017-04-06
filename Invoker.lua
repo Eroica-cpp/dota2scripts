@@ -201,8 +201,10 @@ function Invoker.MeteorBlastCombo(myHero)
     local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
     local blast = NPC.GetAbility(myHero, "invoker_deafening_blast")
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    
     if not meteor or not blast or not invoke then return end
     if not Ability.IsCastable(blast, NPC.GetMana(myHero) - Ability.GetManaCost(invoke) - Ability.GetManaCost(meteor)) then return end
+    if not Invoker.HasInvoked(myHero, blast) and not Ability.IsCastable(invoke, NPC.GetMana(myHero)) then return end
 
 	-- check nearby enemy who is affected by chaos meteor
 	local pos
@@ -233,6 +235,7 @@ function Invoker.SunStrike(myHero)
     
     if not E or not sunstrike or not invoke then return end
     if not Ability.IsCastable(E, 0) or not Ability.IsCastable(sunstrike, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return end
+    if not Invoker.HasInvoked(myHero, sunstrike) and not Ability.IsCastable(invoke, NPC.GetMana(myHero)) then return end
 
     local exort_level = Ability.GetLevel(E)
     if NPC.HasItem(myHero, "item_ultimate_scepter", true) then exort_level = exort_level + 1 end
