@@ -690,14 +690,25 @@ function Dodge.Update(info)
 		info.delay = 0
 	end
 
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_obsidian_destroyer" then
+		info.delay = info.delay - 0.25 -- imprison has 0.25s castpoint
+	end
+
 	table.insert(msg_queue, info)
 end
 
 function Dodge.Defend(myHero, source)
 	if not myHero or NPC.IsStunned(myHero) then return end
 	
+	-- ===========
+	-- Use Items
+	-- ===========
 	Utility.PopDefensiveItems(myHero)
 
+
+	-- ===========
+	-- Cast Spell
+	-- ===========
 	if NPC.IsSilenced(myHero) then return end
 
 	local myMana = NPC.GetMana(myHero)
@@ -777,6 +788,17 @@ function Dodge.Defend(myHero, source)
 	-- invoker's spell: tornado -> blast -> cold snap -> etc ...
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
 		Invoker.Defend(myHero, source)
+	end
+
+	-- OD's imprison
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_obsidian_destroyer" then
+		local imprison = NPC.GetAbilityByIndex(myHero, 1)
+		if imprison and Ability.IsCastable(imprison, NPC.GetMana(myHero))
+			and source and NPC.IsEntityInRange(source, myHero, Ability.GetCastRange(imprison))
+			and not Utility.IsLotusProtected(source) then
+			
+			Ability.CastTarget(imprison, source)
+		end
 	end
 end
 
