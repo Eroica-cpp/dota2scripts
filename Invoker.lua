@@ -21,12 +21,12 @@ function Invoker.OnUpdate()
 
     Invoker.UpdateInvokingStatus(myHero)
 
-    -- test
-    if Input.IsKeyDown(Enum.ButtonCode.KEY_X) then
-        local source = Input.GetNearestUnitToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
-        Invoker.Defend(myHero, source)
-    end
-    -- test
+    -- -- TEST CODE
+    -- if Input.IsKeyDown(Enum.ButtonCode.KEY_X) then
+    --     local source = Input.GetNearestUnitToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+    --     Invoker.Defend(myHero, source)
+    -- end
+    -- -- TEST CODE
 
     if Menu.IsEnabled(optionSunStrike) then
         Invoker.SunStrike(myHero)
