@@ -705,6 +705,13 @@ function Dodge.Defend(myHero, source)
 	-- ===========
 	Utility.PopDefensiveItems(myHero)
 
+	-- Eul's Scepter
+	local item = NPC.GetItem(myHero, "item_cyclone", true)
+	if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
+		if source and NPC.IsEntityInRange(source, myHero, Ability.GetCastRange(item)) and not Utility.IsLotusProtected(source) then
+			Ability.CastTarget(item, source)
+		end
+	end
 
 	-- ===========
 	-- Cast Spell
