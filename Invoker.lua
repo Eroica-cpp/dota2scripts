@@ -115,6 +115,7 @@ function Invoker.RightClickCombo(myHero, target)
     if not myHero or not target then return end
     if Entity.IsSameTeam(myHero, target) then return end
     if not NPC.IsHero(target) and not NPC.IsStructure(target) and not NPC.IsRoshan(target) and not Utility.IsAncientCreep(target) and not (NPC.IsCreep(target) and NPC.GetBountyXP(target)>=88) then return end
+    if not NPC.IsEntityInRange(myHero, target, NPC.GetAttackRange(myHero)) then return end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return end
