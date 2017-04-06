@@ -21,6 +21,8 @@ function LastHit.OnUpdate()
 	if target2 and Entity.IsAlive(target2) and not Entity.IsDormant(target2) and NPC.IsEntityInRange(myHero, target2, range) then target = target2 end
 	if target1 and Entity.IsAlive(target1) and not Entity.IsDormant(target1) and NPC.IsEntityInRange(myHero, target1, range) then target = target1 end
 
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then Invoker.PressKey(myHero, "EEE") end
+
 	if target then Player.AttackTarget(Players.GetLocal(), myHero, target) end
 end
 
