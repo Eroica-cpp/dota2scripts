@@ -122,31 +122,28 @@ function Invoker.RightClickCombo(myHero, target)
     -- combo: right click -> cold snap
     local cold_snap = NPC.GetAbility(myHero, "invoker_cold_snap")
     if cold_snap and NPC.IsHero(target) and Ability.IsCastable(cold_snap, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
-        if not Invoker.HasInvoked(myHero, cold_snap) then
-            Invoker.PressKey(myHero, "QQQR")
+        if Invoker.HasInvoked(myHero, cold_snap) or Invoker.PressKey(myHero, "QQQR") then
+            Ability.CastTarget(cold_snap, target)
+            return
         end
-        Ability.CastTarget(cold_snap, target)
-        return
     end
 
     -- combo: right click -> alacrity
     local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
     if alacrity and Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
-        if not Invoker.HasInvoked(myHero, alacrity) then
-            Invoker.PressKey(myHero, "WWER")
+        if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
+            Ability.CastTarget(alacrity, myHero)
+            return
         end
-        Ability.CastTarget(alacrity, myHero)
-        return
     end
 
     -- combo: right click -> forge spirit
     local forge_spirit = NPC.GetAbility(myHero, "invoker_forge_spirit")
     if forge_spirit and Ability.IsCastable(forge_spirit, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
-        if not Invoker.HasInvoked(myHero, forge_spirit) then
-            Invoker.PressKey(myHero, "QEER")
+        if Invoker.HasInvoked(myHero, forge_spirit) or Invoker.PressKey(myHero, "QEER") then
+            Ability.CastNoTarget(forge_spirit)
+            return
         end
-        Ability.CastNoTarget(forge_spirit)
-        return
     end
 end
 
@@ -171,11 +168,10 @@ function Invoker.ColdSnapCombo(myHero, target)
     	Invoker.PressKey(myHero, "QQQR")
     end
 
-    if not Invoker.HasInvoked(myHero, alacrity) then
-    	Invoker.PressKey(myHero, "WWER")
+    if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
+    	Ability.CastTarget(alacrity, myHero)
     end
 
-	Ability.CastTarget(alacrity, myHero)
     Invoker.PressKey(myHero, "EEE")
 end
 
@@ -192,13 +188,12 @@ function Invoker.IceWallEMPCombo(myHero)
     	Invoker.PressKey(myHero, "QQER")
     end
 
-    if not Invoker.HasInvoked(myHero, emp) then
-    	Invoker.PressKey(myHero, "WWWR")
-    end
-
     local cursorPos = Input.GetWorldCursorPos()
     local pos = (Entity.GetAbsOrigin(myHero) + cursorPos):Scaled(0.5)
-    Ability.CastPosition(emp, pos)
+
+    if Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR") then
+        Ability.CastPosition(emp, pos)
+    end
 end
 
 -- combo: meteor -> blast
@@ -225,13 +220,9 @@ function Invoker.MeteorBlastCombo(myHero)
     	Invoker.PressKey(myHero, "WEER")
     end
 
-    if not Invoker.HasInvoked(myHero, blast) then
-    	Invoker.PressKey(myHero, "QWER")
+    if Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER") then
+        Ability.CastPosition(blast, pos)
     end
-
-    if Ability.IsCastable(blast, NPC.GetMana(myHero)) then
-	    Ability.CastPosition(blast, pos)
-	end
 end
 
 -- auto cast sun strike for kill steal
@@ -255,12 +246,10 @@ function Invoker.SunStrike(myHero)
         	local delay = 1.7 -- sun strike has 1.7s delay
         	local pos = Utility.GetPredictedPosition(enemy, delay)
 
-		    if not Invoker.HasInvoked(myHero, sunstrike) then
-		    	Invoker.PressKey(myHero, "EEER")
-		    end
-
-        	Ability.CastPosition(sunstrike, pos)
-        	return
+		    if Invoker.HasInvoked(myHero, sunstrike) or Invoker.PressKey(myHero, "EEER") then
+            	Ability.CastPosition(sunstrike, pos)
+            	return
+            end
         end
     end
 end
@@ -282,13 +271,10 @@ function Invoker.Defend(myHero, source)
         local range = 800 + 400 * (level - 1)
 
         if dis <= range then
-
-            if not Invoker.HasInvoked(myHero, tornado) then
-                Invoker.PressKey(myHero, "QWWR")
+            if Invoker.HasInvoked(myHero, tornado) or Invoker.PressKey(myHero, "QWWR") then
+                Ability.CastPosition(tornado, Entity.GetAbsOrigin(source))
+                return
             end
-
-            Ability.CastPosition(tornado, Entity.GetAbsOrigin(source))
-            return
         end
     end
 
@@ -298,12 +284,10 @@ function Invoker.Defend(myHero, source)
         
         local range = 1000
         if dis <= range then
-            if not Invoker.HasInvoked(myHero, blast) then
-                Invoker.PressKey(myHero, "QWER")
+            if Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER") then
+                Ability.CastPosition(blast, Entity.GetAbsOrigin(source))
+                return
             end
-
-            Ability.CastPosition(blast, Entity.GetAbsOrigin(source))
-            return
         end
     end
 
@@ -313,12 +297,10 @@ function Invoker.Defend(myHero, source)
         
         local range = 1000
         if dis <= range then
-            if not Invoker.HasInvoked(myHero, coldSnap) then
-                Invoker.PressKey(myHero, "QQQR")
+            if Invoker.HasInvoked(myHero, coldSnap) or Invoker.PressKey(myHero, "QQQR") then
+                Ability.CastTarget(coldSnap, source)
+                return
             end
-
-            Ability.CastTarget(coldSnap, source)
-            return
         end
     end
 
@@ -328,12 +310,10 @@ function Invoker.Defend(myHero, source)
         
         local range = 500
         if dis <= range then
-            if not Invoker.HasInvoked(myHero, iceWall) then
-                Invoker.PressKey(myHero, "QQER")
+            if Invoker.HasInvoked(myHero, iceWall) or Invoker.PressKey(myHero, "QQER") then
+                Ability.CastNoTarget(iceWall)
+                return
             end
-
-            Ability.CastNoTarget(iceWall)
-            return
         end
     end
 
@@ -343,13 +323,11 @@ function Invoker.Defend(myHero, source)
         
         local range = 950
         if dis <= range then
-            if not Invoker.HasInvoked(myHero, emp) then
-                Invoker.PressKey(myHero, "WWWR")
+            if Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR") then
+                local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(source)):Scaled(0.5)
+                Ability.CastPosition(emp, mid)
+                return
             end
-
-            local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(source)):Scaled(0.5)
-            Ability.CastPosition(emp, mid)
-            return
         end
     end
 end
@@ -385,9 +363,13 @@ function Invoker.HasInvoked(myHero, spell)
     return (spell == spell_1) or (spell == spell_2)
 end
 
+-- return true if all ordered keys have been pressed successfully
+-- return false otherwise
 function Invoker.PressKey(myHero, keys)
-	if not myHero or not keys then return end
-	if Invoker.GetInstances(myHero) == keys then return end
+	if not myHero or not keys then return false end
+	if Invoker.GetInstances(myHero) == keys then return true end
+
+    local pressed_keys = ""
 
     local Q = NPC.GetAbility(myHero, "invoker_quas")
     local W = NPC.GetAbility(myHero, "invoker_wex")
@@ -396,11 +378,13 @@ function Invoker.PressKey(myHero, keys)
 
     for i = 1, #keys do
     	local key = keys:sub(i,i)	
-    	if key == "Q" and Q and Ability.IsCastable(Q, 0) then Ability.CastNoTarget(Q) end
-    	if key == "W" and W and Ability.IsCastable(W, 0) then Ability.CastNoTarget(W) end
-    	if key == "E" and E and Ability.IsCastable(E, 0) then Ability.CastNoTarget(E) end
-    	if key == "R" and R and Ability.IsCastable(R, NPC.GetMana(myHero)) then Ability.CastNoTarget(R) end
+    	if key == "Q" and Q and Ability.IsCastable(Q, 0) then Ability.CastNoTarget(Q); pressed_keys = pressed_keys .. key end
+    	if key == "W" and W and Ability.IsCastable(W, 0) then Ability.CastNoTarget(W); pressed_keys = pressed_keys .. key end
+    	if key == "E" and E and Ability.IsCastable(E, 0) then Ability.CastNoTarget(E); pressed_keys = pressed_keys .. key end
+    	if key == "R" and R and Ability.IsCastable(R, NPC.GetMana(myHero)) then Ability.CastNoTarget(R); pressed_keys = pressed_keys .. key end
     end
+
+    return keys == pressed_keys
 end
 
 return Invoker
