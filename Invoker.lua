@@ -21,6 +21,13 @@ function Invoker.OnUpdate()
 
     Invoker.UpdateInvokingStatus(myHero)
 
+    -- test
+    if Input.IsKeyDown(Enum.ButtonCode.KEY_X) then
+        local source = Input.GetNearestUnitToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+        Invoker.Defend(myHero, source)
+    end
+    -- test
+
     if Menu.IsEnabled(optionSunStrike) then
         Invoker.SunStrike(myHero)
     end    
@@ -213,6 +220,33 @@ function Invoker.SunStrike(myHero)
     end
 end
 
+-- define defensive actions
+function Invoker.Defend(myHero, source)
+    if not myHero or not source then return end
+    local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(source)):Length()
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return end
+    
+    -- 1. use tornado to defend if available
+    local tornado = NPC.GetAbility(myHero, "invoker_tornado")
+    if tornado and Ability.IsCastable(tornado, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
+        
+        local level = Ability.GetLevel(tornado)
+        local range = 800 + 400 * (level - 1)
+
+        if dis <= range then
+
+            if not Invoker.HasInvoked(myHero, tornado) then
+                Invoker.PressKey(myHero, "QWWR")
+            end
+
+            Ability.CastPosition(tornado, Entity.GetAbsOrigin(source))
+            return
+        end
+    end
+end
+
 -- return current instances ("QWE", "QQQ", "EEE", etc)
 function Invoker.GetInstances(myHero)
     local modTable = NPC.GetModifiers(myHero)
@@ -260,16 +294,6 @@ function Invoker.PressKey(myHero, keys)
     	if key == "E" and E and Ability.IsCastable(E, 0) then Ability.CastNoTarget(E) end
     	if key == "R" and R and Ability.IsCastable(R, NPC.GetMana(myHero)) then Ability.CastNoTarget(R) end
     end
-end
-
--- return true if npc is stunned, rooted, duel by LC, etc
-function inFixedPosition(npc)
-    return NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) 
-    or NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED)
-    or NPC.HasModifier(npc, "modifier_legion_commander_duel")
-    or NPC.HasModifier(npc, "modifier_axe_berserkers_call")
-    or NPC.HasModifier(npc, "modifier_faceless_void_chronosphere")
-    or NPC.HasModifier(npc, "modifier_enigma_black_hole_pull")
 end
 
 return Invoker
