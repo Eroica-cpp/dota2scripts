@@ -664,7 +664,7 @@ function Dodge.TaskManagement(myHero)
 	if not msg_queue or #msg_queue <= 0 then return end
 	
 	local info = table.remove(msg_queue, 1)
-	if not info then return end
+	if not info or not info.time or not info.delay then return end
 
 	local currentTime = GameRules.GetGameTime()
 	local diff = info.delay - ERROR -- should consider backswing for specific hero
@@ -675,13 +675,21 @@ function Dodge.TaskManagement(myHero)
 	if currentTime < executeTime - DELTA then Dodge.Update(info) return end
 
 	-- executeTime - DELTA <= currentTime <= executeTime + DELTA
-	-- Log.Write("exec time: " .. GameRules.GetGameTime())
 	Dodge.Defend(myHero, info.source)
 end
 
--- into: {time; delay; desc}
+-- info: {time; delay; desc; source}
 function Dodge.Update(info)
-	if not info or not info.time or not info.delay or not info.desc then return end
+	if not info then return end
+
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+
+	-- no delay for invoker's spells
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
+		info.delay = 0
+	end
+
 	table.insert(msg_queue, info)
 end
 
