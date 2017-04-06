@@ -221,6 +221,7 @@ function Invoker.SunStrike(myHero)
 end
 
 -- define defensive actions
+-- priority: tornado -> blast -> cold snap -> ice wall -> EMP
 function Invoker.Defend(myHero, source)
     if not myHero or not source then return end
     local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(source)):Length()
@@ -242,6 +243,67 @@ function Invoker.Defend(myHero, source)
             end
 
             Ability.CastPosition(tornado, Entity.GetAbsOrigin(source))
+            return
+        end
+    end
+
+    -- 2. use deafening blast to defend if available
+    local blast = NPC.GetAbility(myHero, "invoker_deafening_blast")
+    if blast and Ability.IsCastable(blast, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
+        
+        local range = 1000
+        if dis <= range then
+            if not Invoker.HasInvoked(myHero, blast) then
+                Invoker.PressKey(myHero, "QWER")
+            end
+
+            Ability.CastPosition(blast, Entity.GetAbsOrigin(source))
+            return
+        end
+    end
+
+    -- 3. use cold snap to defend if available
+    local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
+    if coldSnap and Ability.IsCastable(coldSnap, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
+        
+        local range = 1000
+        if dis <= range then
+            if not Invoker.HasInvoked(myHero, coldSnap) then
+                Invoker.PressKey(myHero, "QQQR")
+            end
+
+            Ability.CastTarget(coldSnap, source)
+            return
+        end
+    end
+
+    -- 4. use ice wall to defend if available
+    local iceWall = NPC.GetAbility(myHero, "invoker_ice_wall")
+    if iceWall and Ability.IsCastable(iceWall, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
+        
+        local range = 500
+        if dis <= range then
+            if not Invoker.HasInvoked(myHero, iceWall) then
+                Invoker.PressKey(myHero, "QQER")
+            end
+
+            Ability.CastNoTarget(iceWall)
+            return
+        end
+    end
+
+    -- 5. use EMP to defend if available
+    local emp = NPC.GetAbility(myHero, "invoker_emp")
+    if emp and Ability.IsCastable(emp, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
+        
+        local range = 950
+        if dis <= range then
+            if not Invoker.HasInvoked(myHero, emp) then
+                Invoker.PressKey(myHero, "WWWR")
+            end
+
+            local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(source)):Scaled(0.5)
+            Ability.CastPosition(emp, mid)
             return
         end
     end
