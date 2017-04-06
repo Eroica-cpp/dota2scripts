@@ -2,11 +2,11 @@ local Utility = require("Utility")
 
 local Invoker = {}
 
-Invoker.optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
-Invoker.optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
-Invoker.optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
-Invoker.optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
-Invoker.optionSunStrike = Menu.AddOption({"Hero Specific", "Invoker"}, "Sun Strike for KS", "auto cast sun strike on predicted position if can kill an enemy")
+local optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
+local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
+local optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
+local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
+local optionSunStrike = Menu.AddOption({"Hero Specific", "Invoker"}, "Sun Strike for KS", "auto cast sun strike on predicted position if can kill an enemy")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -21,11 +21,11 @@ function Invoker.OnUpdate()
 
     Invoker.UpdateInvokingStatus(myHero)
 
-    if Menu.IsEnabled(Invoker.optionSunStrike) then
+    if Menu.IsEnabled(optionSunStrike) then
         Invoker.SunStrike(myHero)
     end    
 
-    if Menu.IsEnabled(Invoker.optionMeteorBlastCombo) then
+    if Menu.IsEnabled(optionMeteorBlastCombo) then
         Invoker.MeteorBlastCombo(myHero)
     end
 end
@@ -41,17 +41,17 @@ function Invoker.OnPrepareUnitOrders(orders)
     if NPC.HasModifier(myHero, "modifier_teleporting") then return true end
     if NPC.IsChannellingAbility(myHero) then return true end
     
-    if Menu.IsEnabled(Invoker.optionColdSnapCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
+    if Menu.IsEnabled(optionColdSnapCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
         Invoker.ColdSnapCombo(myHero, orders.target)
         return true
     end
 
-    if Menu.IsEnabled(Invoker.optionIceWallEMPCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_ice_wall" then
+    if Menu.IsEnabled(optionIceWallEMPCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_ice_wall" then
         Invoker.IceWallEMPCombo(myHero)
         return true
     end
 
-    if Menu.IsEnabled(Invoker.optionInstanceHelper) then
+    if Menu.IsEnabled(optionInstanceHelper) then
         Invoker.InstanceHelper(myHero, orders.order)
         return true
     end
