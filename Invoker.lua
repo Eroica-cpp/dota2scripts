@@ -7,7 +7,7 @@ local optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold S
 local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
 local optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
 local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
-local optionSunStrike = Menu.AddOption({"Hero Specific", "Invoker"}, "Sun Strike for KS", "auto cast sun strike on predicted position if can kill an enemy")
+local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -29,8 +29,8 @@ function Invoker.OnUpdate()
     -- end
     -- -- TEST CODE
 
-    if Menu.IsEnabled(optionSunStrike) then
-        Invoker.SunStrike(myHero)
+    if Menu.IsEnabled(optionKillSteal) then
+        Invoker.KillSteal(myHero)
     end    
 
     if Menu.IsEnabled(optionMeteorBlastCombo) then
@@ -212,8 +212,8 @@ function Invoker.MeteorBlastCombo(myHero)
     end
 end
 
--- auto cast sun strike for kill steal
-function Invoker.SunStrike(myHero)
+-- auto cast deafening blast, tornado or sun strike to predicted position for kill steal
+function Invoker.KillSteal(myHero)
     local E = NPC.GetAbility(myHero, "invoker_exort")
     if not E or not Ability.IsCastable(E, 0) then return end
 
