@@ -215,12 +215,7 @@ end
 -- auto cast sun strike for kill steal
 function Invoker.SunStrike(myHero)
     local E = NPC.GetAbility(myHero, "invoker_exort")
-    local sunstrike = NPC.GetAbility(myHero, "invoker_sun_strike")
-    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
-    
-    if not E or not sunstrike or not invoke then return end
-    if not Ability.IsCastable(E, 0) or not Ability.IsCastable(sunstrike, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return end
-    if not Invoker.HasInvoked(myHero, sunstrike) and not Ability.IsCastable(invoke, NPC.GetMana(myHero)) then return end
+    if not E or not Ability.IsCastable(E, 0) then return end
 
     local exort_level = Ability.GetLevel(E)
     if NPC.HasItem(myHero, "item_ultimate_scepter", true) then exort_level = exort_level + 1 end
@@ -233,11 +228,7 @@ function Invoker.SunStrike(myHero)
         	
         	local delay = 1.7 -- sun strike has 1.7s delay
         	local pos = Utility.GetPredictedPosition(enemy, delay)
-
-		    if Invoker.HasInvoked(myHero, sunstrike) or Invoker.PressKey(myHero, "EEER") then
-            	Ability.CastPosition(sunstrike, pos)
-            	return
-            end
+            if Invoker.CastSunStrike(myHero, pos) then return end
         end
     end
 end
@@ -416,6 +407,19 @@ end
 
 -- return true if successfully cast, false otherwise
 function Invoker.CastSunStrike(myHero, pos)
+    if not myHero or not pos then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+    
+    local sun_strike = NPC.GetAbility(myHero, "invoker_sun_strike")
+    if not sun_strike or not Ability.IsCastable(sun_strike, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
+
+    if Invoker.HasInvoked(myHero, sun_strike) or Invoker.PressKey(myHero, "EEER") then
+        Ability.CastPosition(sun_strike, pos)
+        return true
+    end
+
     return false
 end
 
