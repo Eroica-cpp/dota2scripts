@@ -114,39 +114,22 @@ end
 function Invoker.RightClickCombo(myHero, target)
     if not myHero or not target then return end
     if Entity.IsSameTeam(myHero, target) then return end
-    if not NPC.IsHero(target) and not NPC.IsStructure(target) and not NPC.IsRoshan(target) and not Utility.IsAncientCreep(target) and not (NPC.IsCreep(target) and NPC.GetBountyXP(target)>=88) then return end
     if not NPC.IsEntityInRange(myHero, target, NPC.GetAttackRange(myHero)) then return end
 
-    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
-    if not invoke then return end
-
-    -- combo: right click -> cold snap
-    -- cast one enemy hero or roshan
-    local cold_snap = NPC.GetAbility(myHero, "invoker_cold_snap")
-    if cold_snap and (NPC.IsHero(target) or NPC.IsRoshan(target)) and Ability.IsCastable(cold_snap, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
-        if Invoker.HasInvoked(myHero, cold_snap) or Invoker.PressKey(myHero, "QQQR") then
-            Ability.CastTarget(cold_snap, target)
-            return
-        end
+    if NPC.IsHero(target) or NPC.IsRoshan(target) then
+        -- combo: right click -> cold snap
+        if Invoker.CastColdSnap(myHero, target) then return end
     end
 
-    -- combo: right click -> alacrity
-    local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
-    if alacrity and Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
-        if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
-            Ability.CastTarget(alacrity, myHero)
-            return
-        end
+    if NPC.IsHero(target) or NPC.IsRoshan(target) or NPC.IsStructure(target) or Utility.IsAncientCreep(target) or (NPC.IsCreep(target) and NPC.GetBountyXP(target)>=88) then
+    
+        -- combo: right click -> alacrity
+        if Invoker.CastAlacrity(myHero, myHero) then return end
+
+        -- combo: right click -> forge spirit
+        if Invoker.CastForgeSpirit(myHero) then return end
     end
 
-    -- combo: right click -> forge spirit
-    local forge_spirit = NPC.GetAbility(myHero, "invoker_forge_spirit")
-    if forge_spirit and Ability.IsCastable(forge_spirit, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then
-        if Invoker.HasInvoked(myHero, forge_spirit) or Invoker.PressKey(myHero, "QEER") then
-            Ability.CastNoTarget(forge_spirit)
-            return
-        end
-    end
 end
 
 -- combo: cold snap -> urn
@@ -403,7 +386,7 @@ function Invoker.CastAlacrity(myHero, target)
     if not invoke then return false end
 
     local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
-    if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then false end
+    if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
         
     if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
         Ability.CastTarget(alacrity, myHero)
