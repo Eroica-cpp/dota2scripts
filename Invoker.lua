@@ -302,10 +302,18 @@ function Invoker.CastTornado(myHero, pos)
     local tornado = NPC.GetAbility(myHero, "invoker_tornado")
     if not tornado or not Ability.IsCastable(tornado, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
     
-    local level = Ability.GetLevel(tornado)
-    local range = 800 + 400 * (level - 1)
-    local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
-    if dis > range then return false end
+    local W = NPC.GetAbility(myHero, "invoker_wex")
+    if not W or not Ability.IsCastable(W, 0) then return false end
+
+    local level = Ability.GetLevel(W)
+    local range = 2000
+    local travel_distance = 800 + 400 * (level - 1)
+
+    local dir = pos - Entity.GetAbsOrigin(myHero)
+    local dis = dir:Length()
+    
+    if dis > travel_distance then return false end
+    if dis > range then pos = Entity.GetAbsOrigin(myHero) + dir:Scaled(range/dis) end
 
     if Invoker.HasInvoked(myHero, tornado) or Invoker.PressKey(myHero, "QWWR") then
         Ability.CastPosition(tornado, pos)
