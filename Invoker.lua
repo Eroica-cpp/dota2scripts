@@ -269,32 +269,10 @@ function Invoker.Defend(myHero, source)
     if not invoke then return end
     
     -- 1. use tornado to defend if available
-    local tornado = NPC.GetAbility(myHero, "invoker_tornado")
-    if tornado and Ability.IsCastable(tornado, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
-        
-        local level = Ability.GetLevel(tornado)
-        local range = 800 + 400 * (level - 1)
-
-        if dis <= range then
-            if Invoker.HasInvoked(myHero, tornado) or Invoker.PressKey(myHero, "QWWR") then
-                Ability.CastPosition(tornado, Entity.GetAbsOrigin(source))
-                return
-            end
-        end
-    end
+    if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(source)) then return end
 
     -- 2. use deafening blast to defend if available
-    local blast = NPC.GetAbility(myHero, "invoker_deafening_blast")
-    if blast and Ability.IsCastable(blast, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
-        
-        local range = 1000
-        if dis <= range then
-            if Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER") then
-                Ability.CastPosition(blast, Entity.GetAbsOrigin(source))
-                return
-            end
-        end
-    end
+    if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(source)) then return end
 
     -- 3. use cold snap to defend if available
     local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
@@ -335,6 +313,53 @@ function Invoker.Defend(myHero, source)
             end
         end
     end
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastTornado(myHero, pos)
+    if not myHero or not pos then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local tornado = NPC.GetAbility(myHero, "invoker_tornado")
+    if not tornado or not Ability.IsCastable(tornado, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
+    
+    local level = Ability.GetLevel(tornado)
+    local range = 800 + 400 * (level - 1)
+    local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
+
+    if dis > range then return false end
+
+    if Invoker.HasInvoked(myHero, tornado) or Invoker.PressKey(myHero, "QWWR") then
+        Ability.CastPosition(tornado, pos)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastDeafeningBlast(myHero, pos)
+    if not myHero or not pos then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local blast = NPC.GetAbility(myHero, "invoker_deafening_blast")
+    if not blast or not Ability.IsCastable(blast, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
+
+    local range = 1000
+    local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
+    
+    if dis > range then return false end
+
+    if Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER") then
+        Ability.CastPosition(blast, Entity.GetAbsOrigin(source))
+        return true
+    end
+
+    return false
 end
 
 -- return current instances ("QWE", "QQQ", "EEE", etc)
