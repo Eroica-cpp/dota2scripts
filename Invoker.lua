@@ -263,10 +263,6 @@ end
 -- priority: tornado -> blast -> cold snap -> ice wall -> EMP
 function Invoker.Defend(myHero, source)
     if not myHero or not source then return end
-    local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(source)):Length()
-
-    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
-    if not invoke then return end
     
     -- 1. use tornado to defend if available
     if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(source)) then return end
@@ -278,31 +274,12 @@ function Invoker.Defend(myHero, source)
     if Invoker.CastColdSnap(myHero, source) then return end
 
     -- 4. use ice wall to defend if available
-    local iceWall = NPC.GetAbility(myHero, "invoker_ice_wall")
-    if iceWall and Ability.IsCastable(iceWall, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
-        
-        local range = 500
-        if dis <= range then
-            if Invoker.HasInvoked(myHero, iceWall) or Invoker.PressKey(myHero, "QQER") then
-                Ability.CastNoTarget(iceWall)
-                return
-            end
-        end
-    end
+    if Invoker.CastIceWall(myHero) then return end
 
     -- 5. use EMP to defend if available
-    local emp = NPC.GetAbility(myHero, "invoker_emp")
-    if emp and Ability.IsCastable(emp, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
-        
-        local range = 950
-        if dis <= range then
-            if Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR") then
-                local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(source)):Scaled(0.5)
-                Ability.CastPosition(emp, mid)
-                return
-            end
-        end
-    end
+    local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(source)):Scaled(0.5)
+    if Invoker.CastEMP(myHero, mid) then return end
+
 end
 
 -- return true if successfully cast, false otherwise
@@ -370,6 +347,47 @@ function Invoker.CastColdSnap(myHero, target)
 
     if Invoker.HasInvoked(myHero, cold_snap) or Invoker.PressKey(myHero, "QQQR") then
         Ability.CastTarget(cold_snap, target)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastIceWall(myHero)
+    if not myHero then return false end
+    if not NPC.IsVisible(myHero) then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local ice_wall = NPC.GetAbility(myHero, "invoker_ice_wall")
+    if not ice_wall or not Ability.IsCastable(ice_wall, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
+        
+    if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
+        Ability.CastNoTarget(ice_wall)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastEMP(myHero, pos)
+    if not myHero or not pos then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local emp = NPC.GetAbility(myHero, "invoker_emp")
+    if not emp or not Ability.IsCastable(emp, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
+
+    local range = 950
+    local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
+    if dis > range then return false end
+        
+    if Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR") then
+        Ability.CastPosition(emp, pos)
         return true
     end
 
