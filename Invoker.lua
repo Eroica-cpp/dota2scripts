@@ -214,21 +214,57 @@ end
 
 -- auto cast deafening blast, tornado or sun strike to predicted position for kill steal
 function Invoker.KillSteal(myHero)
-    local E = NPC.GetAbility(myHero, "invoker_exort")
-    if not E or not Ability.IsCastable(E, 0) then return end
+    if not myHero then return end
 
-    local exort_level = Ability.GetLevel(E)
-    if NPC.HasItem(myHero, "item_ultimate_scepter", true) then exort_level = exort_level + 1 end
-    local sunstrike_damage = 100 + 62.5 * (exort_level - 1)
+    local Q = NPC.GetAbility(myHero, "invoker_quas")
+    local W = NPC.GetAbility(myHero, "invoker_wex")
+    local E = NPC.GetAbility(myHero, "invoker_exort")
+    if not Q or not W or not E then return end
+
+    local Q_level = Ability.GetLevel(Q)
+    local W_level = Ability.GetLevel(W)
+    local E_level = Ability.GetLevel(E)
+
+    if NPC.HasItem(myHero, "item_ultimate_scepter", true) then 
+        Q_level = Q_level + 1
+        W_level = W_level + 1
+        E_level = E_level + 1
+    end
+
+    local damage_tornado = 45 * W_level
+    local damage_deafening_blast = 40 * E_level
+    local damage_sun_strike = 100 + 62.5 * (E_level - 1)
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-    	local enemyHp = Entity.GetHealth(enemy)
-        if enemyHp <= sunstrike_damage and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
-        	
-        	local delay = 1.7 -- sun strike has 1.7s delay
-        	local pos = Utility.GetPredictedPosition(enemy, delay)
-            if Invoker.CastSunStrike(myHero, pos) then return end
+        if not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
+            
+        	local enemyHp = Entity.GetHealth(enemy)
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            local multiplier = NPC.GetMagicalArmorDamageMultiplier(enemy)
+
+            -- cast tornado to KS
+            if enemyHp <= damage_tornado * multiplier then
+                local speed = 1000
+                local delay = dis / (speed + 1)
+                local pos = Utility.GetPredictedPosition(enemy, delay)
+                if Invoker.CastTornado(myHero, pos) then return end
+            end
+
+            -- cast deafening blast to KS
+            if enemyHp <= damage_deafening_blast * multiplier then
+                local speed = 1100
+                local delay = dis / (speed + 1)
+                local pos = Utility.GetPredictedPosition(enemy, delay)
+                if Invoker.CastDeafeningBlast(myHero, pos) then return end
+            end
+
+            -- cast sun strike to KS
+            if enemyHp <= damage_sun_strike then
+            	local delay = 1.7 -- sun strike has 1.7s delay
+            	local pos = Utility.GetPredictedPosition(enemy, delay)
+                if Invoker.CastSunStrike(myHero, pos) then return end
+            end
         end
     end
 end
