@@ -298,6 +298,9 @@ function Invoker.Interrupt(myHero)
 
             -- cast sun strike as follow up
             if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return end
+
+            -- cast chaos meteor as follow up
+            if Invoker.CastChaosMeteor(myHero, Entity.GetAbsOrigin(enemy)) then return end
         end
     end
 end
@@ -514,6 +517,28 @@ function Invoker.CastSunStrike(myHero, pos)
 
     if Invoker.HasInvoked(myHero, sun_strike) or Invoker.PressKey(myHero, "EEER") then
         Ability.CastPosition(sun_strike, pos)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastChaosMeteor(myHero, pos)
+    if not myHero or not pos then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+    
+    local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
+    if not meteor or not Ability.IsCastable(meteor, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
+
+    local range = 700
+    local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
+    if dis > range then return false end
+
+    if Invoker.HasInvoked(myHero, meteor) or Invoker.PressKey(myHero, "WEER") then
+        Ability.CastPosition(meteor, pos)
         return true
     end
 
