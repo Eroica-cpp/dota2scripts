@@ -60,6 +60,7 @@ end
 -- return predicted position
 function Utility.GetPredictedPosition(npc, delay)
     local pos = Entity.GetAbsOrigin(npc)
+    if Utility.InFixedPosition(npc) then return pos end
     if not NPC.IsRunning(npc) or not delay then return pos end
 
     local dir = Entity.GetRotation(npc):GetForward():Normalized()
