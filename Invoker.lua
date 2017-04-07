@@ -394,6 +394,48 @@ function Invoker.CastEMP(myHero, pos)
     return false
 end
 
+-- return true if successfully cast, false otherwise
+function Invoker.CastAlacrity(myHero, target)
+    if not myHero or not target then return false end
+    if not Entity.IsSameTeam(myHero, target) then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
+    if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then false end
+        
+    if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
+        Ability.CastTarget(alacrity, myHero)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastForgeSpirit(myHero)
+    if not myHero then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local forge_spirit = NPC.GetAbility(myHero, "invoker_forge_spirit")
+    if not forge_spirit or not Ability.IsCastable(forge_spirit, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
+        
+    if Invoker.HasInvoked(myHero, forge_spirit) or Invoker.PressKey(myHero, "QEER") then
+        Ability.CastNoTarget(forge_spirit)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastSunStrike(myHero, pos)
+    return false
+end
+
 -- return current instances ("QWE", "QQQ", "EEE", etc)
 function Invoker.GetInstances(myHero)
     local modTable = NPC.GetModifiers(myHero)
