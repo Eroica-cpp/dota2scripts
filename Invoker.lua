@@ -318,7 +318,7 @@ function Invoker.FixedPositionCombo(myHero)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
-            and Invoker.InFixedPosition(enemy) then
+            and Utility.InFixedPosition(enemy) then
 
             -- cast sun strike on stunned/rooted enemy
             if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return end
@@ -614,16 +614,6 @@ function Invoker.PressKey(myHero, keys)
     end
 
     return keys == pressed_keys
-end
-
-function Invoker.InFixedPosition(npc)
-    if not npc then return false end
-
-    if NPC.IsStunned(npc) or NPC.IsRooted(npc) then return true end
-    if NPC.HasModifier(npc, "modifier_axe_berserkers_call") then return true end
-    if NPC.HasModifier(npc, "modifier_legion_commander_duel") then return true end
-
-    return false
 end
 
 return Invoker
