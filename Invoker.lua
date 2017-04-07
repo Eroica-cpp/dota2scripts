@@ -244,7 +244,7 @@ function Invoker.KillSteal(myHero)
             local multiplier = NPC.GetMagicalArmorDamageMultiplier(enemy)
 
             -- cast tornado to KS
-            if enemyHp <= damage_tornado * multiplier then
+            if enemyHp <= damage_tornado * multiplier and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
                 local speed = 1000
                 local delay = dis / (speed + 1)
                 local pos = Utility.GetPredictedPosition(enemy, delay)
@@ -252,7 +252,7 @@ function Invoker.KillSteal(myHero)
             end
 
             -- cast deafening blast to KS
-            if enemyHp <= damage_deafening_blast * multiplier then
+            if enemyHp <= damage_deafening_blast * multiplier and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
                 local speed = 1100
                 local delay = dis / (speed + 1)
                 local pos = Utility.GetPredictedPosition(enemy, delay)
@@ -260,7 +260,7 @@ function Invoker.KillSteal(myHero)
             end
 
             -- cast sun strike to KS
-            if enemyHp <= damage_sun_strike then
+            if enemyHp <= damage_sun_strike and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
             	local delay = 1.7 -- sun strike has 1.7s delay
             	local pos = Utility.GetPredictedPosition(enemy, delay)
                 if Invoker.CastSunStrike(myHero, pos) then return end
