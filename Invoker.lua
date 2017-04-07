@@ -275,17 +275,7 @@ function Invoker.Defend(myHero, source)
     if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(source)) then return end
 
     -- 3. use cold snap to defend if available
-    local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
-    if coldSnap and Ability.IsCastable(coldSnap, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then
-        
-        local range = 1000
-        if dis <= range then
-            if Invoker.HasInvoked(myHero, coldSnap) or Invoker.PressKey(myHero, "QQQR") then
-                Ability.CastTarget(coldSnap, source)
-                return
-            end
-        end
-    end
+    if Invoker.CastColdSnap(myHero, source) then return end
 
     -- 4. use ice wall to defend if available
     local iceWall = NPC.GetAbility(myHero, "invoker_ice_wall")
@@ -328,7 +318,6 @@ function Invoker.CastTornado(myHero, pos)
     local level = Ability.GetLevel(tornado)
     local range = 800 + 400 * (level - 1)
     local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
-
     if dis > range then return false end
 
     if Invoker.HasInvoked(myHero, tornado) or Invoker.PressKey(myHero, "QWWR") then
@@ -351,11 +340,36 @@ function Invoker.CastDeafeningBlast(myHero, pos)
 
     local range = 1000
     local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
-    
     if dis > range then return false end
 
     if Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER") then
-        Ability.CastPosition(blast, Entity.GetAbsOrigin(source))
+        Ability.CastPosition(blast, pos)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastColdSnap(myHero, target)
+    if not myHero or not target then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local cold_snap = NPC.GetAbility(myHero, "invoker_cold_snap")
+    if not cold_snap or not Ability.IsCastable(cold_snap, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
+        
+    local range = 1000
+    local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(target)):Length()
+    if dis > range then return false end
+
+    if NPC.IsStructure(target) or not NPC.IsKillable(target) then return false end
+    if NPC.HasState(target, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
+    if NPC.HasState(target, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
+
+    if Invoker.HasInvoked(myHero, cold_snap) or Invoker.PressKey(myHero, "QQQR") then
+        Ability.CastTarget(cold_snap, target)
         return true
     end
 
