@@ -9,6 +9,7 @@ local optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice 
 local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
+local optionStunCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Stun/Root Combo", "Auto cast sun strike, deafening blast, EMP on stunned/rooted enemy if possible")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -36,6 +37,10 @@ function Invoker.OnUpdate()
 
     if Menu.IsEnabled(optionInterrupt) then
         Invoker.Interrupt(myHero)
+    end  
+
+    if Menu.IsEnabled(optionStunCombo) then
+        Invoker.StunCombo(myHero)
     end  
 
     if Menu.IsEnabled(optionMeteorBlastCombo) then
@@ -280,7 +285,7 @@ function Invoker.Interrupt(myHero)
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        if enemy and not Entity.IsSameTeam(myHero, enemy) 
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
             and (NPC.IsChannellingAbility(enemy) or NPC.HasModifier(enemy, "modifier_teleporting")) then
@@ -290,6 +295,29 @@ function Invoker.Interrupt(myHero)
 
             -- cast tornado to interrupt
             if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
+
+            -- cast sun strike as follow up
+            if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return end
+        end
+    end
+end
+
+-- Auto cast sun strike, deafening blast, EMP on stunned/rooted enemy if possible
+function Invoker.StunCombo(myHero)
+    if not myHero then return end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy)
+            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
+            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
+            and (NPC.IsStunned(enemy) or NPC.IsRooted(enemy)) then
+
+            -- cast cold snap to interrupt
+            -- if Invoker.CastColdSnap(myHero, enemy) then return end
+
+            -- cast tornado to interrupt
+            -- if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
         end
     end
 end
