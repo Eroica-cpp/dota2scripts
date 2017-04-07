@@ -8,6 +8,7 @@ local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Met
 local optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
 local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
+local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -32,6 +33,10 @@ function Invoker.OnUpdate()
     if Menu.IsEnabled(optionKillSteal) then
         Invoker.KillSteal(myHero)
     end    
+
+    if Menu.IsEnabled(optionInterrupt) then
+        Invoker.Interrupt(myHero)
+    end  
 
     if Menu.IsEnabled(optionMeteorBlastCombo) then
         Invoker.MeteorBlastCombo(myHero)
@@ -265,6 +270,26 @@ function Invoker.KillSteal(myHero)
             	local pos = Utility.GetPredictedPosition(enemy, delay)
                 if Invoker.CastSunStrike(myHero, pos) then return end
             end
+        end
+    end
+end
+
+-- Auto interrupt enemy's tp or channelling spell with tornado or cold snap
+function Invoker.Interrupt(myHero)
+    if not myHero then return end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) 
+            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
+            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
+            and (NPC.IsChannellingAbility(enemy) or NPC.HasModifier(enemy, "modifier_teleporting")) then
+
+            -- cast cold snap to interrupt
+            if Invoker.CastColdSnap(myHero, enemy) then return end
+
+            -- cast tornado to interrupt
+            if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
         end
     end
 end
