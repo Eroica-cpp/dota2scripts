@@ -195,7 +195,7 @@ end
 function Utility.InFixedPosition(npc)
     if not npc then return false end
 
-    if NPC.IsStunned(npc) or NPC.IsRooted(npc) then return true end
+    if NPC.IsRooted(npc) or Utility.GetStunTimeLeft(npc) >= 1 then return true end
     if NPC.HasModifier(npc, "modifier_axe_berserkers_call") then return true end
     if NPC.HasModifier(npc, "modifier_legion_commander_duel") then return true end
 
