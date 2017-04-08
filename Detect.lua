@@ -1,9 +1,15 @@
-local Alert = {}
+local Detect = {}
 
-local option = Menu.AddOption({ "Awareness" }, "Alert", "Alerts you when certain abilities are used.")
+local option = Menu.AddOption({ "Awareness" }, "Detect", "Alerts you when certain abilities are used.")
 
-Alert.heroEvents = 
+Detect.heroEvents = 
 {
+    {  
+        name = "damage_flash",
+        msg = "hero right click",
+        duration = 1,
+        unique = false
+    },
     {  
         name = "nyx_assassin_vendetta_start",
         msg = "Nyx has used Vendetta",
@@ -18,7 +24,7 @@ Alert.heroEvents =
     }
 }
 
-Alert.teamEvents =
+Detect.teamEvents =
 {
     -- unique because this particle gets created for every enemy team hero.
     {  
@@ -29,12 +35,13 @@ Alert.teamEvents =
     }
 }
 
-local alert_msg = {}
+local msg = {}
 
-function Alert.OnParticleCreate(particle)
+function Detect.OnParticleCreate(particle)
     if not Menu.IsEnabled(option) or not particle then return end
 
     --Log.Write(particle.name .. "=" .. string.format("0x%x", particle.particleNameIndex))
+    Log.Write(particle.name .. " " .. tostring(particle.position))
 end
 
-return Alert
+return Detect
