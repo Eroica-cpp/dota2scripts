@@ -57,6 +57,7 @@ end
 -- Returns true if an alert was created (or an existing one was extended), false otherwise.
 function AbilityAlert.InsertTeamSpecific(particle)
     local myHero = Heroes.GetLocal()
+    if not myHero then return false end
 
     if particle.entity == nil then return end
     if Entity.IsSameTeam(myHero, particle.entity) then return end
