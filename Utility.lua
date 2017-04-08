@@ -202,4 +202,26 @@ function Utility.InFixedPosition(npc)
     return false
 end
 
+-- only able to get stun modifier. no specific modifier for root or hex.
+function Utility.GetStunTimeLeft(npc)
+    local mod = NPC.GetModifier(npc, "modifier_stunned")
+    if not mod then return 0 end
+    return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
+end
+
+-- hex only has three types: sheepstick, lion's hex, shadow shaman's hex
+function Utility.GetHexTimeLeft(npc)
+    local mod
+    local mod1 = NPC.GetModifier(npc, "modifier_sheepstick_debuff")
+    local mod2 = NPC.GetModifier(npc, "modifier_lion_voodoo")
+    local mod3 = NPC.GetModifier(npc, "modifier_shadow_shaman_voodoo")
+
+    if mod1 then mod = mod1 end
+    if mod2 then mod = mod2 end
+    if mod3 then mod = mod3 end
+
+    if not mod then return 0 end
+    return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
+end
+
 return Utility
