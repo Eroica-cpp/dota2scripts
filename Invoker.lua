@@ -17,7 +17,7 @@ local lastInvokeTime = 0
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
-	if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return end
+	if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
     if NPC.HasModifier(myHero, "modifier_teleporting") then return end
     if NPC.IsChannellingAbility(myHero) then return end
@@ -310,6 +310,7 @@ function Invoker.Interrupt(myHero)
 end
 
 -- Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible
+-- priority: chaos meteor -> EMP -> sun strike
 function Invoker.FixedPositionCombo(myHero)
     if not myHero then return end
 
@@ -320,14 +321,14 @@ function Invoker.FixedPositionCombo(myHero)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
             and Utility.InFixedPosition(enemy) then
 
-            -- cast sun strike on stunned/rooted enemy
-            if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return end
-
             -- cast chaos meteor on stunned/rooted enemy
             if Invoker.CastChaosMeteor(myHero, Entity.GetAbsOrigin(enemy)) then return end
 
             -- cast EMP on stunned/rooted enemy
             if Invoker.CastEMP(myHero, Entity.GetAbsOrigin(enemy)) then return end
+
+            -- cast sun strike on stunned/rooted enemy
+            if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return end
 
         end
     end
