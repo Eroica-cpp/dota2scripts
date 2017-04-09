@@ -300,6 +300,9 @@ function Invoker.OnParticleUpdate(particle)
     if NPC.IsChannellingAbility(myHero) then return end
 
     -- have to make sure this tp particle is not from teammate
+    if not particle.position or particle.position:Length() <= 2 then return end
+    local allies = NPCs.InRadius(particle.position, 50, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
+    if allies and #allies > 0 then return end
     
     if Invoker.CastTornado(myHero, particle.position) then return end
 
