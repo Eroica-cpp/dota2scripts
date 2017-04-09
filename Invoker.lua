@@ -279,6 +279,33 @@ function Invoker.KillSteal(myHero)
     end
 end
 
+local TpParticleIndex
+
+function Invoker.OnParticleCreate(particle)
+    if not particle then return end
+    if particle.name == "teleport_start" then TpParticleIndex = particle.index end
+end
+
+function Invoker.OnParticleUpdate(particle)
+    if not Menu.IsEnabled(optionInterrupt) then return end
+
+    if not particle then return end
+    if not TpParticleIndex or TpParticleIndex ~= particle.index then return end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
+    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
+    if NPC.IsChannellingAbility(myHero) then return end
+
+    -- have to make sure this tp particle is not from teammate
+    
+    if Invoker.CastTornado(myHero, particle.position) then return end
+
+    if Invoker.CastSunStrike(myHero, particle.position) then return end
+end
+
 -- Auto interrupt enemy's tp or channelling spell with tornado or cold snap
 function Invoker.Interrupt(myHero)
     if not myHero then return end
