@@ -53,15 +53,16 @@ local cache = {}
 -- know particle's index, spellname; have chance to know entity
 function Detect.OnParticleCreate(particle)
     if not particle then return end
-    Log.Write("OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity))
+    -- Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(Entity.GetAbsOrigin(particle.entity)))
 end
 
 -- know particle's index, position
 function Detect.OnParticleUpdate(particle)
     if not particle then return end
-    Log.Write("OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
+    -- Log.Write("2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
     -- Detect.UpdatePos(NPC.GetUnitName(particle.entity), particle.position, GameRules.GetGameTime())
     tmpPos = particle.position
+    if tmpPos and tmpPos:GetX() == 350 then tmpPos = nil end
 end
 
 -- know particle's index, position, entity
@@ -69,9 +70,11 @@ function Detect.OnParticleUpdateEntity(particle)
     if not particle then return end
     if not particle.entity or not NPC.IsHero(particle.entity) then return end
 
-    Log.Write("OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position))
+    -- Log.Write("3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position))
     -- Detect.UpdatePos(NPC.GetUnitName(particle.entity), particle.position, GameRules.GetGameTime())
     -- tmpName = NPC.GetUnitName(particle.entity)
+    tmpPos = particle.position
+    if tmpPos and tmpPos:GetX() == 350 then tmpPos = nil end
 end
 
 -- npc_name -> {pos, showtime}
@@ -91,14 +94,17 @@ function Detect.UpdatePos(name, pos, time)
 end
 
 function Detect.OnDraw()
-    local myHero = Heroes.GetLocal()
-    if not myHero then return end
+    -- local myHero = Heroes.GetLocal()
+    -- if not myHero then return end
 
     local name = "npc_dota_hero_lina"
-    Detect.DrawMiniHero(name, Entity.GetAbsOrigin(myHero))
+    if tmpPos then
+        -- Detect.DrawHero(name, tmpPos)
+    end
 end
 
-function Detect.DrawMiniHero(heroName, pos)
+-- draw hero's icon on map or ground
+function Detect.DrawHero(heroName, pos)
     if not heroName or not pos then return end
 
     local handler = cache[heroName]
@@ -108,10 +114,27 @@ function Detect.DrawMiniHero(heroName, pos)
         cache[heroName] = handler
     end
 
-    local size = 50
+    local size1 = 50
     Renderer.SetDrawColor(255, 255, 255, 255)
+
     local x, y, visible = Renderer.WorldToScreen(pos)
-    Renderer.DrawImage(handler, x-math.floor(size/2), y-math.floor(size/2), size, size)
+    Renderer.DrawImage(handler, x-math.floor(size1/2), y-math.floor(size1/2), size1, size1)
+
+    local size2 = 20
+    local x, y, visible = Renderer.WorldToScreen(Input.GetWorldCursorPos())
+    Renderer.DrawImage(handler, x, y, size2, size2)
+
+    local cursorPos = Input.GetWorldCursorPos()
+    Log.Write(cursorPos:GetX() .. " " .. cursorPos:GetY())
+end
+
+-- origin in my screen: (6, 575) -> (198, 755)
+-- world origin: (-3220, -2842) -> (4222, 2838)
+function Detect.WorldToMap(pos)
+    local x1, y1 = 6, 575
+    local x2, y2 = 198, 755
+    local width = x2 - x1
+    local height = y2 - y1
 end
 
 return Detect
