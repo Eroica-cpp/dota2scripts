@@ -34,6 +34,11 @@ function Axe.AutoBattleHunger(myHero, orders)
     if not myHero or not orders then return end
     if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE and orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then return end
 
+    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
+    if NPC.IsChannellingAbility(myHero) then return end
+
     local battle_hunger = NPC.GetAbility(myHero, "axe_battle_hunger")
     if not battle_hunger or not Ability.IsCastable(battle_hunger, NPC.GetMana(myHero)) then return end
     
