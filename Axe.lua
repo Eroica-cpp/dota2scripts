@@ -12,33 +12,40 @@ local shouldAutoInitiate = false
 
 -- blink to best position before call
 function Axe.OnPrepareUnitOrders(orders)
-	if not Menu.IsEnabled(Axe.optionBlinkHelper) then return true end
-	if not orders or not orders.ability then return true end
-    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
-
-	if not Entity.IsAbility(orders.ability) then return true end
-	if Ability.GetName(orders.ability) ~= "axe_berserkers_call" then return true end
+    if not orders then return true end
 
     local myHero = Heroes.GetLocal()
     if not myHero then return true end
     if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
 
-    if not NPC.HasItem(myHero, "item_blink", true) then return true end
+	if Menu.IsEnabled(Axe.optionBlinkHelper) then
+        Axe.BlinkHelper(myHero, orders)
+    end
+
+    return true
+end
+
+function Axe.BlinkHelper(myHero, orders)
+    if not myHero or not orders then return end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return end
+
+    if not orders.ability or not Entity.IsAbility(orders.ability) then return end
+    if Ability.GetName(orders.ability) ~= "axe_berserkers_call" then return end
+
+    if not NPC.HasItem(myHero, "item_blink", true) then return end
     local blink = NPC.GetItem(myHero, "item_blink", true)
-    if not blink or not Ability.IsCastable(blink, 0) then return true end
+    if not blink or not Ability.IsCastable(blink, 0) then return end
 
     local call_radius = 300
     local blink_radius = 1200
 
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, blink_radius, Enum.TeamType.TEAM_ENEMY)
-    if not enemyHeroes or #enemyHeroes <= 0 then return true end
+    if not enemyHeroes or #enemyHeroes <= 0 then return end
 
     local pos = Utility.BestPosition(enemyHeroes, call_radius)
     if pos then
     	Ability.CastPosition(blink, pos)
     end
-
-    return true
 end
 
 -- auto use items when calling enemy heroes (blademail, lotus, etc)
