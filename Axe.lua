@@ -3,6 +3,7 @@ local Utility = require("Utility")
 local Axe = {}
 
 Axe.optionAutoItem = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Use Items", "Auto use items like blademail, lotus when calling")
+Axe.optionAutoBattleHunger = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Battle Hunger", "Auto cast battle hunger to the enemy that you are attacking")
 Axe.optionBlinkHelper = Menu.AddOption({"Hero Specific", "Axe"}, "Blink Helper", "Auto blink to best position when calling")
 Axe.optionAutoInitiate = Menu.AddOption({"Hero Specific", "Axe"}, "Auto Initiate", "Auto initiate once see enemy heroes (can be turn on/off by key)")
 Axe.key = Menu.AddKeyOption({"Hero Specific", "Axe"}, "Auto Initiate Key", Enum.ButtonCode.KEY_E)
@@ -18,11 +19,33 @@ function Axe.OnPrepareUnitOrders(orders)
     if not myHero then return true end
     if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) then return true end
 
+    if Menu.IsEnabled(Axe.optionAutoBattleHunger) then
+        Axe.AutoBattleHunger(myHero, orders)
+    end
+
 	if Menu.IsEnabled(Axe.optionBlinkHelper) then
         Axe.BlinkHelper(myHero, orders)
     end
 
     return true
+end
+
+function Axe.AutoBattleHunger(myHero, orders)
+    if not myHero or not orders then return end
+    if orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE and orders.order ~= Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then return end
+
+    local battle_hunger = NPC.GetAbility(myHero, "axe_battle_hunger")
+    if not battle_hunger or not Ability.IsCastable(battle_hunger, NPC.GetMana(myHero)) then return end
+    
+    if not orders.target or not NPC.IsHero(orders.target) or Entity.IsSameTeam(myHero, orders.target) then return end
+    if NPC.HasModifier(orders.target, "modifier_axe_battle_hunger") then return end
+    if NPC.HasState(orders.target, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
+    if NPC.HasState(orders.target, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return end
+
+    local range = 750
+    if not NPC.IsEntityInRange(myHero, orders.target, range) then return end
+
+    Ability.CastTarget(battle_hunger, orders.target)
 end
 
 function Axe.BlinkHelper(myHero, orders)
