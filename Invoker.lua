@@ -24,13 +24,6 @@ function Invoker.OnUpdate()
 
     Invoker.UpdateInvokingStatus(myHero)
 
-    -- -- TEST CODE
-    -- if Input.IsKeyDown(Enum.ButtonCode.KEY_X) then
-    --     local source = Input.GetNearestUnitToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
-    --     Invoker.Defend(myHero, source)
-    -- end
-    -- -- TEST CODE
-
     if Menu.IsEnabled(optionKillSteal) then
         Invoker.KillSteal(myHero)
     end    
@@ -281,11 +274,13 @@ end
 
 local TpParticleIndex
 
+-- interrupt enemy's tp, using information from particle effects
 function Invoker.OnParticleCreate(particle)
     if not particle then return end
     if particle.name == "teleport_start" then TpParticleIndex = particle.index end
 end
 
+-- interrupt enemy's tp, using information from particle effects
 function Invoker.OnParticleUpdate(particle)
     if not Menu.IsEnabled(optionInterrupt) then return end
 
@@ -340,25 +335,32 @@ function Invoker.Interrupt(myHero)
 end
 
 -- Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible
+-- Auto cast these spells on enemy who is slower then threshold
 -- priority: chaos meteor -> EMP -> sun strike
 function Invoker.FixedPositionCombo(myHero)
     if not myHero then return end
 
+    local speedThreshold = 250
+
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
+        -- NPC.GetMoveSpeed() fails to consider (1) hex (2) ice wall
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
-            and Utility.InFixedPosition(enemy) then
+            and (Utility.InFixedPosition(enemy) or NPC.GetMoveSpeed(enemy) < speedThreshold) then
 
             -- cast chaos meteor on stunned/rooted enemy
-            if Invoker.CastChaosMeteor(myHero, Entity.GetAbsOrigin(enemy)) then return end
+            local pos = Utility.GetPredictedPosition(enemy, 1.3)
+            if Invoker.CastChaosMeteor(myHero, pos) then return end
 
             -- cast EMP on stunned/rooted enemy
-            if Invoker.CastEMP(myHero, Entity.GetAbsOrigin(enemy)) then return end
+            local pos = Utility.GetPredictedPosition(enemy, 2.9)
+            if Invoker.CastEMP(myHero, pos) then return end
 
             -- cast sun strike on stunned/rooted enemy
-            if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return end
+            local pos = Utility.GetPredictedPosition(enemy, 1.7)
+            if Invoker.CastSunStrike(myHero, pos) then return end
 
         end
     end
