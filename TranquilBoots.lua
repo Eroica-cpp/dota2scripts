@@ -1,10 +1,11 @@
 local TranquilBoots = {}
 
-local option = Menu.AddOption({"Item Specific", "Tranquil Boots"}, "Auto Switch", "auto put the boot on backpack when attack no-hero unit, otherwise put it back to inventory")
+local optionSwitch = Menu.AddOption({"Item Specific", "Tranquil Boots"}, "Auto Switch", "auto put the boot on backpack when attack no-hero unit, otherwise put it back to inventory")
+local optionEnableKey = Menu.AddOption({"Item Specific", "Tranquil Boots"}, "Enable Key", "tap one key to put tranquil boot to backpack; tap again to put it back to inventory")
 local key = Menu.AddKeyOption({"Item Specific", "Tranquil Boots"}, "Key", Enum.ButtonCode.KEY_TAB)
 
 function TranquilBoots.OnPrepareUnitOrders(orders)
-    if not Menu.IsEnabled(option) then return true end
+    if not Menu.IsEnabled(optionSwitch) then return true end
     if not orders or not orders.order then return true end
 
     local myHero = Heroes.GetLocal()
@@ -29,7 +30,7 @@ end
 
 
 function TranquilBoots.OnUpdate()
-    if not Menu.IsEnabled(option) or not Menu.IsKeyDownOnce(key) then return end
+    if not Menu.IsEnabled(optionEnableKey) or not Menu.IsKeyDownOnce(key) then return end
 
     local myHero = Heroes.GetLocal()
     if not myHero then return end
