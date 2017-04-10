@@ -47,9 +47,6 @@ local spellname2heroname = {}
 local tmpPos
 local tmpName
 
-local path = "resource/flash3/images/miniheroes/"
-local cache = {}
-
 -- know particle's index, spellname; have chance to know entity
 function Detect.OnParticleCreate(particle)
     if not particle then return end
@@ -91,58 +88,6 @@ function Detect.Update(name, pos, time)
         heroname2position[name].pos = pos
         heroname2position[name].time = time
     end
-end
-
-function Detect.OnDraw()
-    -- local myHero = Heroes.GetLocal()
-    -- if not myHero then return end
-
-    local name = "npc_dota_hero_lina"
-    -- Detect.DrawHero(name, tmpPos)
-end
-
--- draw hero's icon on map or ground
-function Detect.DrawHero(heroName, pos)
-    if not heroName or not pos then return end
-
-    local handler = cache[heroName]
-    if not handler then
-        local shortName = string.gsub(heroName, "npc_dota_hero_", "")
-        handler = Renderer.LoadImage(path .. shortName .. ".png")
-        cache[heroName] = handler
-    end
-
-    local size1 = 50
-    Renderer.SetDrawColor(255, 255, 255, 255)
-    local x, y, visible = Renderer.WorldToScreen(pos)
-    Renderer.DrawImage(handler, x-math.floor(size1/2), y-math.floor(size1/2), size1, size1)
-
-    local size2 = 20
-    Renderer.SetDrawColor(0, 255, 127)
-    local map_pos = Detect.WorldToMap(pos)
-    local x, y = math.floor(map_pos:GetX()), math.floor(map_pos:GetY())
-    Renderer.DrawImage(handler, x, y, size2, size2)
-
-    Log.Write(x .. " " .. y)
-    -- local cursorPos = Input.GetWorldCursorPos()
-    -- Log.Write(cursorPos:GetX() .. " " .. cursorPos:GetY())
-end
-
--- map: position in world -> position in map (screen)
--- origin in my screen: (6, 575) -> (198, 755)
--- mini word origin: (-3220, -2842) -> (4222, 2838)
--- world origin: (-7600, -7400) -> (8000, 7400)
-function Detect.WorldToMap(pos)
-    local world_point1 = Vector(-7600, -7400)
-    local world_point2 = Vector(8000, 7400)
-    local map_point1 = Vector(6, 575)
-    local map_point2 = Vector(198, 755)
-
-    local length_world = (world_point2 - world_point1):Length()
-    local length_map = (map_point2 - map_point1):Length()
-
-    -- position in map
-    return map_point1 + (pos - world_point1):Scaled(length_map/length_world)
 end
 
 return Detect
