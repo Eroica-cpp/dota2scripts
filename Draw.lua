@@ -1,7 +1,8 @@
 -- =============================
 -- Usage:
 -- Draw.DrawMap()
--- Draw.DrawHero(name, pos)
+-- Draw.DrawHeroOnMap(name, pos)
+-- Draw.DrawHeroOnGround(name, pos)
 -- =============================
 
 local Draw = {}
@@ -14,8 +15,23 @@ local map_origin = Vector(238, 606)
 local path = "resource/flash3/images/miniheroes/"
 local cache = {}
 
--- draw hero's icon on map or ground
-function Draw.DrawHero(heroName, pos)
+function Draw.DrawHeroOnGround(heroName, pos)
+    if not heroName or not pos then return end
+
+    local handler = cache[heroName]
+    if not handler then
+        local shortName = string.gsub(heroName, "npc_dota_hero_", "")
+        handler = Renderer.LoadImage(path .. shortName .. ".png")
+        cache[heroName] = handler
+    end
+
+    Renderer.SetDrawColor(255, 255, 255, 255)    
+    local size = 50
+    local x, y, visible = Renderer.WorldToScreen(pos)
+    Renderer.DrawImage(handler, math.floor(x-size/2), math.floor(y-size/2), size, size)
+end
+
+function Draw.DrawHeroOnMap(heroName, pos)
     if not heroName or not pos then return end
 
     local handler = cache[heroName]
@@ -26,16 +42,9 @@ function Draw.DrawHero(heroName, pos)
     end
 
     Renderer.SetDrawColor(255, 255, 255, 255)
-    
-    -- draw on the ground
-    local size = 50
-    local x, y, visible = Renderer.WorldToScreen(pos)
-    Renderer.DrawImage(handler, x-math.floor(size/2), y-math.floor(size/2), size, size)
-
-    -- draw on new mini map
     local size = 28
     local x, y = Draw.WorldToMap(pos)
-    Renderer.DrawImage(handler, x-size/2, y-size/2, size, size)
+    Renderer.DrawImage(handler, math.floor((x-size/2)), math.floor(y-size/2), size, size)
 end
 
 function Draw.DrawMap()
