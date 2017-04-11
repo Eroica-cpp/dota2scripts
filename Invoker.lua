@@ -124,7 +124,7 @@ function Invoker.RightClickCombo(myHero, target)
         if Invoker.CastColdSnap(myHero, target) then return end
     end
 
-    if NPC.IsHero(target) or NPC.IsRoshan(target) or NPC.IsStructure(target) or Utility.IsAncientCreep(target) or (NPC.IsCreep(target) and NPC.GetBountyXP(target)>=88) then
+    if NPC.IsHero(target) or NPC.IsRoshan(target) or NPC.IsStructure(target) or Utility.IsAncientCreep(target) or (NPC.IsCreep(target) and not NPC.IsLaneCreep(target)) then
     
         -- combo: right click -> alacrity
         if Invoker.CastAlacrity(myHero, myHero) then return end
