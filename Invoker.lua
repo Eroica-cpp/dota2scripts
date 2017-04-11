@@ -348,7 +348,7 @@ function Invoker.FixedPositionCombo(myHero)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
-            and (Utility.InFixedPosition(enemy) or NPC.GetMoveSpeed(enemy) < speedThreshold) then
+            and (Utility.CantMove(enemy) or Utility.GetMoveSpeed(enemy) < speedThreshold) then
 
             -- cast chaos meteor on stunned/rooted enemy
             local pos = Utility.GetPredictedPosition(enemy, 1.3)

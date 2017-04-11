@@ -60,13 +60,26 @@ end
 -- return predicted position
 function Utility.GetPredictedPosition(npc, delay)
     local pos = Entity.GetAbsOrigin(npc)
-    if Utility.InFixedPosition(npc) then return pos end
+    if Utility.CantMove(npc) then return pos end
     if not NPC.IsRunning(npc) or not delay then return pos end
 
     local dir = Entity.GetRotation(npc):GetForward():Normalized()
-    local speed = NPC.GetMoveSpeed(npc)
+    local speed = Utility.GetMoveSpeed(npc)
 
     return pos + dir:Scaled(speed * delay)
+end
+
+function Utility.GetMoveSpeed(npc)
+    local base_speed = NPC.GetBaseSpeed(npc)
+    local bonus_speed = NPC.GetMoveSpeed(npc) - NPC.GetBaseSpeed(npc)
+
+    -- when affected by ice wall, assume move speed as 100 for convenience
+    if NPC.HasModifier(npc, "modifier_invoker_ice_wall_slow_debuff") then return 100 end
+
+    -- when get hexed,  move speed = 140/100 + bonus_speed 
+    if Utility.GetHexTimeLeft(npc) > 0 then return 140 + bonus_speed end  
+
+    return base_speed + bonus_speed
 end
 
 -- return true if is protected by lotus orb or AM's aghs
@@ -192,7 +205,7 @@ function Utility.IsAncientCreep(npc)
     return false
 end
 
-function Utility.InFixedPosition(npc)
+function Utility.CantMove(npc)
     if not npc then return false end
 
     if NPC.IsRooted(npc) or Utility.GetStunTimeLeft(npc) >= 1 then return true end
