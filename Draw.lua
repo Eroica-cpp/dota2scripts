@@ -1,3 +1,9 @@
+-- =============================
+-- Usage:
+-- Draw.DrawMap()
+-- Draw.DrawHero(name, pos)
+-- =============================
+
 local Draw = {}
 
 -- draw a new map right next to build-in map
@@ -7,17 +13,6 @@ local map_origin = Vector(238, 606)
 
 local path = "resource/flash3/images/miniheroes/"
 local cache = {}
-
-function Draw.OnDraw()
-    local myHero = Heroes.GetLocal()
-    if not myHero then return end
-
-    local name = "npc_dota_hero_invoker"
-    local pos = Entity.GetAbsOrigin(myHero)
-
-    -- Draw.DrawMap()
-    -- Draw.DrawHero(name, pos)
-end
 
 -- draw hero's icon on map or ground
 function Draw.DrawHero(heroName, pos)
