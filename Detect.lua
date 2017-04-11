@@ -4,27 +4,35 @@ local Detect = {}
 
 local option = Menu.AddOption({ "Awareness" }, "Detect", "Alerts you when certain abilities are used.")
 
-Detect.heroEvents = {}
-
-Detect.teamEvents = {}
-
 -- index -> {name = Str; entity = Object; pos = Vector(), time = Int}
 local posInfo = {}
 
--- spellname2heroname[spellname] = heroname
-local spellname2heroname = {}
+-- index -> spellname
+local particleInfo = {}
+
+-- spellname -> heroname
+local spellName2heroName = {}
 
 -- know particle's index, spellname; have chance to know entity
 function Detect.OnParticleCreate(particle)
-    if not particle then return end
-    -- Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(Entity.GetAbsOrigin(particle.entity)))
+    if not particle or not particle.index then return end
+    Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(Entity.GetAbsOrigin(particle.entity)))
+    particleInfo[particle.index] = particle.name
+
+    if particle.entity then
+        Detect.Update(NPC.GetUnitName(particle.entity), particle.entity, Entity.GetAbsOrigin(particle.entity), GameRules.GetGameTime())
+    end
 end
 
 -- know particle's index, position
 function Detect.OnParticleUpdate(particle)
-    if not particle then return end
-    -- Log.Write("2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
-    -- Detect.Update(NPC.GetUnitName(particle.entity), particle.position, GameRules.GetGameTime())
+    if not particle or not particle.index then return end
+    if not particleInfo[particle.index] then return end
+
+    local spellname = particleInfo[particle.index]
+    local name = spellName2heroName[spellname]
+    Log.Write("2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
+    Detect.Update(name, nil, particle.position, GameRules.GetGameTime())
 end
 
 -- know particle's index, position, entity
@@ -33,8 +41,6 @@ function Detect.OnParticleUpdateEntity(particle)
     if not particle.entity or not NPC.IsHero(particle.entity) then return end
 
     Log.Write("3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position))
-    
-    -- Detect.Update(name, entity, pos, time)
     Detect.Update(NPC.GetUnitName(particle.entity), particle.entity, particle.position, GameRules.GetGameTime())
 end
 
@@ -67,7 +73,7 @@ function Detect.OnDraw()
     Draw.DrawMap()
 
     for i, info in ipairs(posInfo) do
-        if info and info.name and info.entity and info.pos and info.time and math.abs(GameRules.GetGameTime() - info.time) <= threshold then
+        if info and info.name and info.pos and info.time and math.abs(GameRules.GetGameTime() - info.time) <= threshold then
 
             -- no need to draw visible hero on the ground
             -- if Entity.IsDormant(info.entity) then
