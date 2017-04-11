@@ -1,4 +1,5 @@
 local Draw = require("Draw")
+local Dict = require("Dict")
 
 local Detect = {}
 
@@ -12,17 +13,27 @@ local posInfo = {}
 -- index -> spellname
 local particleInfo = {}
 
--- spellname -> heroname
+-- only for few cases
+-- index -> heroName
+local particleHero = {}
+
+-- For particle effects that cant be tracked by OnParticleUpdateEntity(),
+-- but have name info from OnParticleCreate() and position info from OnParticleUpdate()
+-- (has been replaced by Dict.Phrase2HeroName())
+-- spellname -> heroname 
 local spellName2heroName = {}
 
 -- know particle's index, spellname; have chance to know entity
+-- Entity.GetAbsOrigin(particle.entity) is not correct. It just shows last seen position.
+-- NPC.GetUnitName(particle.entity) can be useful, like know blink start position, smoke position, etc
 function Detect.OnParticleCreate(particle)
     if not particle or not particle.index then return end
-    Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(Entity.GetAbsOrigin(particle.entity)))
+    local text = "1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity)
+    -- Log.Write(text)
     particleInfo[particle.index] = particle.name
 
-    if particle.entity then
-        Detect.Update(NPC.GetUnitName(particle.entity), particle.entity, Entity.GetAbsOrigin(particle.entity), GameRules.GetGameTime())
+    if particle.entity then 
+        particleHero[particle.index] = NPC.GetUnitName(particle.entity)
     end
 end
 
@@ -32,8 +43,11 @@ function Detect.OnParticleUpdate(particle)
     if not particleInfo[particle.index] then return end
 
     local spellname = particleInfo[particle.index]
-    local name = spellName2heroName[spellname]
-    Log.Write("2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
+    local name = Dict.Phrase2HeroName(spellname)
+    if not name or name == "" then name = particleHero[particle.index] end
+
+    text = "2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position)
+    -- Log.Write(text)
     Detect.Update(name, nil, particle.position, GameRules.GetGameTime())
 end
 
@@ -42,7 +56,8 @@ function Detect.OnParticleUpdateEntity(particle)
     if not particle then return end
     if not particle.entity or not NPC.IsHero(particle.entity) then return end
 
-    Log.Write("3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position))
+    local text = "3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position)
+    -- Log.Write(text)
     Detect.Update(NPC.GetUnitName(particle.entity), particle.entity, particle.position, GameRules.GetGameTime())
 end
 
