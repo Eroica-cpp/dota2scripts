@@ -2,14 +2,12 @@ local Utility = require("Utility")
 
 local Invoker = {}
 
-local optionRightClickCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Right Click Combo", "cast cold snap, alacrity or forge spirit when right click enemy hero or building")
-local optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Cold Snap Combo", "cast alacrity and urn before cold snap")
-local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
-local optionIceWallEMPCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Ice Wall & EMP Combo", "cast EMP after ice wall")
-local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
-local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
-local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
-local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible")
+local optionRightClickCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Right Click Combo", "cast cold snap, alacrity or forge spirit when right click enemy hero or building")
+local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
+local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
+local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
+local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
+local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -56,14 +54,6 @@ function Invoker.OnPrepareUnitOrders(orders)
         Invoker.RightClickCombo(myHero, orders.target)
     end
     
-    if Menu.IsEnabled(optionColdSnapCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_cold_snap" then
-        Invoker.ColdSnapCombo(myHero, orders.target)
-    end
-
-    if Menu.IsEnabled(optionIceWallEMPCombo) and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "invoker_ice_wall" then
-        Invoker.IceWallEMPCombo(myHero)
-    end
-
     if Menu.IsEnabled(optionInstanceHelper) then
         Invoker.InstanceHelper(myHero, orders.order)
     end
@@ -133,55 +123,6 @@ function Invoker.RightClickCombo(myHero, target)
         if Invoker.CastForgeSpirit(myHero) then return end
     end
 
-end
-
--- combo: cold snap -> urn
--- combo: cold snap -> alacrity
-function Invoker.ColdSnapCombo(myHero, target)
-    if not myHero or not target then return end
-
-    local urn = NPC.GetItem(myHero, "item_urn_of_shadows", true)
-    if urn and Ability.IsCastable(urn, 0) and Item.GetCurrentCharges(urn) > 0 then
-        Ability.CastTarget(urn, target)
-    end
-   
-    local coldSnap = NPC.GetAbility(myHero, "invoker_cold_snap")
-    local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
-    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
-    if not alacrity or not coldSnap or not invoke then return end
-    if not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke) - Ability.GetManaCost(coldSnap)) then return end
-
-    -- pop cold snap to first slot
-    if coldSnap ~= NPC.GetAbilityByIndex(myHero, 3) then
-    	Invoker.PressKey(myHero, "QQQR")
-    end
-
-    if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
-    	Ability.CastTarget(alacrity, myHero)
-    end
-
-    Invoker.PressKey(myHero, "EEE")
-end
-
--- combo: ice wall -> EMP
-function Invoker.IceWallEMPCombo(myHero)
-	local iceWall = NPC.GetAbility(myHero, "invoker_ice_wall")
-	local emp = NPC.GetAbility(myHero, "invoker_emp")
-	local invoke = NPC.GetAbility(myHero, "invoker_invoke")
-	if not iceWall or not emp or not invoke then return end
-	if not Ability.IsCastable(emp, NPC.GetMana(myHero) - Ability.GetManaCost(invoke) - Ability.GetManaCost(iceWall)) then return end
-
-	-- pop ice wall to first slot
-    if iceWall ~= NPC.GetAbilityByIndex(myHero, 3) then
-    	Invoker.PressKey(myHero, "QQER")
-    end
-
-    local cursorPos = Input.GetWorldCursorPos()
-    local pos = (Entity.GetAbsOrigin(myHero) + cursorPos):Scaled(0.5)
-
-    if Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR") then
-        Ability.CastPosition(emp, pos)
-    end
 end
 
 -- combo: meteor -> blast
