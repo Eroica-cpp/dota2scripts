@@ -22,19 +22,19 @@ function Invoker.OnUpdate()
 
     Invoker.UpdateInvokingStatus(myHero)
 
-    if Menu.IsEnabled(optionKillSteal) then
+    if Menu.IsEnabled(optionKillSteal) and not isInvokingSpell then
         Invoker.KillSteal(myHero)
     end    
 
-    if Menu.IsEnabled(optionInterrupt) then
+    if Menu.IsEnabled(optionInterrupt) and not isInvokingSpell then
         Invoker.Interrupt(myHero)
     end  
 
-    if Menu.IsEnabled(optionFixedPositionCombo) then
+    if Menu.IsEnabled(optionFixedPositionCombo) and not isInvokingSpell then
         Invoker.FixedPositionCombo(myHero)
     end  
 
-    if Menu.IsEnabled(optionMeteorBlastCombo) then
+    if Menu.IsEnabled(optionMeteorBlastCombo) and not isInvokingSpell then
         Invoker.MeteorBlastCombo(myHero)
     end
 end
@@ -50,11 +50,11 @@ function Invoker.OnPrepareUnitOrders(orders)
     if NPC.HasModifier(myHero, "modifier_teleporting") then return true end
     if NPC.IsChannellingAbility(myHero) then return true end
 
-    if Menu.IsEnabled(optionRightClickCombo) and orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
+    if Menu.IsEnabled(optionRightClickCombo) and orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET and not isInvokingSpell then
         Invoker.RightClickCombo(myHero, orders.target)
     end
     
-    if Menu.IsEnabled(optionInstanceHelper) then
+    if Menu.IsEnabled(optionInstanceHelper) and not isInvokingSpell then
         Invoker.InstanceHelper(myHero, orders.order)
     end
 
@@ -78,7 +78,6 @@ end
 
 function Invoker.InstanceHelper(myHero, order)
 	if not myHero or not order then return end
-    if isInvokingSpell then return end
 
 	-- if about to move
 	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
