@@ -126,7 +126,6 @@ Dict.ShortName2FullName = {
 	windrunner = "npc_dota_hero_windrunner",
 	winter_wyvern = "npc_dota_hero_winter_wyvern",
 	wisp = "npc_dota_hero_wisp",
-	io = "npc_dota_hero_wisp",
 	witch_doctor = "npc_dota_hero_witch_doctor",
 	zuus = "npc_dota_hero_zuus",
 	zeus = "npc_dota_hero_zuus"

@@ -48,7 +48,7 @@ function Detect.OnParticleUpdate(particle)
     local name = Dict.Phrase2HeroName(spellname)
     if not name or name == "" then name = particleHero[particle.index] end
 
-    text = "2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position)
+    local text = "2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position)
     -- Log.Write(text)
     Detect.Update(name, nil, particle.position, GameRules.GetGameTime())
 end
