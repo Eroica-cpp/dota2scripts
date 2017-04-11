@@ -4,6 +4,8 @@ local Detect = {}
 
 local option = Menu.AddOption({ "Awareness" }, "Detect", "Alerts you when certain abilities are used.")
 
+local enemyList = {}
+
 -- index -> {name = Str; entity = Object; pos = Vector(), time = Int}
 local posInfo = {}
 
@@ -65,7 +67,18 @@ end
 
 function Detect.OnDraw()
     if not Menu.IsEnabled(option) then return end
-    if not Engine.IsInGame() then return end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero then return end
+
+    -- update enemy list
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        local name = NPC.GetUnitName(enemy)
+        if not enemyList[name] and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) then
+            enemyList[name] = enemy
+        end
+    end
 
     -- threshold for elapsed time
     local threshold = 3
@@ -75,10 +88,10 @@ function Detect.OnDraw()
     for i, info in ipairs(posInfo) do
         if info and info.name and info.pos and info.time and math.abs(GameRules.GetGameTime() - info.time) <= threshold then
 
-            -- no need to draw visible hero on the ground
-            -- if Entity.IsDormant(info.entity) then
-            Draw.DrawHeroOnGround(info.name, info.pos)
-            -- end
+            -- no need to draw visible enemy hero on the ground
+            if not enemyList[info.name] or Entity.IsDormant(enemyList[info.name]) then
+                Draw.DrawHeroOnGround(info.name, info.pos)
+            end
 
             Draw.DrawHeroOnMap(info.name, info.pos)
         end
