@@ -4,6 +4,8 @@ local Dict = require("Dict")
 local Detect = {}
 
 local option = Menu.AddOption({ "Awareness" }, "Detect", "Alerts you when certain abilities are used.")
+local optionEnemyAround = Menu.AddOption({ "Awareness" }, "Enemy Around", "Show how many enemy hero around")
+local font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
 local heroList = {}
 
@@ -86,6 +88,10 @@ function Detect.OnDraw()
     local myHero = Heroes.GetLocal()
     if not myHero then return end
 
+    local pos = Entity.GetAbsOrigin(myHero)
+    local counter = 0
+    local radius = 1500
+
     -- update hero list
     for i = 1, Heroes.Count() do
         local hero = Heroes.Get(i)
@@ -100,6 +106,14 @@ function Detect.OnDraw()
 
     Draw.DrawMap()
 
+    -- draw visible enemy on new map
+    for name, enemy in pairs(heroList) do
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
+            Draw.DrawHeroOnMap(name, Entity.GetAbsOrigin(enemy))
+        end
+    end
+
+    -- draw enemy position given by particle effects
     for i, info in ipairs(posInfo) do
         if info and info.name and info.pos and info.time and math.abs(GameRules.GetGameTime() - info.time) <= threshold then
 
@@ -113,6 +127,11 @@ function Detect.OnDraw()
                 Draw.DrawHeroOnMap(info.name, info.pos)
             end
         end
+    end
+
+    -- show how many enemy hero around
+    if not Menu.IsEnabled(optionEnemyAround) then
+        -- TBD
     end
 end
 
