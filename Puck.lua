@@ -45,6 +45,33 @@ function Puck.Defend(target)
 
 	-- 2. use silence against enemy in range
 	if Puck.CastSilence(target) then return end
+
+	-- 3. use jaunt to dodge; it can be dangerous in some conditions
+	-- if Puck.CastJaunt() then return end
+end
+
+function Puck.CastOrb(default_pos)
+	local myHero = Heroes.GetLocal()
+	if not myHero then return false end
+	local pos = Entity.GetAbsOrigin(myHero)
+
+	local orb = NPC.GetAbility(myHero, "puck_illusory_orb")
+	if not orb or not Ability.IsCastable(orb, NPC.GetMana(myHero)) then return false end
+
+	local range = 3000
+	Ability.CastPosition(orb, pos + (default_pos - pos):Normalized():Scaled(range))
+	return true
+end
+
+function Puck.CastJaunt()
+	local myHero = Heroes.GetLocal()
+	if not myHero then return false end
+
+	local jaunt = NPC.GetAbility(myHero, "puck_ethereal_jaunt")
+	if not jaunt or not Ability.IsCastable(jaunt, NPC.GetMana(myHero)) then return false end
+
+	Ability.CastNoTarget(jaunt)
+	return true
 end
 
 -- input: target entity, can be nil
