@@ -129,7 +129,43 @@ function Invoker.RightClickCombo(myHero, target)
 
 end
 
+-- tornado/eul combo
+-- priority: ice wall -> sun strike -> chaos meteor -> emp 
 function Invoker.TornadoCombo(myHero)
+    if not myHero then return end
+
+    local mod
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) then
+
+            local mod1 = NPC.GetModifier(enemy, "modifier_invoker_tornado")
+            local mod2 = NPC.GetModifier(enemy, "modifier_eul_cyclone")
+            local mod3 = NPC.GetModifier(enemy, "modifier_brewmaster_storm_cyclone")
+
+            if mod1 then mod = mod1 end
+            if mod2 then mod = mod2 end
+            if mod3 then mod = mod3 end
+
+            if mod then
+                local pos =  Entity.GetAbsOrigin(enemy)
+                local dis = (Entity.GetAbsOrigin(myHero) - pos):Length2D()
+                local time_left = math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
+
+                -- 1. cast ice wall
+                if dis >= 100 and dis <= 300 and Invoker.CastIceWall(myHero) then return end
+
+                -- 2. cast sun strike
+                if time_left >= 1 and time_left < 1.7 and Invoker.CastSunStrike(myHero, pos) then return end
+
+                -- 3. cast chaos meteor
+                if time_left >= 0.5 and time_left < 1.3 and Invoker.CastChaosMeteor(myHero, pos) then return end
+                
+                -- 4. cast EMP
+                if time_left >= 1 and time_left < 2.9 and Invoker.CastEMP(myHero, pos) then return end
+            end
+        end
+    end    
 end
 
 -- combo: meteor -> blast
