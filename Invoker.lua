@@ -380,6 +380,7 @@ function Invoker.CastTornado(myHero, pos)
 
     if Invoker.HasInvoked(myHero, tornado) or Invoker.PressKey(myHero, "QWWR") then
         Ability.CastPosition(tornado, pos)
+        Invoker.ProtectSpell(myHero, tornado)
         return true
     end
 
@@ -402,6 +403,7 @@ function Invoker.CastDeafeningBlast(myHero, pos)
 
     if Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER") then
         Ability.CastPosition(blast, pos)
+        Invoker.ProtectSpell(myHero, blast)
         return true
     end
 
@@ -428,6 +430,7 @@ function Invoker.CastColdSnap(myHero, target)
 
     if Invoker.HasInvoked(myHero, cold_snap) or Invoker.PressKey(myHero, "QQQR") then
         Ability.CastTarget(cold_snap, target)
+        Invoker.ProtectSpell(myHero, cold_snap)
         return true
     end
 
@@ -447,6 +450,7 @@ function Invoker.CastIceWall(myHero)
         
     if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
         Ability.CastNoTarget(ice_wall)
+        Invoker.ProtectSpell(myHero, ice_wall)
         return true
     end
 
@@ -469,6 +473,7 @@ function Invoker.CastEMP(myHero, pos)
         
     if Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR") then
         Ability.CastPosition(emp, pos)
+        Invoker.ProtectSpell(myHero, emp)
         return true
     end
 
@@ -488,6 +493,7 @@ function Invoker.CastAlacrity(myHero, target)
         
     if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
         Ability.CastTarget(alacrity, myHero)
+        Invoker.ProtectSpell(myHero, alacrity)
         return true
     end
 
@@ -506,6 +512,7 @@ function Invoker.CastForgeSpirit(myHero)
         
     if Invoker.HasInvoked(myHero, forge_spirit) or Invoker.PressKey(myHero, "QEER") then
         Ability.CastNoTarget(forge_spirit)
+        Invoker.ProtectSpell(myHero, forge_spirit)
         return true
     end
 
@@ -524,6 +531,7 @@ function Invoker.CastSunStrike(myHero, pos)
 
     if Invoker.HasInvoked(myHero, sun_strike) or Invoker.PressKey(myHero, "EEER") then
         Ability.CastPosition(sun_strike, pos)
+        Invoker.ProtectSpell(myHero, sun_strike)
         return true
     end
 
@@ -546,6 +554,7 @@ function Invoker.CastChaosMeteor(myHero, pos)
 
     if Invoker.HasInvoked(myHero, meteor) or Invoker.PressKey(myHero, "WEER") then
         Ability.CastPosition(meteor, pos)
+        Invoker.ProtectSpell(myHero, meteor)
         return true
     end
 
@@ -577,16 +586,41 @@ end
 
 -- return whether a spell has been invoked.
 function Invoker.HasInvoked(myHero, spell)
-    if not myHero or not spell then return false end
+    if not myHero or not spell then return false end 
     
     local name = Ability.GetName(spell)
     local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
     local spell_2 = NPC.GetAbilityByIndex(myHero, 4)    
-   
-    if spell_1 and name == Ability.GetName(spell_1) then return true end
+
     if spell_2 and name == Ability.GetName(spell_2) then return true end
+    if spell_1 and name == Ability.GetName(spell_1) then return true end
 
     return false
+end
+
+-- After casting a spell , move this spell to second slot 
+-- so as to protect another spell
+function Invoker.ProtectSpell(myHero, spell)
+    if not myHero or not spell then return end
+    if not Invoker.HasInvoked(myHero, spell) then return end
+
+    local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
+    local spell_2 = NPC.GetAbilityByIndex(myHero, 4)
+    if not spell_1 or not spell_2 then return end
+    if Ability.GetName(spell) == Ability.GetName(spell_2) then return end
+
+    local name = Ability.GetName(spell_2)
+
+    if name == "invoker_cold_snap" then Invoker.PressKey(myHero, "QQQR") end
+    if name == "invoker_ghost_walk" then Invoker.PressKey(myHero, "QQWR") end
+    if name == "invoker_tornado" then Invoker.PressKey(myHero, "QWWR") end
+    if name == "invoker_emp" then Invoker.PressKey(myHero, "WWWR") end
+    if name == "invoker_alacrity" then Invoker.PressKey(myHero, "WWER") end
+    if name == "invoker_chaos_meteor" then Invoker.PressKey(myHero, "WEER") end
+    if name == "invoker_sun_strike" then Invoker.PressKey(myHero, "EEER") end
+    if name == "invoker_forge_spirit" then Invoker.PressKey(myHero, "QEER") end
+    if name == "invoker_ice_wall" then Invoker.PressKey(myHero, "QQER") end
+    if name == "invoker_deafening_blast" then Invoker.PressKey(myHero, "QWER") end
 end
 
 -- return true if all ordered keys have been pressed successfully
