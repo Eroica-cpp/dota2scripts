@@ -9,6 +9,7 @@ local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible")
 local optionTornadoCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Eul/Tornado Combo", "Auto cast ice wall, chaos meteor, sun strike, EMP with eul/tornado")
+local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -45,7 +46,7 @@ function Invoker.OnUpdate()
 end
 
 function Invoker.OnPrepareUnitOrders(orders)
-    if not orders or not orders.ability then return true end
+    if not orders then return true end
     if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
 
     local myHero = Heroes.GetLocal()
@@ -63,6 +64,10 @@ function Invoker.OnPrepareUnitOrders(orders)
         Invoker.InstanceHelper(myHero, orders.order)
     end
 
+    if Menu.IsEnabled(optionSpellProtection) and orders.ability and Entity.IsAbility(orders.ability) then
+        Invoker.ProtectSpell(myHero, orders.ability)
+    end
+
     return true
 end
 
@@ -74,8 +79,8 @@ function Invoker.UpdateInvokingStatus(myHero)
         isInvokingSpell = false
     end
 
-    -- if one of Q, W, E, R or F5(ghost walk) is pressed
-    if Input.IsKeyDown(Enum.ButtonCode.KEY_F5) or Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) then
+    -- if one of Q, W, E, R, D, F or F5(ghost walk) is pressed
+    if Input.IsKeyDown(Enum.ButtonCode.KEY_F5) or Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) or Input.IsKeyDown(Enum.ButtonCode.KEY_D) or Input.IsKeyDown(Enum.ButtonCode.KEY_F) then
         isInvokingSpell = true
         lastInvokeTime = GameRules.GetGameTime()
     end
