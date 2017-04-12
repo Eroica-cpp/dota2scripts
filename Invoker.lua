@@ -585,7 +585,7 @@ function Invoker.HasInvoked(myHero, spell)
    
     if spell_1 and name == Ability.GetName(spell_1) then return true end
     if spell_2 and name == Ability.GetName(spell_2) then return true end
-    
+
     return false
 end
 
@@ -594,8 +594,6 @@ end
 function Invoker.PressKey(myHero, keys)
 	if not myHero or not keys then return false end
 	if Invoker.GetInstances(myHero) == keys then return true end
-
-    local pressed_keys = ""
 
     local Q = NPC.GetAbility(myHero, "invoker_quas")
     local W = NPC.GetAbility(myHero, "invoker_wex")
@@ -612,13 +610,13 @@ function Invoker.PressKey(myHero, keys)
 
     for i = 1, #keys do
     	local key = keys:sub(i,i)	
-    	if key == "Q" then Ability.CastNoTarget(Q); pressed_keys = pressed_keys .. key end
-    	if key == "W" then Ability.CastNoTarget(W); pressed_keys = pressed_keys .. key end
-    	if key == "E" then Ability.CastNoTarget(E); pressed_keys = pressed_keys .. key end
-    	if key == "R" then Ability.CastNoTarget(R); pressed_keys = pressed_keys .. key end
+    	if key == "Q" then Ability.CastNoTarget(Q) end
+    	if key == "W" then Ability.CastNoTarget(W) end
+    	if key == "E" then Ability.CastNoTarget(E) end
+    	if key == "R" then Ability.CastNoTarget(R) end
     end
 
-    return keys == pressed_keys
+    return true
 end
 
 return Invoker
