@@ -94,19 +94,38 @@ function Utility.IsLotusProtected(npc)
 	return false
 end
 
--- situations that can't or no need to cast spell on enemy
-function Utility.IsEligibleEnemy(npc)
-	-- situations that no need to cast spell
-	if NPC.IsIllusion(npc) or not Entity.IsAlive(npc) then return false end
-	if NPC.IsStunned(npc) then return false end
-	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_HEXED) then return false end
-	
-	-- situations that can't cast spell
+-- return true if this npc is disabled, return false otherwise
+function Utility.IsDisabled(npc)
+	if not Entity.IsAlive(npc) then return true end
+	if NPC.IsStunned(npc) then return true end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_HEXED) then return true end
+
+    return false
+end
+
+-- return true if can cast spell on this npc, return false otherwise
+function Utility.CanCastSpellOn(npc)
 	if Entity.IsDormant(npc) then return false end
 	if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
-	
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
+
 	return true
+end
+
+-- check if it is safe to cast spell or item on enemy
+-- in case enemy has blademail or lotus.
+-- Caster will take double damage if target has both lotus and blademail
+function Utility.IsSafeToCast(myHero, enemy, magic_damage)
+    if not myHero or not enemy or not magic_damage then return true end
+    if magic_damage <= 0 then return true end
+
+    local counter = 0
+    if NPC.HasModifier(enemy, "modifier_item_lotus_orb_active") then counter = counter + 1 end
+    if NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") then counter = counter + 1 end
+    
+    local reflect_damage = counter * magic_damage * NPC.GetMagicalArmorDamageMultiplier(myHero)
+    return Entity.GetHealth(myHero) > reflect_damage
 end
 
 -- situations that ally need to be saved

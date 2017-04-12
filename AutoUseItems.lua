@@ -199,7 +199,8 @@ function AutoUseItems.item_sheepstick(myHero)
 	local minDistance = 99999
 	local target = nil
 	for i, enemy in ipairs(enemyAround) do
-		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy) then
+		if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+			and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy) then
 			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
 			if dis < minDistance then
 				minDistance = dis
@@ -229,7 +230,8 @@ function AutoUseItems.item_orchid(myHero)
 	local minDistance = 99999
 	local target = nil
 	for i, enemy in ipairs(enemyAround) do
-		if Utility.IsEligibleEnemy(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
+		if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+			and Utility.CanCastSpellOn(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
 			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
 			if dis < minDistance then
 				minDistance = dis
@@ -254,8 +256,10 @@ function AutoUseItems.item_rod_of_atos(myHero)
 	local minDistance = 99999
 	local target = nil
 	for i, enemy in ipairs(enemyAround) do
-		if Utility.IsEligibleEnemy(enemy) and not Utility.IsLotusProtected(enemy)
-			and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
+		if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+			and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy)
+			and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
+			
 			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
 			if dis < minDistance then
 				minDistance = dis
@@ -316,7 +320,9 @@ function AutoUseItems.item_dagon(myHero)
 	local minHp = 99999
 	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 	for i, enemy in ipairs(enemyAround) do
-		if Utility.IsEligibleEnemy(enemy) and AutoUseItems.IsSafeToCast(myHero, enemy, magic_damage) then
+		if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+			and Utility.CanCastSpellOn(enemy) and Utility.IsSafeToCast(myHero, enemy, magic_damage) then
+			
 			local enemyHp = Entity.GetHealth(enemy)
 			if enemyHp < minHp then
 				target = enemy
@@ -327,21 +333,6 @@ function AutoUseItems.item_dagon(myHero)
 
 	-- cast dagon on enemy with lowest HP in range
 	if target then Ability.CastTarget(item, target) end
-end
-
--- check if it is safe to cast spell or item on enemy
--- in case enemy has blademail or lotus.
--- Caster will take double damage if target has both lotus and blademail
-function AutoUseItems.IsSafeToCast(myHero, enemy, magic_damage)
-	if not myHero or not enemy or not magic_damage then return true end
-	if magic_damage <= 0 then return true end
-
-	local counter = 0
-	if NPC.HasModifier(enemy, "modifier_item_lotus_orb_active") then counter = counter + 1 end
-	if NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") then counter = counter + 1 end
-	
-	local reflect_damage = counter * magic_damage * NPC.GetMagicalArmorDamageMultiplier(myHero)
-	return Entity.GetHealth(myHero) > reflect_damage
 end
 
 function AutoUseItems.item_veil_of_discord(myHero)
