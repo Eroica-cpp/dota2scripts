@@ -1,5 +1,6 @@
 local Utility = require("Utility")
 local Invoker = require("Invoker")
+local Puck = require("Puck")
 
 local Dodge = {}
 
@@ -736,12 +737,9 @@ function Dodge.Defend(myHero, source)
 		end
 	end
 
-	-- puck's phase shift
+	-- puck's defensive behaviors. It is defined in Puck.Defend()
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_puck" then
-		local shift = NPC.GetAbilityByIndex(myHero, 2)
-		if shift and Ability.IsCastable(shift, 0) then
-			Ability.CastNoTarget(shift)
-		end
+		Puck.Defend(source)
 	end
 
 	-- weaver's shukuchi
