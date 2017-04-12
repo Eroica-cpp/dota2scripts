@@ -8,6 +8,7 @@ local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible")
+local optionTornadoCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Eul/Tornado Combo", "Auto cast ice wall, chaos meteor, sun strike, EMP with eul/tornado")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -22,21 +23,25 @@ function Invoker.OnUpdate()
 
     Invoker.UpdateInvokingStatus(myHero)
 
-    if Menu.IsEnabled(optionKillSteal) and not isInvokingSpell then
+    if Menu.IsEnabled(optionKillSteal) then
         Invoker.KillSteal(myHero)
     end    
 
-    if Menu.IsEnabled(optionInterrupt) and not isInvokingSpell then
+    if Menu.IsEnabled(optionInterrupt) then
         Invoker.Interrupt(myHero)
     end  
 
-    if Menu.IsEnabled(optionFixedPositionCombo) and not isInvokingSpell then
+    if Menu.IsEnabled(optionFixedPositionCombo) then
         Invoker.FixedPositionCombo(myHero)
     end  
 
-    if Menu.IsEnabled(optionMeteorBlastCombo) and not isInvokingSpell then
+    if Menu.IsEnabled(optionMeteorBlastCombo) then
         Invoker.MeteorBlastCombo(myHero)
     end
+
+    if Menu.IsEnabled(optionTornadoCombo) then
+        Invoker.TornadoCombo(myHero)
+    end    
 end
 
 function Invoker.OnPrepareUnitOrders(orders)
@@ -50,7 +55,7 @@ function Invoker.OnPrepareUnitOrders(orders)
     if NPC.HasModifier(myHero, "modifier_teleporting") then return true end
     if NPC.IsChannellingAbility(myHero) then return true end
 
-    if Menu.IsEnabled(optionRightClickCombo) and orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET and not isInvokingSpell then
+    if Menu.IsEnabled(optionRightClickCombo) and orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
         Invoker.RightClickCombo(myHero, orders.target)
     end
     
@@ -124,34 +129,19 @@ function Invoker.RightClickCombo(myHero, target)
 
 end
 
+function Invoker.TornadoCombo(myHero)
+end
+
 -- combo: meteor -> blast
 function Invoker.MeteorBlastCombo(myHero)
-    local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
-    local blast = NPC.GetAbility(myHero, "invoker_deafening_blast")
-    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
-    
-    if not meteor or not blast or not invoke then return end
-    if not Ability.IsCastable(blast, NPC.GetMana(myHero) - Ability.GetManaCost(invoke) - Ability.GetManaCost(meteor)) then return end
-    if not Invoker.HasInvoked(myHero, blast) and not Ability.IsCastable(invoke, NPC.GetMana(myHero)) then return end
+    if not myHero then return end
 
 	-- check nearby enemy who is affected by chaos meteor
-	local pos
-	local radius = 1000
-	local enemyAround = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
-	for i, enemy in ipairs(enemyAround) do
-		if NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
-			pos = Entity.GetAbsOrigin(enemy)
-		end
-	end
-	if not pos then return end
-
-    -- pop chaos meteor to first slot
-    if meteor ~= NPC.GetAbilityByIndex(myHero, 3) then
-    	Invoker.PressKey(myHero, "WEER")
-    end
-
-    if Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER") then
-        Ability.CastPosition(blast, pos)
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
+            if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
+        end
     end
 end
 
