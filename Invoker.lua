@@ -578,9 +578,15 @@ end
 -- return whether a spell has been invoked.
 function Invoker.HasInvoked(myHero, spell)
     if not myHero or not spell then return false end
+    
+    local name = Ability.GetName(spell)
     local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
-    local spell_2 = NPC.GetAbilityByIndex(myHero, 4)
-    return (spell == spell_1) or (spell == spell_2)
+    local spell_2 = NPC.GetAbilityByIndex(myHero, 4)    
+   
+    if spell_1 and name == Ability.GetName(spell_1) then return true end
+    if spell_2 and name == Ability.GetName(spell_2) then return true end
+    
+    return false
 end
 
 -- return true if all ordered keys have been pressed successfully
