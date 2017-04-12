@@ -59,7 +59,7 @@ function Detect.OnParticleUpdateEntity(particle)
     if not particle.entity or not NPC.IsHero(particle.entity) then return end
 
     local text = "3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position)
-    -- Log.Write(text)
+    -- Log.Write(text) 
     Detect.Update(NPC.GetUnitName(particle.entity), particle.entity, particle.position, GameRules.GetGameTime())
 end
 
@@ -86,7 +86,13 @@ function Detect.OnDraw()
     if not Menu.IsEnabled(option) then return end
 
     local myHero = Heroes.GetLocal()
-    if not myHero then return end
+    if not myHero then
+        heroList, posInfo, particleInfo, particleHero = {}, {}, {}, {}
+        return
+    end
+
+    -- test
+    -- Log.Write(tostring(Input.GetWorldCursorPos()))
 
     local pos = Entity.GetAbsOrigin(myHero)
     local counter = 0
