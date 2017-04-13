@@ -1,5 +1,6 @@
 local Draw = require("Draw")
 local Dict = require("Dict")
+local Invoker = require("Invoker")
 
 local Detect = {}
 
@@ -51,6 +52,8 @@ function Detect.OnParticleUpdate(particle)
     local text = "2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position)
     -- Log.Write(text)
     Detect.Update(name, nil, particle.position, GameRules.GetGameTime())
+
+    Invoker.MapHack(particle.position, spellname)
 end
 
 -- know particle's index, position, entity
@@ -61,6 +64,8 @@ function Detect.OnParticleUpdateEntity(particle)
     local text = "3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position)
     -- Log.Write(text) 
     Detect.Update(NPC.GetUnitName(particle.entity), particle.entity, particle.position, GameRules.GetGameTime())
+
+    Invoker.MapHack(particle.position, "")
 end
 
 function Detect.Update(name, entity, pos, time)

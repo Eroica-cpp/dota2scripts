@@ -1,4 +1,5 @@
 local Utility = require("Utility")
+local Map = require("Map")
 
 local Invoker = {}
 
@@ -10,6 +11,7 @@ local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "
 local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible")
 local optionTornadoCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Eul/Tornado Combo", "Auto cast ice wall, chaos meteor, sun strike, EMP with eul/tornado")
 local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
+local optionMapHack = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Map Hack", "use information from particle efftects, to tornado tping enemy, or sun strike enemy if it is tping, farming or roshing.")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -243,36 +245,69 @@ function Invoker.KillSteal(myHero)
     end
 end
 
-local TpParticleIndex
+-- local TpParticleIndex
 
--- interrupt enemy's tp, using information from particle effects
-function Invoker.OnParticleCreate(particle)
-    if not particle then return end
-    if particle.name == "teleport_start" then TpParticleIndex = particle.index end
-end
+-- -- interrupt enemy's tp, using information from particle effects
+-- function Invoker.OnParticleCreate(particle)
+--     if not particle then return end
+--     if particle.name == "teleport_start" then TpParticleIndex = particle.index end
+-- end
 
--- interrupt enemy's tp, using information from particle effects
-function Invoker.OnParticleUpdate(particle)
-    if not Menu.IsEnabled(optionInterrupt) then return end
+-- -- interrupt enemy's tp, using information from particle effects
+-- function Invoker.OnParticleUpdate(particle)
+--     if not Menu.IsEnabled(optionInterrupt) then return end
 
-    if not particle then return end
-    if not TpParticleIndex or TpParticleIndex ~= particle.index then return end
+--     if not particle then return end
+--     if not TpParticleIndex or TpParticleIndex ~= particle.index then return end
+
+--     local myHero = Heroes.GetLocal()
+--     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
+--     if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
+--     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
+--     if NPC.HasModifier(myHero, "modifier_teleporting") then return end
+--     if NPC.IsChannellingAbility(myHero) then return end
+
+--     -- have to make sure this tp particle is not from teammate
+--     if not particle.position or particle.position:Length() <= 2 then return end
+--     local allies = NPCs.InRadius(particle.position, 50, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
+--     if allies and #allies > 0 then return end
+    
+--     if Invoker.CastTornado(myHero, particle.position) then return end
+
+--     if Invoker.CastSunStrike(myHero, particle.position) then return end
+-- end
+
+-- according to info given by particle effects
+-- cast sun strike when enemy is (1) tping; (2) farming neutral creep; (3) roshing
+-- interrupt enemy's tp by tornado
+function Invoker.MapHack(pos, particleName)
+    if not Menu.IsEnabled(optionMapHack) then return end
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
+    
     if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
     if NPC.HasModifier(myHero, "modifier_teleporting") then return end
     if NPC.IsChannellingAbility(myHero) then return end
 
-    -- have to make sure this tp particle is not from teammate
-    if not particle.position or particle.position:Length() <= 2 then return end
-    local allies = NPCs.InRadius(particle.position, 50, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
+    -- have to make sure these particles are not from teammate
+    if not pos or not Map.IsValidPos(pos) then return end
+    local allies = NPCs.InRadius(pos, 50, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
     if allies and #allies > 0 then return end
-    
-    if Invoker.CastTornado(myHero, particle.position) then return end
 
-    if Invoker.CastSunStrike(myHero, particle.position) then return end
+    -- tp effects
+    if particleName == "teleport_start"then
+        -- interrupt tp with tornado
+        if Invoker.CastTornado(myHero, pos) then return end
+        -- sun strike on tping enemy. dont sun strike if enemy is tping in fountain (that would be so obvious)
+        if not Map.InFountain(pos) and Invoker.CastSunStrike(myHero, pos) then return end
+    end
+
+    -- sun strike when enemy is farming neutral camp or doing roshan
+    if Map.InNeutralCamp(pos) or Map.InRoshan(pos) then
+        if Invoker.CastSunStrike(myHero, pos) then return end
+    end
 end
 
 -- Auto interrupt enemy's tp or channelling spell with tornado or cold snap
