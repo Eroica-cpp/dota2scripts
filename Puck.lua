@@ -3,6 +3,16 @@ local Utility = require("Utility")
 local Puck = {}
 
 local optionUltimateHelper = Menu.AddOption({"Hero Specific", "Puck"}, "Ultimate Helper", "Cast ultimate on best position once the order key is pressed")
+local optionKillSteal = Menu.AddOption({"Hero Specific", "Puck"}, "Kill Steal", "Cast spell (silence) on enemy to KS")
+
+function Puck.OnUpdate()
+	local myHero = Heroes.GetLocal()
+	if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_puck" then return end
+
+	if Menu.IsEnabled(optionKillSteal) then
+		Puck.KillSteal()
+	end
+end
 
 function Puck.OnPrepareUnitOrders(orders)
     if not orders then return true end
@@ -34,6 +44,38 @@ function Puck.UltimateHelper(default_pos)
 	if best_pos then Ability.CastPosition(ultimate, best_pos) end
 end
 
+function Puck.KillSteal()
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+
+	local orb = NPC.GetAbility(myHero, "puck_illusory_orb")
+	local orb_damage = 0
+	if orb then orb_damage = 70 * Ability.GetLevel(orb) end
+
+	local silence = NPC.GetAbility(myHero, "puck_waning_rift")
+	local silence_damage = 0
+	if silence and Ability.GetLevel(silence) > 0 then 
+		silence_damage = 100 + 60 * (Ability.GetLevel(silence) - 1)
+	end
+
+	for i = 1, Heroes.Count() do
+		local enemy = Heroes.Get(i)
+		if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and Utility.CanCastSpellOn(enemy) then
+			
+			local true_silence_damage = silence_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+			if true_silence_damage >= Entity.GetHealth(enemy) and Puck.CastSilence(enemy) then return end
+
+			local true_orb_damage = orb_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+			if true_orb_damage >= Entity.GetHealth(enemy) then
+				local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+				local delay = dis / 651
+				local pos = Utility.GetPredictedPosition(enemy, delay)
+				if Puck.CastOrb(pos) then return end
+			end
+		end
+	end
+end
+
 -- define Puck's defind behavior
 -- input: target entity, can be nil
 function Puck.Defend(target)
@@ -50,16 +92,18 @@ function Puck.Defend(target)
 	-- if Puck.CastJaunt() then return end
 end
 
-function Puck.CastOrb(default_pos)
+function Puck.CastOrb(pos)
 	local myHero = Heroes.GetLocal()
 	if not myHero then return false end
-	local pos = Entity.GetAbsOrigin(myHero)
 
 	local orb = NPC.GetAbility(myHero, "puck_illusory_orb")
 	if not orb or not Ability.IsCastable(orb, NPC.GetMana(myHero)) then return false end
 
-	local range = 3000
-	Ability.CastPosition(orb, pos + (default_pos - pos):Normalized():Scaled(range))
+	local range = 1950
+	local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
+	if dis > range then return false end
+
+	Ability.CastPosition(orb, pos)
 	return true
 end
 
