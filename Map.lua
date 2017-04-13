@@ -28,9 +28,19 @@ Map.CampLocation = {
 
 Map.RoshanLocation = Vector(-2350, 1800, 160)
 
-function Map.OnDraw()
-	local pos = Input.GetWorldCursorPos()
-	Log.Write(tostring(pos) .." ".. tostring(Map.InRoshan(pos)))
+-- function Map.OnDraw()
+-- 	local pos = Input.GetWorldCursorPos()
+-- 	Log.Write(tostring(pos) .." ".. tostring(Map.InRoshan(pos)))
+-- end
+
+-- valid position can't be like Vector(1.0, 1.0, 1.0) or Vector(350.0, 350.0, 1.0)
+function Map.IsValidPos(pos)
+	if not pos then return false end
+
+	if pos:GetX() == math.floor(pos:GetX()) then return false end
+	if pos:GetY() == math.floor(pos:GetY()) then return false end
+	if pos:GetZ() == math.floor(pos:GetZ()) then return false end
+	return true
 end
 
 function Map.InFountain(pos)
