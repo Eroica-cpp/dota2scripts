@@ -26,6 +26,13 @@ Map.CampLocation = {
 	dire_large_camp_3 = Vector(4350, 750, 384)
 }
 
+Map.RoshanLocation = Vector(-2350, 1800, 160)
+
+function Map.OnDraw()
+	local pos = Input.GetWorldCursorPos()
+	Log.Write(tostring(pos) .." ".. tostring(Map.InRoshan(pos)))
+end
+
 function Map.InFountain(pos)
 	local range = 2000
 	if (Map.BuildingLocation["radiant_fountain"] - pos):Length() <= range then return true end
@@ -40,6 +47,11 @@ function Map.InNeutralCamp(pos)
 		if dis <= range then return true end
 	end
 	return false
+end
+
+function Map.InRoshan(pos)
+	local range = 500
+	return (Map.RoshanLocation - pos):Length() <= range
 end
 
 return Map
