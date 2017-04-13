@@ -292,12 +292,10 @@ function Invoker.MapHack(pos, particleName)
     if NPC.IsChannellingAbility(myHero) then return end
 
     -- have to make sure these particles are not from teammate
-    if not pos or not Map.IsValidPos(pos) then return end
-    local allies = NPCs.InRadius(pos, 50, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
-    if allies and #allies > 0 then return end
+    if not pos or not Map.IsValidPos(pos) or Map.IsAlly(myHero, pos) then return end
 
     -- tp effects
-    if particleName == "teleport_start"then
+    if particleName == "teleport_start" then
         -- interrupt tp with tornado
         if Invoker.CastTornado(myHero, pos) then return end
         -- sun strike on tping enemy. dont sun strike if enemy is tping in fountain (that would be so obvious)

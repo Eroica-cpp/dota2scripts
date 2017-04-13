@@ -36,10 +36,7 @@ Map.RoshanLocation = Vector(-2350, 1800, 160)
 -- valid position can't be like Vector(1.0, 1.0, 1.0) or Vector(350.0, 350.0, 1.0)
 function Map.IsValidPos(pos)
 	if not pos then return false end
-
-	if pos:GetX() == math.floor(pos:GetX()) then return false end
-	if pos:GetY() == math.floor(pos:GetY()) then return false end
-	if pos:GetZ() == math.floor(pos:GetZ()) then return false end
+	if pos:GetX() == math.floor(pos:GetX()) and pos:GetY() == math.floor(pos:GetY()) then return false end
 	return true
 end
 
@@ -48,6 +45,14 @@ function Map.InFountain(pos)
 	if (Map.BuildingLocation["radiant_fountain"] - pos):Length() <= range then return true end
 	if (Map.BuildingLocation["dire_fountain"] - pos):Length() <= range then return true end
 	return false
+end
+
+-- tell whether given position is ally
+function Map.IsAlly(myHero, pos)
+    local range = 50
+    local allies = NPCs.InRadius(pos, range, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
+    if allies and #allies > 0 then return true end
+    return false
 end
 
 function Map.InNeutralCamp(pos)

@@ -1,3 +1,5 @@
+-- package.loaded.Invoker = nil
+
 local Draw = require("Draw")
 local Dict = require("Dict")
 local Invoker = require("Invoker")
@@ -31,8 +33,9 @@ local spellName2heroName = {}
 -- NPC.GetUnitName(particle.entity) can be useful, like know blink start position, smoke position, etc
 function Detect.OnParticleCreate(particle)
     if not particle or not particle.index then return end
-    local text = "1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity)
-    -- Log.Write(text)
+    
+    -- Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity))
+    
     particleInfo[particle.index] = particle.name
 
     if particle.entity then 
@@ -43,16 +46,16 @@ end
 -- know particle's index, position
 function Detect.OnParticleUpdate(particle)
     if not particle or not particle.index then return end
+    
+    -- Log.Write("2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
+    
     if not particleInfo[particle.index] then return end
 
     local spellname = particleInfo[particle.index]
     local name = Dict.Phrase2HeroName(spellname)
     if not name or name == "" then name = particleHero[particle.index] end
-
-    local text = "2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position)
-    -- Log.Write(text)
+    
     Detect.Update(name, nil, particle.position, GameRules.GetGameTime())
-
     Invoker.MapHack(particle.position, spellname)
 end
 
@@ -61,8 +64,8 @@ function Detect.OnParticleUpdateEntity(particle)
     if not particle then return end
     if not particle.entity or not NPC.IsHero(particle.entity) then return end
 
-    local text = "3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position)
-    -- Log.Write(text) 
+    -- Log.Write("3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position))
+    
     Detect.Update(NPC.GetUnitName(particle.entity), particle.entity, particle.position, GameRules.GetGameTime())
 
     Invoker.MapHack(particle.position, "")
@@ -95,9 +98,6 @@ function Detect.OnDraw()
         heroList, posInfo, particleInfo, particleHero = {}, {}, {}, {}
         return
     end
-
-    -- test
-    -- Log.Write(tostring(Input.GetWorldCursorPos()))
 
     local pos = Entity.GetAbsOrigin(myHero)
     local counter = 0
