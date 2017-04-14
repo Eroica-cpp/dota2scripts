@@ -181,7 +181,8 @@ function Invoker.TornadoCombo(myHero)
     end    
 end
 
--- combo: meteor -> blast
+-- combo: chaos meteor -> deafening blast
+-- combo: chaos meteor -> cold snap
 function Invoker.MeteorBlastCombo(myHero)
     if not myHero then return end
 
@@ -189,7 +190,11 @@ function Invoker.MeteorBlastCombo(myHero)
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
+            -- combo: chaos meteor -> deafening blast
             if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
+
+            -- combo: chaos meteor -> cold snap
+            if Invoker.CastColdSnap(myHero, enemy) then return end
         end
     end
 end
