@@ -3,6 +3,7 @@ local Map = require("Map")
 
 local Invoker = {}
 
+local keyGhostWalk = Menu.AddKeyOption({"Hero Specific", "Invoker Extension"}, "Ghost Walk Key", Enum.ButtonCode.KEY_F5)
 local optionRightClickCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Right Click Combo", "cast cold snap, alacrity or forge spirit when right click enemy hero or building")
 local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
 local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
@@ -25,6 +26,11 @@ function Invoker.OnUpdate()
     if NPC.IsChannellingAbility(myHero) then return end
 
     Invoker.UpdateInvokingStatus(myHero)
+
+    if Menu.IsKeyDownOnce(keyGhostWalk) then
+        Invoker.CastGhostWalk(myHero)
+        return
+    end
 
     if Menu.IsEnabled(optionKillSteal) then
         Invoker.KillSteal(myHero)
@@ -593,6 +599,31 @@ function Invoker.CastChaosMeteor(myHero, pos)
     if Invoker.HasInvoked(myHero, meteor) or Invoker.PressKey(myHero, "WEER") then
         Ability.CastPosition(meteor, pos)
         Invoker.ProtectSpell(myHero, meteor)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastGhostWalk(myHero)
+    if not myHero then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+    
+    local ghost_walk = NPC.GetAbility(myHero, "invoker_ghost_walk")
+    if not ghost_walk or not Ability.IsCastable(ghost_walk, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
+
+    if Invoker.HasInvoked(myHero, ghost_walk) or Invoker.PressKey(myHero, "QQWR") then
+        local ratio = 0.8
+        if Entity.GetHealth(myHero) >= ratio * Entity.GetMaxHealth(myHero) then
+            Invoker.PressKey(myHero, "WWW")
+        else
+            Invoker.PressKey(myHero, "QQQ")
+        end
+
+        Ability.CastNoTarget(ghost_walk)
         return true
     end
 
