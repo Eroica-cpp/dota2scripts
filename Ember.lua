@@ -37,7 +37,7 @@ function Ember.FistChain(myHero)
 	local chain = NPC.GetAbilityByIndex(myHero, 0)
 	if not chain or not Ability.IsCastable(chain, NPC.GetMana(myHero)) then return end
 
-	local chain_radius = 400
+	local chain_radius = 100
 	local enemyAround = NPC.GetHeroesInRadius(myHero, chain_radius, Enum.TeamType.TEAM_ENEMY)
 	if #enemyAround > 0 then
 		Ability.CastNoTarget(chain)
