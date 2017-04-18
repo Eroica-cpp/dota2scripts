@@ -242,7 +242,7 @@ function Invoker.KillSteal(myHero)
             local multiplier = NPC.GetMagicalArmorDamageMultiplier(enemy)
 
             -- cast tornado to KS
-            if enemyHp <= damage_tornado * multiplier and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
+            if enemyHp <= damage_tornado * multiplier and Utility.CanCastSpellOn(enemy) then
                 local speed = 1000
                 local delay = dis / (speed + 1)
                 local pos = Utility.GetPredictedPosition(enemy, delay)
@@ -250,7 +250,7 @@ function Invoker.KillSteal(myHero)
             end
 
             -- cast deafening blast to KS
-            if enemyHp <= damage_deafening_blast * multiplier and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
+            if enemyHp <= damage_deafening_blast * multiplier and Utility.CanCastSpellOn(enemy) then
                 local speed = 1100
                 local delay = dis / (speed + 1)
                 local pos = Utility.GetPredictedPosition(enemy, delay)
@@ -258,7 +258,7 @@ function Invoker.KillSteal(myHero)
             end
 
             -- cast sun strike to KS
-            if enemyHp <= damage_sun_strike and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then
+            if enemyHp <= damage_sun_strike and Utility.CanCastSpellOn(enemy) then
             	local delay = 1.7 -- sun strike has 1.7s delay
             	local pos = Utility.GetPredictedPosition(enemy, delay)
                 if Invoker.CastSunStrike(myHero, pos) then return end
@@ -306,9 +306,7 @@ function Invoker.Interrupt(myHero)
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy)
-            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
-            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and Utility.CanCastSpellOn(enemy)
             and (NPC.IsChannellingAbility(enemy) or NPC.HasModifier(enemy, "modifier_teleporting")) then
 
             -- cast cold snap to interrupt
@@ -342,9 +340,7 @@ function Invoker.FixedPositionCombo(myHero)
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         -- NPC.GetMoveSpeed() fails to consider (1) hex (2) ice wall
-        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy)
-            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
-            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and Utility.CanCastSpellOn(enemy)
             and (Utility.CantMove(enemy) or Utility.GetMoveSpeed(enemy) < speedThreshold) then
 
             -- cast chaos meteor on stunned/rooted enemy
@@ -459,10 +455,6 @@ function Invoker.CastColdSnap(myHero, target)
     local range = 1000
     local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(target)):Length()
     if dis > range then return false end
-
-    if NPC.IsStructure(target) or not NPC.IsKillable(target) then return false end
-    if NPC.HasState(target, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
-    if NPC.HasState(target, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
 
     if Invoker.HasInvoked(myHero, cold_snap) or Invoker.PressKey(myHero, "QQQR") then
         Ability.CastTarget(cold_snap, target)
