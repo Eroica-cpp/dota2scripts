@@ -267,4 +267,61 @@ function Utility.IsSuitableToCastSpell(myHero)
     return true
 end
 
+function Utility.IsAffectedByDoT(npc)
+    if not npc then return false end
+
+    if NPC.HasModifier(npc, "modifier_item_radiance_debuff") then return true end
+    if NPC.HasModifier(npc, "modifier_item_urn_damage") then return true end
+    if NPC.HasModifier(npc, "modifier_alchemist_acid_spray") then return true end
+    if NPC.HasModifier(npc, "modifier_cold_feet") then return true end
+    if NPC.HasModifier(npc, "modifier_ice_blast") then return true end
+    if NPC.HasModifier(npc, "modifier_axe_battle_hunger") then return true end
+    if NPC.HasModifier(npc, "modifier_bane_fiends_grip") then return true end
+    if NPC.HasModifier(npc, "modifier_batrider_firefly") then return true end
+    if NPC.HasModifier(npc, "modifier_rattletrap_battery_assault") then return true end
+    if NPC.HasModifier(npc, "modifier_crystal_maiden_frostbite") then return true end
+    if NPC.HasModifier(npc, "modifier_crystal_maiden_freezing_field") then return true end
+    if NPC.HasModifier(npc, "modifier_dazzle_poison_touch") then return true end
+    if NPC.HasModifier(npc, "modifier_disruptor_static_storm") then return true end
+    if NPC.HasModifier(npc, "modifier_disruptor_thunder_strike") then return true end
+    if NPC.HasModifier(npc, "modifier_doom_bringer_doom") then return true end
+    if NPC.HasModifier(npc, "modifier_doom_bringer_scorched_earth_effect") then return true end
+    if NPC.HasModifier(npc, "modifier_dragon_knight_corrosive_breath_dot") then return true end
+    if NPC.HasModifier(npc, "modifier_earth_spirit_magnetize") then return true end
+    if NPC.HasModifier(npc, "modifier_ember_spirit_flame_guard") then return true end
+    if NPC.HasModifier(npc, "modifier_enigma_malefice") then return true end
+    if NPC.HasModifier(npc, "modifier_brewmaster_fire_permanent_immolation") then return true end
+    if NPC.HasModifier(npc, "modifier_gyrocopter_rocket_barrage") then return true end
+    if NPC.HasModifier(npc, "modifier_huskar_burning_spear_debuff") then return true end
+    if NPC.HasModifier(npc, "modifier_invoker_ice_wall_slow_debuff") then return true end
+    if NPC.HasModifier(npc, "modifier_invoker_chaos_meteor_burn") then return true end
+    if NPC.HasModifier(npc, "modifier_jakiro_dual_breath_burn") then return true end
+    if NPC.HasModifier(npc, "modifier_jakiro_macropyre") then return true end
+    if NPC.HasModifier(npc, "modifier_juggernaut_blade_fury") then return true end
+    if NPC.HasModifier(npc, "modifier_leshrac_diabolic_edict") then return true end
+    if NPC.HasModifier(npc, "modifier_leshrac_pulse_nova") then return true end
+    if NPC.HasModifier(npc, "modifier_ogre_magi_ignite") then return true end
+    if NPC.HasModifier(npc, "modifier_phoenix_fire_spirit_burn") then return true end
+    if NPC.HasModifier(npc, "modifier_phoenix_icarus_dive_burn") then return true end
+    if NPC.HasModifier(npc, "modifier_phoenix_sun_debuff") then return true end
+    if NPC.HasModifier(npc, "modifier_pudge_rot") then return true end
+    if NPC.HasModifier(npc, "modifier_pugna_life_drain") then return true end
+    if NPC.HasModifier(npc, "modifier_queenofpain_shadow_strike") then return true end
+    if NPC.HasModifier(npc, "modifier_razor_eye_of_the_storm") then return true end
+    if NPC.HasModifier(npc, "modifier_sandking_sand_storm") then return true end
+    if NPC.HasModifier(npc, "modifier_silencer_curse_of_the_silent") then return true end
+    if NPC.HasModifier(npc, "modifier_sniper_shrapnel_slow") then return true end
+    if NPC.HasModifier(npc, "modifier_shredder_chakram_debuff") then return true end
+    if NPC.HasModifier(npc, "modifier_treant_leech_seed") then return true end
+    if NPC.HasModifier(npc, "modifier_abyssal_underlord_firestorm_burn") then return true end
+    if NPC.HasModifier(npc, "modifier_venomancer_venomous_gale") then return true end
+    if NPC.HasModifier(npc, "modifier_venomancer_poison_nova") then return true end
+    if NPC.HasModifier(npc, "modifier_viper_viper_strike") then return true end
+    if NPC.HasModifier(npc, "modifier_warlock_shadow_word") then return true end
+    if NPC.HasModifier(npc, "modifier_warlock_golem_permanent_immolation_debuff") then return true end
+    if NPC.HasModifier(npc, "modifier_maledict") then return true end
+
+    return false
+end
+
 return Utility
