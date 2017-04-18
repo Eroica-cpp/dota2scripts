@@ -256,4 +256,15 @@ function Utility.GetHexTimeLeft(npc)
     return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
 end
 
+-- return false for conditions that are not suitable to cast spell (like TPing, being invisible)
+-- return true otherwise
+function Utility.IsSuitableToCastSpell(myHero)
+    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return false end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return false end
+    if NPC.IsChannellingAbility(myHero) then return false end
+    
+    return true
+end
+
 return Utility

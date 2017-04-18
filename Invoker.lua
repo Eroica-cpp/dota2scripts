@@ -20,10 +20,6 @@ local lastInvokeTime = 0
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
-	if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
-    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
-    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
-    if NPC.IsChannellingAbility(myHero) then return end
 
     Invoker.UpdateInvokingStatus(myHero)
 
@@ -96,6 +92,7 @@ end
 
 function Invoker.InstanceHelper(myHero, order)
 	if not myHero or not order then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
 	-- if about to move
 	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
@@ -123,6 +120,7 @@ end
 -- combo: right click -> forge spirit
 function Invoker.RightClickCombo(myHero, target)
     if not myHero or not target then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
     if Entity.IsSameTeam(myHero, target) then return end
     if not NPC.IsEntityInRange(myHero, target, NPC.GetAttackRange(myHero)) then return end
 
@@ -146,6 +144,7 @@ end
 -- priority: ice wall -> sun strike -> chaos meteor -> emp 
 function Invoker.TornadoCombo(myHero)
     if not myHero then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
     local mod
     for i = 1, Heroes.Count() do
@@ -184,6 +183,7 @@ end
 -- combo: chaos meteor -> cold snap
 function Invoker.MeteorBlastCombo(myHero)
     if not myHero then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
 	-- check nearby enemy who is affected by chaos meteor
     for i = 1, Heroes.Count() do
@@ -201,6 +201,7 @@ end
 -- auto cast deafening blast, tornado or sun strike to predicted position for kill steal
 function Invoker.KillSteal(myHero)
     if not myHero then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
     local Q = NPC.GetAbility(myHero, "invoker_quas")
     local W = NPC.GetAbility(myHero, "invoker_wex")
@@ -295,6 +296,7 @@ function Invoker.MapHack(pos, particleName)
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
     
     if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
@@ -321,6 +323,7 @@ end
 -- Auto interrupt enemy's tp or channelling spell with tornado or cold snap
 function Invoker.Interrupt(myHero)
     if not myHero then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
@@ -353,6 +356,7 @@ end
 -- priority: chaos meteor -> EMP -> sun strike
 function Invoker.FixedPositionCombo(myHero)
     if not myHero then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
     local speedThreshold = 250
 
@@ -384,7 +388,8 @@ end
 -- priority: tornado -> blast -> cold snap -> ice wall -> EMP
 function Invoker.Defend(myHero, source)
     if not myHero or not source then return end
-    
+    if not Utility.IsSuitableToCastSpell(myHero) then return end    
+
     -- 1. use tornado to defend if available
     if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(source)) then return end
 
@@ -406,6 +411,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastTornado(myHero, pos)
     if not myHero or not pos then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -438,6 +444,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastDeafeningBlast(myHero, pos)
     if not myHero or not pos then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -461,6 +468,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastColdSnap(myHero, target)
     if not myHero or not target then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -489,7 +497,7 @@ end
 -- input: target, can be nil
 function Invoker.CastIceWall(myHero, target)
     if not myHero then return false end
-    if not NPC.IsVisible(myHero) then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -523,6 +531,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastEMP(myHero, pos)
     if not myHero or not pos then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -546,6 +555,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastAlacrity(myHero, target)
     if not myHero or not target then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
     if not Entity.IsSameTeam(myHero, target) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
@@ -566,6 +576,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastForgeSpirit(myHero)
     if not myHero then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -585,6 +596,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastSunStrike(myHero, pos)
     if not myHero or not pos then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -604,6 +616,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastChaosMeteor(myHero, pos)
     if not myHero or not pos then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -627,6 +640,7 @@ end
 -- return true if successfully cast, false otherwise
 function Invoker.CastGhostWalk(myHero)
     if not myHero then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
