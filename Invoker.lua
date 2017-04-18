@@ -5,7 +5,7 @@ local Invoker = {}
 
 local keyGhostWalk = Menu.AddKeyOption({"Hero Specific", "Invoker Extension"}, "Ghost Walk Key", Enum.ButtonCode.KEY_F5)
 local optionRightClickCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Right Click Combo", "cast cold snap, alacrity or forge spirit when right click enemy hero or building")
-local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Meteor & Blast Combo", "cast defending blast after chaos meteor")
+local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Meteor & Blast Combo", "cast deafening blast after chaos meteor")
 local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
@@ -251,38 +251,6 @@ function Invoker.KillSteal(myHero)
         end
     end
 end
-
--- local TpParticleIndex
-
--- -- interrupt enemy's tp, using information from particle effects
--- function Invoker.OnParticleCreate(particle)
---     if not particle then return end
---     if particle.name == "teleport_start" then TpParticleIndex = particle.index end
--- end
-
--- -- interrupt enemy's tp, using information from particle effects
--- function Invoker.OnParticleUpdate(particle)
---     if not Menu.IsEnabled(optionInterrupt) then return end
-
---     if not particle then return end
---     if not TpParticleIndex or TpParticleIndex ~= particle.index then return end
-
---     local myHero = Heroes.GetLocal()
---     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
---     if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
---     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
---     if NPC.HasModifier(myHero, "modifier_teleporting") then return end
---     if NPC.IsChannellingAbility(myHero) then return end
-
---     -- have to make sure this tp particle is not from teammate
---     if not particle.position or particle.position:Length() <= 2 then return end
---     local allies = NPCs.InRadius(particle.position, 50, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_FRIEND)
---     if allies and #allies > 0 then return end
-    
---     if Invoker.CastTornado(myHero, particle.position) then return end
-
---     if Invoker.CastSunStrike(myHero, particle.position) then return end
--- end
 
 -- according to info given by particle effects
 -- cast sun strike when enemy is (1) tping; (2) farming neutral creep; (3) roshing
