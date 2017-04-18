@@ -6,11 +6,12 @@ local Invoker = {}
 local keyGhostWalk = Menu.AddKeyOption({"Hero Specific", "Invoker Extension"}, "Ghost Walk Key", Enum.ButtonCode.KEY_F5)
 local optionRightClickCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Right Click Combo", "cast cold snap, alacrity or forge spirit when right click enemy hero or building")
 local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Meteor & Blast Combo", "cast deafening blast after chaos meteor")
+local optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Cold Snap Combo", "cast cold snap on enemy who is affected by DoT, like chaos meteor, urn, ice wall, etc.")
+local optionTornadoCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Eul/Tornado Combo", "Auto cast ice wall, chaos meteor, sun strike, EMP with eul/tornado")
+local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible")
 local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
-local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible")
-local optionTornadoCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Eul/Tornado Combo", "Auto cast ice wall, chaos meteor, sun strike, EMP with eul/tornado")
 local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
 local optionMapHack = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Map Hack", "use information from particle efftects, to tornado tping enemy, or sun strike enemy if it is tping, farming or roshing.")
 
@@ -46,7 +47,11 @@ function Invoker.OnUpdate()
 
     if Menu.IsEnabled(optionTornadoCombo) then
         Invoker.TornadoCombo(myHero)
-    end    
+    end
+
+    if Menu.IsEnabled(optionColdSnapCombo) then
+        Invoker.ColdSnapCombo(myHero)
+    end
 end
 
 function Invoker.OnPrepareUnitOrders(orders)
@@ -176,7 +181,6 @@ function Invoker.TornadoCombo(myHero)
 end
 
 -- combo: chaos meteor -> deafening blast
--- combo: chaos meteor -> cold snap
 function Invoker.MeteorBlastCombo(myHero)
     if not myHero then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
@@ -185,10 +189,21 @@ function Invoker.MeteorBlastCombo(myHero)
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
-            -- combo: chaos meteor -> deafening blast
+            
             if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
+        end
+    end
+end
 
-            -- combo: chaos meteor -> cold snap
+-- cast cold snap on enemy who is affected by DoT
+function Invoker.ColdSnapCombo(myHero)
+    if not myHero then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and Utility.IsAffectedByDoT(enemy) then
+            
             if Invoker.CastColdSnap(myHero, enemy) then return end
         end
     end
@@ -433,6 +448,7 @@ end
 function Invoker.CastColdSnap(myHero, target)
     if not myHero or not target then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(target) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
@@ -521,6 +537,7 @@ function Invoker.CastAlacrity(myHero, target)
     if not myHero or not target then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
     if not Entity.IsSameTeam(myHero, target) then return false end
+    if not Utility.CanCastSpellOn(target) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
