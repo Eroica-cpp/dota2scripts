@@ -577,6 +577,11 @@ function Invoker.CastSunStrike(myHero, pos)
     local sun_strike = NPC.GetAbility(myHero, "invoker_sun_strike")
     if not sun_strike or not Ability.IsCastable(sun_strike, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
 
+    -- dont cast sun strike if there are more than one enemy around the position
+    local radius = 175
+    local enemies = NPCs.InRadius(pos, radius, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+    if enemies and #enemies >= 2 then return false end
+
     if Invoker.HasInvoked(myHero, sun_strike) or Invoker.PressKey(myHero, "EEER") then
         Ability.CastPosition(sun_strike, pos)
         Invoker.ProtectSpell(myHero, sun_strike)
