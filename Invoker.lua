@@ -55,10 +55,6 @@ function Invoker.OnPrepareUnitOrders(orders)
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return true end
-    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return true end
-    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return true end
-    if NPC.HasModifier(myHero, "modifier_teleporting") then return true end
-    if NPC.IsChannellingAbility(myHero) then return true end
 
     if Menu.IsEnabled(optionRightClickCombo) and orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
         Invoker.RightClickCombo(myHero, orders.target)
@@ -704,6 +700,7 @@ end
 -- so as to protect another spell
 function Invoker.ProtectSpell(myHero, spell)
     if not myHero or not spell then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
     if not Invoker.HasInvoked(myHero, spell) then return end
 
     local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
@@ -729,6 +726,7 @@ end
 -- return false otherwise
 function Invoker.PressKey(myHero, keys)
 	if not myHero or not keys then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
 	if Invoker.GetInstances(myHero) == keys then return true end
 
     local Q = NPC.GetAbility(myHero, "invoker_quas")
