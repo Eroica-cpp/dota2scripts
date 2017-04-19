@@ -5,14 +5,11 @@ AutoFarm.key = Menu.AddKeyOption({ "Utility", "Auto Farm" }, "Turn On/Off Key", 
 AutoFarm.font = Renderer.LoadFont("Tahoma", 24, Enum.FontWeight.EXTRABOLD)
 
 local shouldGoFarm = false
+local lasttime
+local delay = 0.05
 
 function AutoFarm.OnUpdate()
 	if not Menu.IsEnabled(AutoFarm.optionEnabled) then return end
-
-	if Menu.IsKeyDownOnce(AutoFarm.key) then
-		shouldGoFarm = not shouldGoFarm
-	end
-
 	if not shouldGoFarm then return end
 
 	local myHero = Heroes.GetLocal()
@@ -25,17 +22,30 @@ function AutoFarm.OnUpdate()
 			AutoFarm.Farm(npc)
 		end
 	end
+end
 
+function AutoFarm.OnDraw()
+	if not Menu.IsEnabled(AutoFarm.optionEnabled) then return end
+
+	if Menu.IsKeyDownOnce(AutoFarm.key) then
+		shouldGoFarm = not shouldGoFarm
+	end
+
+	if not shouldGoFarm then return end
+
+	local myHero = Heroes.GetLocal()
+	if not myHero then return end
+
+	-- draw when farming key up
+	local pos = Entity.GetAbsOrigin(myHero)
+	local x, y, visible = Renderer.WorldToScreen(pos)
+	Renderer.SetDrawColor(0, 255, 0, 255)
+	Renderer.DrawTextCentered(AutoFarm.font, x, y, "Micro", 1)
 end
 
 function AutoFarm.Farm(npc)
 	if not npc or not Entity.IsAlive(npc) then return end
-
-	-- draw when farming key up
-	local pos = Entity.GetAbsOrigin(npc)
-	local x, y, visible = Renderer.WorldToScreen(pos)
-	Renderer.SetDrawColor(0, 255, 0, 255)
-	Renderer.DrawTextCentered(AutoFarm.font, x, y, "Auto", 1)
+	if lasttime and math.abs(GameRules.GetGameTime() - lasttime) <= delay then return end
 
 	local myPlayer = Players.GetLocal()
 	if not myPlayer then return end
@@ -52,6 +62,7 @@ function AutoFarm.Farm(npc)
 			and NPC.IsKillable(enemy)
 			then
 			Player.AttackTarget(myPlayer, npc, enemy, true)
+			lasttime = GameRules.GetGameTime()
 			return
 		end
 	end	
@@ -68,6 +79,7 @@ function AutoFarm.Farm(npc)
 			and Entity.GetHealth(creep) <= physicalDamage
 			then
 			Player.AttackTarget(myPlayer, npc, creep, true)
+			lasttime = GameRules.GetGameTime()
 			return
 		end
 	end
@@ -82,7 +94,8 @@ function AutoFarm.Farm(npc)
 			and Entity.GetHealth(creep) > 2 * physicalDamage
 			then
 			Player.AttackTarget(myPlayer, npc, creep, true)
-			return			
+			lasttime = GameRules.GetGameTime()
+			return
 		end
 	end
 
@@ -94,6 +107,7 @@ function AutoFarm.Farm(npc)
 			and creep ~= Heroes.GetLocal() 
 			then
 			Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET, creep, Vector(), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, npc)
+			lasttime = GameRules.GetGameTime()
 			return
 		end
 	end
