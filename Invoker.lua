@@ -29,29 +29,31 @@ function Invoker.OnUpdate()
         return
     end
 
-    if Menu.IsEnabled(optionKillSteal) then
-        Invoker.KillSteal(myHero)
-    end    
+    Invoker.Iteration(myHero)
 
-    if Menu.IsEnabled(optionInterrupt) then
-        Invoker.Interrupt(myHero)
-    end  
+    -- if Menu.IsEnabled(optionKillSteal) then
+    --     Invoker.KillSteal(myHero)
+    -- end    
 
-    if Menu.IsEnabled(optionFixedPositionCombo) then
-        Invoker.FixedPositionCombo(myHero)
-    end  
+    -- if Menu.IsEnabled(optionInterrupt) then
+    --     Invoker.Interrupt(myHero)
+    -- end  
 
-    if Menu.IsEnabled(optionMeteorBlastCombo) then
-        Invoker.MeteorBlastCombo(myHero)
-    end
+    -- if Menu.IsEnabled(optionFixedPositionCombo) then
+    --     Invoker.FixedPositionCombo(myHero)
+    -- end  
 
-    if Menu.IsEnabled(optionTornadoCombo) then
-        Invoker.TornadoCombo(myHero)
-    end
+    -- if Menu.IsEnabled(optionMeteorBlastCombo) then
+    --     Invoker.MeteorBlastCombo(myHero)
+    -- end
 
-    if Menu.IsEnabled(optionColdSnapCombo) then
-        Invoker.ColdSnapCombo(myHero)
-    end
+    -- if Menu.IsEnabled(optionTornadoCombo) then
+    --     Invoker.TornadoCombo(myHero)
+    -- end
+
+    -- if Menu.IsEnabled(optionColdSnapCombo) then
+    --     Invoker.ColdSnapCombo(myHero)
+    -- end
 end
 
 function Invoker.OnPrepareUnitOrders(orders)
@@ -88,6 +90,30 @@ function Invoker.UpdateInvokingStatus(myHero)
     if Input.IsKeyDown(Enum.ButtonCode.KEY_F5) or Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) or Input.IsKeyDown(Enum.ButtonCode.KEY_D) or Input.IsKeyDown(Enum.ButtonCode.KEY_F) then
         isInvokingSpell = true
         lastInvokeTime = GameRules.GetGameTime()
+    end
+end
+
+-- deal all iteration related features, for efficiency
+function Invoker.Iteration(myHero)
+    if not myHero then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) then
+            
+            if Menu.IsEnabled(optionKillSteal) then Invoker.KillSteal(myHero, enemy) end
+
+            if Menu.IsEnabled(optionInterrupt) then Invoker.Interrupt(myHero, enemy) end
+
+            if Menu.IsEnabled(optionFixedPositionCombo) then Invoker.FixedPositionCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionMeteorBlastCombo) then Invoker.MeteorBlastCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionTornadoCombo) then Invoker.TornadoCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionColdSnapCombo) then Invoker.ColdSnapCombo(myHero, enemy) end
+        end
     end
 end
 
@@ -143,81 +169,78 @@ end
 
 -- tornado/eul combo
 -- priority: ice wall -> sun strike -> chaos meteor -> emp 
-function Invoker.TornadoCombo(myHero)
-    if not myHero then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end
+function Invoker.TornadoCombo(myHero, enemy)
+    if not myHero or not enemy then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
 
     local mod
-    for i = 1, Heroes.Count() do
-        local enemy = Heroes.Get(i)
-        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) then
 
-            local mod1 = NPC.GetModifier(enemy, "modifier_invoker_tornado")
-            local mod2 = NPC.GetModifier(enemy, "modifier_eul_cyclone")
-            local mod3 = NPC.GetModifier(enemy, "modifier_brewmaster_storm_cyclone")
+    local mod1 = NPC.GetModifier(enemy, "modifier_invoker_tornado")
+    local mod2 = NPC.GetModifier(enemy, "modifier_eul_cyclone")
+    local mod3 = NPC.GetModifier(enemy, "modifier_brewmaster_storm_cyclone")
 
-            if mod1 then mod = mod1 end
-            if mod2 then mod = mod2 end
-            if mod3 then mod = mod3 end
+    if mod1 then mod = mod1 end
+    if mod2 then mod = mod2 end
+    if mod3 then mod = mod3 end
 
-            if mod then
-                local pos =  Entity.GetAbsOrigin(enemy)
-                local time_left = math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
+    if not mod then return false end
 
-                -- 1. cast ice wall
-                if Invoker.CastIceWall(myHero, enemy) then return end
+    local pos =  Entity.GetAbsOrigin(enemy)
+    local time_left = math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
 
-                -- 2. cast sun strike
-                if time_left >= 1 and time_left < 1.7 and Invoker.CastSunStrike(myHero, pos) then return end
+    -- 1. cast ice wall
+    if Invoker.CastIceWall(myHero, enemy) then return true end
 
-                -- 3. cast chaos meteor
-                if time_left >= 0.5 and time_left < 1.3 and Invoker.CastChaosMeteor(myHero, pos) then return end
-                
-                -- 4. cast EMP
-                if time_left >= 1 and time_left < 2.9 and Invoker.CastEMP(myHero, pos) then return end
-            end
-        end
-    end    
+    -- 2. cast sun strike
+    if time_left >= 1 and time_left < 1.7 and Invoker.CastSunStrike(myHero, pos) then return true end
+
+    -- 3. cast chaos meteor
+    if time_left >= 0.5 and time_left < 1.3 and Invoker.CastChaosMeteor(myHero, pos) then return true end
+
+    -- 4. cast EMP
+    if time_left >= 1 and time_left < 2.9 and Invoker.CastEMP(myHero, pos) then return true end
+
+    return false
 end
 
 -- combo: chaos meteor -> deafening blast
-function Invoker.MeteorBlastCombo(myHero)
-    if not myHero then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end
+function Invoker.MeteorBlastCombo(myHero, enemy)
+    if not myHero or not enemy then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
 
 	-- check nearby enemy who is affected by chaos meteor
-    for i = 1, Heroes.Count() do
-        local enemy = Heroes.Get(i)
-        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
-            
-            if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
-        end
-    end
+    if not NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then return false end
+
+    if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return true end
+
+    return false
 end
 
 -- cast cold snap on enemy who is affected by DoT
-function Invoker.ColdSnapCombo(myHero)
-    if not myHero then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end
+function Invoker.ColdSnapCombo(myHero, enemy)
+    if not myHero or not enemy then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
 
-    for i = 1, Heroes.Count() do
-        local enemy = Heroes.Get(i)
-        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and Utility.IsAffectedByDoT(enemy) then
-            
-            if Invoker.CastColdSnap(myHero, enemy) then return end
-        end
-    end
+    if not Utility.IsAffectedByDoT(enemy) then return false end
+
+    if Invoker.CastColdSnap(myHero, enemy) then return true end
+
+    return false
 end
 
 -- auto cast deafening blast, tornado or sun strike to predicted position for kill steal
-function Invoker.KillSteal(myHero)
-    if not myHero then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end
+function Invoker.KillSteal(myHero, enemy)
+    if not myHero or not enemy then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
 
     local Q = NPC.GetAbility(myHero, "invoker_quas")
     local W = NPC.GetAbility(myHero, "invoker_wex")
     local E = NPC.GetAbility(myHero, "invoker_exort")
-    if not Q or not W or not E then return end
+    if not Q or not W or not E then return false end
 
     local Q_level = Ability.GetLevel(Q)
     local W_level = Ability.GetLevel(W)
@@ -232,39 +255,35 @@ function Invoker.KillSteal(myHero)
     local damage_tornado = 45 * W_level
     local damage_deafening_blast = 40 * E_level
     local damage_sun_strike = 100 + 62.5 * (E_level - 1)
+   
+    local enemyHp = Entity.GetHealth(enemy)
+    local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+    local multiplier = NPC.GetMagicalArmorDamageMultiplier(enemy)
 
-    for i = 1, Heroes.Count() do
-        local enemy = Heroes.Get(i)
-        if not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
-            
-        	local enemyHp = Entity.GetHealth(enemy)
-            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
-            local multiplier = NPC.GetMagicalArmorDamageMultiplier(enemy)
-
-            -- cast tornado to KS
-            if enemyHp <= damage_tornado * multiplier and Utility.CanCastSpellOn(enemy) then
-                local speed = 1000
-                local delay = dis / (speed + 1)
-                local pos = Utility.GetPredictedPosition(enemy, delay)
-                if Invoker.CastTornado(myHero, pos) then return end
-            end
-
-            -- cast deafening blast to KS
-            if enemyHp <= damage_deafening_blast * multiplier and Utility.CanCastSpellOn(enemy) then
-                local speed = 1100
-                local delay = dis / (speed + 1)
-                local pos = Utility.GetPredictedPosition(enemy, delay)
-                if Invoker.CastDeafeningBlast(myHero, pos) then return end
-            end
-
-            -- cast sun strike to KS
-            if enemyHp <= damage_sun_strike and Utility.CanCastSpellOn(enemy) then
-            	local delay = 1.7 -- sun strike has 1.7s delay
-            	local pos = Utility.GetPredictedPosition(enemy, delay)
-                if Invoker.CastSunStrike(myHero, pos) then return end
-            end
-        end
+    -- cast tornado to KS
+    if enemyHp <= damage_tornado * multiplier then
+        local speed = 1000
+        local delay = dis / (speed + 1)
+        local pos = Utility.GetPredictedPosition(enemy, delay)
+        if Invoker.CastTornado(myHero, pos) then return true end
     end
+
+    -- cast deafening blast to KS
+    if enemyHp <= damage_deafening_blast * multiplier then
+        local speed = 1100
+        local delay = dis / (speed + 1)
+        local pos = Utility.GetPredictedPosition(enemy, delay)
+        if Invoker.CastDeafeningBlast(myHero, pos) then return true end
+    end
+
+    -- cast sun strike to KS
+    if enemyHp <= damage_sun_strike then
+        local delay = 1.7 -- sun strike has 1.7s delay
+        local pos = Utility.GetPredictedPosition(enemy, delay)
+        if Invoker.CastSunStrike(myHero, pos) then return true end
+    end
+
+    return false
 end
 
 -- according to info given by particle effects
@@ -300,63 +319,56 @@ function Invoker.MapHack(pos, particleName)
 end
 
 -- Auto interrupt enemy's tp or channelling spell with tornado or cold snap
-function Invoker.Interrupt(myHero)
-    if not myHero then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end
+function Invoker.Interrupt(myHero, enemy)
+    if not myHero or not enemy then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
 
-    for i = 1, Heroes.Count() do
-        local enemy = Heroes.Get(i)
-        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and Utility.CanCastSpellOn(enemy)
-            and (NPC.IsChannellingAbility(enemy) or NPC.HasModifier(enemy, "modifier_teleporting")) then
+    if not NPC.IsChannellingAbility(enemy) and not NPC.HasModifier(enemy, "modifier_teleporting") then return false end
 
-            -- cast cold snap to interrupt
-            if Invoker.CastColdSnap(myHero, enemy) then return end
+    -- cast cold snap to interrupt
+    if Invoker.CastColdSnap(myHero, enemy) then return true end
 
-            -- cast tornado to interrupt
-            if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
+    -- cast tornado to interrupt
+    if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return true end
 
-            -- cast sun strike as follow up
-            if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return end
+    -- cast sun strike as follow up
+    if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return true end
 
-            -- cast chaos meteor as follow up
-            if Invoker.CastChaosMeteor(myHero, Entity.GetAbsOrigin(enemy)) then return end
+    -- cast chaos meteor as follow up
+    if Invoker.CastChaosMeteor(myHero, Entity.GetAbsOrigin(enemy)) then return true end
 
-            -- cast EMP as follow up
-            if Invoker.CastEMP(myHero, Entity.GetAbsOrigin(enemy)) then return end
+    -- cast EMP as follow up
+    if Invoker.CastEMP(myHero, Entity.GetAbsOrigin(enemy)) then return true end
 
-        end
-    end
+    return false
 end
 
 -- Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible
 -- Auto cast these spells on enemy who is slower then threshold
 -- priority: chaos meteor -> EMP -> sun strike
-function Invoker.FixedPositionCombo(myHero)
-    if not myHero then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end
+function Invoker.FixedPositionCombo(myHero, enemy)
+    if not myHero or not enemy then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
 
+    -- NPC.GetMoveSpeed() fails to consider (1) hex (2) ice wall
     local speedThreshold = 250
+    if not Utility.CantMove(enemy) and Utility.GetMoveSpeed(enemy) >= speedThreshold then return false end
 
-    for i = 1, Heroes.Count() do
-        local enemy = Heroes.Get(i)
-        -- NPC.GetMoveSpeed() fails to consider (1) hex (2) ice wall
-        if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) and Utility.CanCastSpellOn(enemy)
-            and (Utility.CantMove(enemy) or Utility.GetMoveSpeed(enemy) < speedThreshold) then
+    -- cast chaos meteor on stunned/rooted enemy
+    local pos = Utility.GetPredictedPosition(enemy, 1.3)
+    if Invoker.CastChaosMeteor(myHero, pos) then return true end
 
-            -- cast chaos meteor on stunned/rooted enemy
-            local pos = Utility.GetPredictedPosition(enemy, 1.3)
-            if Invoker.CastChaosMeteor(myHero, pos) then return end
+    -- cast EMP on stunned/rooted enemy
+    local pos = Utility.GetPredictedPosition(enemy, 2.9)
+    if Invoker.CastEMP(myHero, pos) then return true end
 
-            -- cast EMP on stunned/rooted enemy
-            local pos = Utility.GetPredictedPosition(enemy, 2.9)
-            if Invoker.CastEMP(myHero, pos) then return end
+    -- cast sun strike on stunned/rooted enemy
+    local pos = Utility.GetPredictedPosition(enemy, 1.7)
+    if Invoker.CastSunStrike(myHero, pos) then return true end
 
-            -- cast sun strike on stunned/rooted enemy
-            local pos = Utility.GetPredictedPosition(enemy, 1.7)
-            if Invoker.CastSunStrike(myHero, pos) then return end
-
-        end
-    end
+    return false
 end
 
 -- define defensive actions
