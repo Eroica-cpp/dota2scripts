@@ -102,17 +102,17 @@ function Invoker.Iteration(myHero)
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) then
             
-            if Menu.IsEnabled(optionKillSteal) then Invoker.KillSteal(myHero, enemy) end
+            if Menu.IsEnabled(optionKillSteal) and Invoker.KillSteal(myHero, enemy) then return end
 
-            if Menu.IsEnabled(optionInterrupt) then Invoker.Interrupt(myHero, enemy) end
+            if Menu.IsEnabled(optionInterrupt) and Invoker.Interrupt(myHero, enemy) then return end
 
-            if Menu.IsEnabled(optionFixedPositionCombo) then Invoker.FixedPositionCombo(myHero, enemy) end
+            if Menu.IsEnabled(optionFixedPositionCombo) and Invoker.FixedPositionCombo(myHero, enemy) then return end
 
-            if Menu.IsEnabled(optionMeteorBlastCombo) then Invoker.MeteorBlastCombo(myHero, enemy) end
+            if Menu.IsEnabled(optionMeteorBlastCombo) and Invoker.MeteorBlastCombo(myHero, enemy) then return end
 
-            if Menu.IsEnabled(optionTornadoCombo) then Invoker.TornadoCombo(myHero, enemy) end
+            if Menu.IsEnabled(optionTornadoCombo) and Invoker.TornadoCombo(myHero, enemy) then return end
 
-            if Menu.IsEnabled(optionColdSnapCombo) then Invoker.ColdSnapCombo(myHero, enemy) end
+            if Menu.IsEnabled(optionColdSnapCombo) and Invoker.ColdSnapCombo(myHero, enemy) then return end
         end
     end
 end
@@ -295,11 +295,6 @@ function Invoker.MapHack(pos, particleName)
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
-    
-    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
-    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
-    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
-    if NPC.IsChannellingAbility(myHero) then return end
 
     -- have to make sure these particles are not from teammate
     if not pos or not Map.IsValidPos(pos) or Map.IsAlly(myHero, pos) then return end
