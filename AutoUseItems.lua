@@ -31,54 +31,54 @@ function AutoUseItems.OnUpdate()
     -- Defensive items 
     -- ========================
     if Menu.IsEnabled(AutoUseItems.optionTomeOfKnowledge) then
-    	AutoUseItems.item_tome_of_knowledge(myHero)
+        AutoUseItems.item_tome_of_knowledge(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionMidas) then
-    	AutoUseItems.item_hand_of_midas(myHero)
+        AutoUseItems.item_hand_of_midas(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionDeward) then
-    	AutoUseItems.deward(myHero)
+        AutoUseItems.deward(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionIronTalon) then
-    	AutoUseItems.item_iron_talon(myHero)
+        AutoUseItems.item_iron_talon(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionHeal) then
-    	AutoUseItems.heal(myHero)
+        AutoUseItems.heal(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionLotus) then
-    	AutoUseItems.item_lotus_orb(myHero)
+        AutoUseItems.item_lotus_orb(myHero)
     end
 
     -- ========================
     -- Aggressive items 
     -- ========================
     if Menu.IsEnabled(AutoUseItems.optionSheepstick) and NPC.IsVisible(myHero) then
-    	AutoUseItems.item_sheepstick(myHero)
+        AutoUseItems.item_sheepstick(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionOrchid) and NPC.IsVisible(myHero) then
-    	AutoUseItems.item_orchid(myHero)
+        AutoUseItems.item_orchid(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionAtos) and NPC.IsVisible(myHero) then
-    	AutoUseItems.item_rod_of_atos(myHero)
+        AutoUseItems.item_rod_of_atos(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionAbyssal) and NPC.IsVisible(myHero) then
-    	AutoUseItems.item_abyssal_blade(myHero)
+        AutoUseItems.item_abyssal_blade(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionDagon) and NPC.IsVisible(myHero) then
-    	AutoUseItems.item_dagon(myHero)
+        AutoUseItems.item_dagon(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionVeil) and NPC.IsVisible(myHero) then
-    	AutoUseItems.item_veil_of_discord(myHero)
+        AutoUseItems.item_veil_of_discord(myHero)
     end
 end
 
@@ -102,7 +102,7 @@ function AutoUseItems.OnPrepareUnitOrders(orders)
     -- If in base, stash items before using soul ring.
     -- It has to team with stash2inventory() action in AutoStash.lua
     if NPC.HasModifier(myHero, "modifier_fountain_aura_buff") then
-    	AutoStash.inventory2stash(myHero)
+        AutoStash.inventory2stash(myHero)
     end
 
     Ability.CastNoTarget(soul_ring)
@@ -115,274 +115,274 @@ end
 
 -- auto use midas on high XP creeps once available
 function AutoUseItems.item_hand_of_midas(myHero)
-	local item = NPC.GetItem(myHero, "item_hand_of_midas", true)
-	if not item or not Ability.IsCastable(item, 0) then return end
+    local item = NPC.GetItem(myHero, "item_hand_of_midas", true)
+    if not item or not Ability.IsCastable(item, 0) then return end
 
-	local range = 600
-	local XP_threshold = 88
-	local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-	for i, npc in ipairs(creeps) do
-		local XP = NPC.GetBountyXP(npc)
-		if NPC.IsCreep(npc) and not Utility.IsAncientCreep(npc) and XP >= XP_threshold then
-			Ability.CastTarget(item, npc)
-			return
-		end
-	end
+    local range = 600
+    local XP_threshold = 88
+    local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    for i, npc in ipairs(creeps) do
+        local XP = NPC.GetBountyXP(npc)
+        if NPC.IsCreep(npc) and not Utility.IsAncientCreep(npc) and XP >= XP_threshold then
+            Ability.CastTarget(item, npc)
+            return
+        end
+    end
 end
 
 -- Auto use quelling blade, iron talen, or battle fury to deward
 function AutoUseItems.deward(myHero)
-	local item1 = NPC.GetItem(myHero, "item_quelling_blade", true)
-	local item2 = NPC.GetItem(myHero, "item_iron_talon", true)
-	local item3 = NPC.GetItem(myHero, "item_bfury", true)
+    local item1 = NPC.GetItem(myHero, "item_quelling_blade", true)
+    local item2 = NPC.GetItem(myHero, "item_iron_talon", true)
+    local item3 = NPC.GetItem(myHero, "item_bfury", true)
 
-	local item = nil
-	if item1 and Ability.IsCastable(item1, 0) then item = item1 end
-	if item2 and Ability.IsCastable(item2, 0) then item = item2 end
-	if item3 and Ability.IsCastable(item3, 0) then item = item3 end
-	if not item then return end
+    local item = nil
+    if item1 and Ability.IsCastable(item1, 0) then item = item1 end
+    if item2 and Ability.IsCastable(item2, 0) then item = item2 end
+    if item3 and Ability.IsCastable(item3, 0) then item = item3 end
+    if not item then return end
 
-	local range = 450
-	local wards = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-	for i, npc in ipairs(wards) do
-		if NPC.GetUnitName(npc) == "npc_dota_observer_wards" or NPC.GetUnitName(npc) == "npc_dota_sentry_wards" then
-			Ability.CastTarget(item, npc)
-			return
-		end
-	end
+    local range = 450
+    local wards = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    for i, npc in ipairs(wards) do
+        if NPC.GetUnitName(npc) == "npc_dota_observer_wards" or NPC.GetUnitName(npc) == "npc_dota_sentry_wards" then
+            Ability.CastTarget(item, npc)
+            return
+        end
+    end
 end
 
 -- Auto use iron talon to remove creep's HP
 function AutoUseItems.item_iron_talon(myHero)
-	local item = NPC.GetItem(myHero, "item_iron_talon", true)
-	if not item or not Ability.IsCastable(item, 0) then return end
+    local item = NPC.GetItem(myHero, "item_iron_talon", true)
+    if not item or not Ability.IsCastable(item, 0) then return end
 
-	local HpThreshold = 550
-	local range = 350
-	local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    local HpThreshold = 550
+    local range = 350
+    local creeps = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
-	for i, npc in ipairs(creeps) do
-		if npc and NPC.IsCreep(npc) and Entity.GetHealth(npc) >= HpThreshold and not Utility.IsAncientCreep(npc) then
-			Ability.CastTarget(item, npc)
-			return
-		end
-	end
+    for i, npc in ipairs(creeps) do
+        if npc and NPC.IsCreep(npc) and Entity.GetHealth(npc) >= HpThreshold and not Utility.IsAncientCreep(npc) then
+            Ability.CastTarget(item, npc)
+            return
+        end
+    end
 end
 
 -- Auto use magic wand(stick) or faerie fire if HP is low
 function AutoUseItems.heal(myHero)
-	local item1 = NPC.GetItem(myHero, "item_magic_stick", true)
-	local item2 = NPC.GetItem(myHero, "item_magic_wand", true)
-	local item3 = NPC.GetItem(myHero, "item_faerie_fire", true)
+    local item1 = NPC.GetItem(myHero, "item_magic_stick", true)
+    local item2 = NPC.GetItem(myHero, "item_magic_wand", true)
+    local item3 = NPC.GetItem(myHero, "item_faerie_fire", true)
 
-	local item = nil
-	if item1 and Ability.IsCastable(item1, 0) and Item.GetCurrentCharges(item1)>0 then item = item1 end
-	if item2 and Ability.IsCastable(item2, 0) and Item.GetCurrentCharges(item2)>0 then item = item2 end
-	if item3 and Ability.IsCastable(item3, 0) then item = item3 end
-	if not item then return end
+    local item = nil
+    if item1 and Ability.IsCastable(item1, 0) and Item.GetCurrentCharges(item1)>0 then item = item1 end
+    if item2 and Ability.IsCastable(item2, 0) and Item.GetCurrentCharges(item2)>0 then item = item2 end
+    if item3 and Ability.IsCastable(item3, 0) then item = item3 end
+    if not item then return end
 
-	local HpThreshold = 200
-	if Entity.GetHealth(myHero) <= HpThreshold then
-		Ability.CastNoTarget(item)
-	end
+    local HpThreshold = 200
+    if Entity.GetHealth(myHero) <= HpThreshold then
+        Ability.CastNoTarget(item)
+    end
 end
 
 -- Auto use sheepstick on enemy hero once available
 -- Doesn't use on enemy who is lotus orb protected or AM with aghs.
 function AutoUseItems.item_sheepstick(myHero)
-	local item = NPC.GetItem(myHero, "item_sheepstick", true)
-	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+    local item = NPC.GetItem(myHero, "item_sheepstick", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-	local range = 800
-	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    local range = 800
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
-	local minDistance = 99999
-	local target = nil
-	for i, enemy in ipairs(enemyAround) do
-		if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
-			and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy) then
-			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
-			if dis < minDistance then
-				minDistance = dis
-				target = enemy
-			end
-		end
-	end
+    local minDistance = 99999
+    local target = nil
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+            and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy) then
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            if dis < minDistance then
+                minDistance = dis
+                target = enemy
+            end
+        end
+    end
 
-	-- cast sheepstick on nearest enemy in range
-	if target then Ability.CastTarget(item, target) end
+    -- cast sheepstick on nearest enemy in range
+    if target then Ability.CastTarget(item, target) end
 end
 
 -- Auto use orchid or bloodthorn on enemy hero once available
 -- Doesn't use on enemy who is lotus orb protected or AM with aghs.
 function AutoUseItems.item_orchid(myHero)
-	local item1 = NPC.GetItem(myHero, "item_orchid", true)
-	local item2 = NPC.GetItem(myHero, "item_bloodthorn", true)
+    local item1 = NPC.GetItem(myHero, "item_orchid", true)
+    local item2 = NPC.GetItem(myHero, "item_bloodthorn", true)
 
-	local item = nil
-	if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then item = item1 end
-	if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then item = item2 end
-	if not item then return end
+    local item = nil
+    if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then item = item1 end
+    if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then item = item2 end
+    if not item then return end
 
-	local range = 900
-	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-	
-	local minDistance = 99999
-	local target = nil
-	for i, enemy in ipairs(enemyAround) do
-		if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
-			and Utility.CanCastSpellOn(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
-			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
-			if dis < minDistance then
-				minDistance = dis
-				target = enemy
-			end
-		end
-	end
+    local range = 900
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    
+    local minDistance = 99999
+    local target = nil
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+            and Utility.CanCastSpellOn(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            if dis < minDistance then
+                minDistance = dis
+                target = enemy
+            end
+        end
+    end
 
-	-- cast orchid/bloodthorn on nearest enemy in range
-	if target then Ability.CastTarget(item, target) end
+    -- cast orchid/bloodthorn on nearest enemy in range
+    if target then Ability.CastTarget(item, target) end
 end
 
 -- Auto use rod of atos on enemy hero once available
 -- Doesn't use on enemy who is lotus orb protected or AM with aghs.
 function AutoUseItems.item_rod_of_atos(myHero)
-	local item = NPC.GetItem(myHero, "item_rod_of_atos", true)
-	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+    local item = NPC.GetItem(myHero, "item_rod_of_atos", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-	local range = 1150
-	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    local range = 1150
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
-	local minDistance = 99999
-	local target = nil
-	for i, enemy in ipairs(enemyAround) do
-		if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
-			and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy)
-			and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
-			
-			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
-			if dis < minDistance then
-				minDistance = dis
-				target = enemy
-			end
-		end
-	end
+    local minDistance = 99999
+    local target = nil
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+            and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy)
+            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
+            
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            if dis < minDistance then
+                minDistance = dis
+                target = enemy
+            end
+        end
+    end
 
-	-- cast rod of atos on nearest enemy in range
-	if target then Ability.CastTarget(item, target) end
+    -- cast rod of atos on nearest enemy in range
+    if target then Ability.CastTarget(item, target) end
 end
 
 -- Auto use abyssal blade on enemy hero once available
 -- Doesn't use on enemy who is lotus orb protected or AM with aghs.
 function AutoUseItems.item_abyssal_blade(myHero)
-	local item = NPC.GetItem(myHero, "item_abyssal_blade", true)
-	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+    local item = NPC.GetItem(myHero, "item_abyssal_blade", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-	local range = 140
-	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    local range = 140
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
 
-	local minDistance = 99999
-	local target = nil
-	for i, enemy in ipairs(enemyAround) do
-		if not NPC.IsIllusion(enemy) and not NPC.IsStunned(enemy) and not Utility.IsLotusProtected(enemy) then
-			local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
-			if dis < minDistance then
-				minDistance = dis
-				target = enemy
-			end
-		end
-	end
+    local minDistance = 99999
+    local target = nil
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not NPC.IsStunned(enemy) and not Utility.IsLotusProtected(enemy) then
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            if dis < minDistance then
+                minDistance = dis
+                target = enemy
+            end
+        end
+    end
 
-	-- cast rod of atos on nearest enemy in range
-	if target then Ability.CastTarget(item, target) end
+    -- cast rod of atos on nearest enemy in range
+    if target then Ability.CastTarget(item, target) end
 end
 
 function AutoUseItems.item_dagon(myHero)
-	local level, item
-	local item1 = NPC.GetItem(myHero, "item_dagon", true)
-	local item2 = NPC.GetItem(myHero, "item_dagon_2", true)
-	local item3 = NPC.GetItem(myHero, "item_dagon_3", true)
-	local item4 = NPC.GetItem(myHero, "item_dagon_4", true)
-	local item5 = NPC.GetItem(myHero, "item_dagon_5", true)
+    local level, item
+    local item1 = NPC.GetItem(myHero, "item_dagon", true)
+    local item2 = NPC.GetItem(myHero, "item_dagon_2", true)
+    local item3 = NPC.GetItem(myHero, "item_dagon_3", true)
+    local item4 = NPC.GetItem(myHero, "item_dagon_4", true)
+    local item5 = NPC.GetItem(myHero, "item_dagon_5", true)
 
-	if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then item = item1; level = 1 end
-	if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then item = item2; level = 2 end
-	if item3 and Ability.IsCastable(item3, NPC.GetMana(myHero)) then item = item3; level = 3 end
-	if item4 and Ability.IsCastable(item4, NPC.GetMana(myHero)) then item = item4; level = 4 end
-	if item5 and Ability.IsCastable(item5, NPC.GetMana(myHero)) then item = item5; level = 5 end
+    if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then item = item1; level = 1 end
+    if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then item = item2; level = 2 end
+    if item3 and Ability.IsCastable(item3, NPC.GetMana(myHero)) then item = item3; level = 3 end
+    if item4 and Ability.IsCastable(item4, NPC.GetMana(myHero)) then item = item4; level = 4 end
+    if item5 and Ability.IsCastable(item5, NPC.GetMana(myHero)) then item = item5; level = 5 end
 
-	if not item then return end
+    if not item then return end
 
-	local range = 600 + 50 * (level - 1)
-	local magic_damage = 400 + 100 * (level - 1)
+    local range = 600 + 50 * (level - 1)
+    local magic_damage = 400 + 100 * (level - 1)
 
-	local target
-	local minHp = 99999
-	local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-	for i, enemy in ipairs(enemyAround) do
-		if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
-			and Utility.CanCastSpellOn(enemy) and Utility.IsSafeToCast(myHero, enemy, magic_damage) then
-			
-			local enemyHp = Entity.GetHealth(enemy)
-			if enemyHp < minHp then
-				target = enemy
-				minHp = enemyHp
-			end
-		end
-	end
+    local target
+    local minHp = 99999
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+            and Utility.CanCastSpellOn(enemy) and Utility.IsSafeToCast(myHero, enemy, magic_damage) then
+            
+            local enemyHp = Entity.GetHealth(enemy)
+            if enemyHp < minHp then
+                target = enemy
+                minHp = enemyHp
+            end
+        end
+    end
 
-	-- cast dagon on enemy with lowest HP in range
-	if target then Ability.CastTarget(item, target) end
+    -- cast dagon on enemy with lowest HP in range
+    if target then Ability.CastTarget(item, target) end
 end
 
 function AutoUseItems.item_veil_of_discord(myHero)
-	local item = NPC.GetItem(myHero, "item_veil_of_discord", true)
-	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+    local item = NPC.GetItem(myHero, "item_veil_of_discord", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-	local range = 1000
-	local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-	if not enemyHeroes or #enemyHeroes <= 0 then return end
+    local range = 1000
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    if not enemyHeroes or #enemyHeroes <= 0 then return end
 
-	local radius = 600
-	local pos = Utility.BestPosition(enemyHeroes, radius)
+    local radius = 600
+    local pos = Utility.BestPosition(enemyHeroes, radius)
     if pos then Ability.CastPosition(item, pos) end
 end
 
 -- Auto cast lotus orb to save ally
 -- For tinker, auto use lotus orb on self or allies once available
 function AutoUseItems.item_lotus_orb(myHero)
-	local item = NPC.GetItem(myHero, "item_lotus_orb", true)
-	if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+    local item = NPC.GetItem(myHero, "item_lotus_orb", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
-	local range = 900
-	local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
-	if not allyAround or #allyAround <= 0 then return end
+    local range = 900
+    local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
+    if not allyAround or #allyAround <= 0 then return end
 
-	-- save ally who get stunned, silenced, rooted, disarmed, low Hp, etc
-	for i, ally in ipairs(allyAround) do
-		if Utility.NeedToBeSaved(ally) then
-			Ability.CastTarget(item, ally)
-			return
-		end
-	end
+    -- save ally who get stunned, silenced, rooted, disarmed, low Hp, etc
+    for i, ally in ipairs(allyAround) do
+        if Utility.NeedToBeSaved(ally) then
+            Ability.CastTarget(item, ally)
+            return
+        end
+    end
 
-	-- for tinker
-	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
+    -- for tinker
+    if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
 
-	if not NPC.HasModifier(myHero, "modifier_item_lotus_orb_active") then
-		Ability.CastTarget(item, myHero)
-		return
-	end
+    if not NPC.HasModifier(myHero, "modifier_item_lotus_orb_active") then
+        Ability.CastTarget(item, myHero)
+        return
+    end
 
-	-- cast lotus orb once available
-	for i, ally in ipairs(allyAround) do
-		if Entity.IsAlive(ally) and not NPC.IsIllusion(ally) 
-			and not NPC.HasModifier(ally, "modifier_item_lotus_orb_active") then
-			
-			Ability.CastTarget(item, ally)
-			return
-		end
-	end
+    -- cast lotus orb once available
+    for i, ally in ipairs(allyAround) do
+        if Entity.IsAlive(ally) and not NPC.IsIllusion(ally) 
+            and not NPC.HasModifier(ally, "modifier_item_lotus_orb_active") then
+            
+            Ability.CastTarget(item, ally)
+            return
+        end
+    end
 end
 
 return AutoUseItems
