@@ -4,6 +4,7 @@ local Puck = {}
 
 local optionUltimateHelper = Menu.AddOption({"Hero Specific", "Puck"}, "Ultimate Helper", "Cast ultimate on best position once the order key is pressed")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Puck"}, "Kill Steal", "Cast spell (silence) on enemy to KS")
+local optionPhaseShiftProtection = Menu.AddOption({"Hero Specific", "Puck"}, "Phase Shift Protection", "don't break phase shift unless using blink or pressing S")
 
 function Puck.OnUpdate()
 	local myHero = Heroes.GetLocal()
@@ -16,6 +17,24 @@ end
 
 function Puck.OnPrepareUnitOrders(orders)
     if not orders then return true end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero then return true end
+
+    if Menu.IsEnabled(optionPhaseShiftProtection) and NPC.HasModifier(myHero, "modifier_puck_phase_shift") then
+    	-- interrupt phase shift when using blink
+    	if orders.ability and Entity.IsAbility(orders.ability) and Ability.GetName(orders.ability) == "item_blink" then
+    		return true
+    	end
+
+    	-- interrupt phase shift when pressing stop
+    	if orders.order and (orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_STOP or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_HOLD_POSITION) then
+    		return true
+    	end
+
+    	-- ignore other source of interruption
+    	return false
+    end
 
     if Menu.IsEnabled(optionUltimateHelper) and orders.ability and Entity.IsAbility(orders.ability)
     	and Ability.GetName(orders.ability) == "puck_dream_coil"
