@@ -16,6 +16,7 @@ AutoUseItems.optionAbyssal = Menu.AddOption({"Item Specific"}, "Abyssal Blade", 
 AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon on enemy hero once available")
 AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "Auto use veil once available")
 AutoUseItems.optionLotus = Menu.AddOption({"Item Specific"}, "Lotus Orb", "(For tinker) auto use lotus orb on self or allies once available")
+AutoUseItems.optionCrest = Menu.AddOption({"Item Specific"}, "Medallion & Crest", "Auto use medallion & crest to save ally")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -52,6 +53,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionLotus) then
         AutoUseItems.item_lotus_orb(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionCrest) then
+        AutoUseItems.item_solar_crest(myHero)
     end
 
     -- ========================
@@ -360,7 +365,7 @@ function AutoUseItems.item_lotus_orb(myHero)
 
     -- save ally who get stunned, silenced, rooted, disarmed, low Hp, etc
     for i, ally in ipairs(allyAround) do
-        if Utility.NeedToBeSaved(ally) then
+        if Utility.NeedToBeSaved(ally) and Utility.CanCastSpellOn(ally) then
             Ability.CastTarget(item, ally)
             return
         end
@@ -369,16 +374,39 @@ function AutoUseItems.item_lotus_orb(myHero)
     -- for tinker
     if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
 
-    if not NPC.HasModifier(myHero, "modifier_item_lotus_orb_active") then
+    if not NPC.HasModifier(myHero, "modifier_item_lotus_orb_active") and Utility.CanCastSpellOn(myHero) then
         Ability.CastTarget(item, myHero)
         return
     end
 
     -- cast lotus orb once available
     for i, ally in ipairs(allyAround) do
-        if Entity.IsAlive(ally) and not NPC.IsIllusion(ally) 
+        if Entity.IsAlive(ally) and not NPC.IsIllusion(ally) and Utility.CanCastSpellOn(ally)
             and not NPC.HasModifier(ally, "modifier_item_lotus_orb_active") then
             
+            Ability.CastTarget(item, ally)
+            return
+        end
+    end
+end
+
+-- Auto cast solar crest/medallion of courage to save ally
+function AutoUseItems.item_solar_crest(myHero)
+	local item
+    local item1 = NPC.GetItem(myHero, "item_solar_crest", true)
+    local item2 = NPC.GetItem(myHero, "item_medallion_of_courage", true)
+
+    if item1 then item = item1 end
+    if item2 then item = item2 end
+
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    local range = 1000
+    local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
+    if not allyAround or #allyAround <= 0 then return end
+
+    for i, ally in ipairs(allyAround) do
+        if Utility.NeedToBeSaved(ally) and Utility.CanCastSpellOn(ally) then
             Ability.CastTarget(item, ally)
             return
         end
