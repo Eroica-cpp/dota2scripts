@@ -9,6 +9,8 @@ AutoStash.dontStashList = {
     item_tpscroll = true,
     item_wind_lace = true,
     item_boots = true,
+    item_tranquil_boots = true,
+    item_phase_boots = true,
     item_travel_boots = true,
     item_travel_boots_2 = true,
     item_quelling_blade = true,
@@ -28,7 +30,10 @@ AutoStash.dontStashList = {
     item_ward_sentry = true,
     item_recipe_ward_dispenser = true,
     item_ward_dispenser = true,
-    item_gem = true
+    item_gem = true,
+    item_hand_of_midas = true,
+    item_stout_shield = true,
+    item_poor_mans_shield = true
 }
 
 -- stash items when (1) using soul ring in base; (2) using bottle in base
