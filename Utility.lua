@@ -267,6 +267,15 @@ function Utility.IsSuitableToCastSpell(myHero)
     return true
 end
 
+function Utility.IsSuitableToUseItem(myHero)
+    if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return false end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return false end
+    if NPC.IsChannellingAbility(myHero) then return false end
+    
+    return true
+end
+
 function Utility.IsAffectedByDoT(npc)
     if not npc then return false end
 
