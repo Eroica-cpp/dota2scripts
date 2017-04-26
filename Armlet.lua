@@ -6,6 +6,7 @@ local option = Menu.AddOption({"Item Specific"}, "Armlet", "Auto toggle armlet")
 
 local safeThreshold = 550
 local dangerousThreshold = 200
+local lasttime = GameRules.GetGameTime()
 
 function Armlet.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(option) then return true end
@@ -31,28 +32,29 @@ function Armlet.OnPrepareUnitOrders(orders)
     return true
 end
 
--- function Armlet.OnUpdate()
---     if not Menu.IsEnabled(option) then return end
+function Armlet.OnUpdate()
+    if not Menu.IsEnabled(option) then return end
 
---     local myHero = Heroes.GetLocal()
---     if not myHero then return end
+    local myHero = Heroes.GetLocal()
+    if not myHero then return end
+    if not Utility.IsSuitableToUseItem(myHero) then return end
 
---     local item = NPC.GetItem(myHero, "item_armlet", true)
---     if not item then return end
+    local item = NPC.GetItem(myHero, "item_armlet", true)
+    if not item then return end
 
---     local delay = 0.6
---     local mod = NPC.GetModifier(myHero, "modifier_item_armlet_unholy_strength")
-
---     if Entity.GetHealth(myHero) <= dangerousThreshold then
---         -- if doesn't toggle, then toggle armlet
---         if not mod then Ability.Toggle(item); return end
-        
---         -- if does toggled, toggle it again after 0.6 second
---         if math.abs(GameRules.GetGameTime() - Modifier.GetCreationTime(mod) - delay) <= 0.05 then
---             Ability.Toggle(item)
---             Ability.Toggle(item)
---         end
---     end
--- end
+    if Entity.GetHealth(myHero) <= dangerousThreshold then
+        if Ability.GetToggleState(item) and GameRules.GetGameTime() - lasttime > 0.6 then
+	        Ability.Toggle(item)
+	        lasttime = GameRules.GetGameTime()
+	        return
+	    end
+	    
+	    if not Ability.GetToggleState(item) and GameRules.GetGameTime() - lasttime > 0.1 then
+	        Ability.Toggle(item)
+	        lasttime = GameRules.GetGameTime()
+	        return
+	    end
+    end
+end
 
 return Armlet
