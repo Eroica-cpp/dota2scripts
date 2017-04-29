@@ -6,7 +6,7 @@ local option = Menu.AddOption({"Item Specific"}, "Armlet", "Auto toggle armlet")
 
 local safeThreshold = 550
 local dangerousThreshold = 200
-local lasttime = GameRules.GetGameTime()
+local msg_queue = {}
 
 function Armlet.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(option) then return true end
@@ -42,18 +42,48 @@ function Armlet.OnUpdate()
     local item = NPC.GetItem(myHero, "item_armlet", true)
     if not item then return end
 
-    if Entity.GetHealth(myHero) <= dangerousThreshold then
-        if Ability.GetToggleState(item) and GameRules.GetGameTime() - lasttime > 0.6 then
-	        Ability.Toggle(item)
-	        lasttime = GameRules.GetGameTime()
-	        return
-	    end
-	    
-	    if not Ability.GetToggleState(item) and GameRules.GetGameTime() - lasttime > 0.1 then
-	        Ability.Toggle(item)
-	        lasttime = GameRules.GetGameTime()
-	        return
-	    end
+    if not msg_queue or #msg_queue <= 0 then return end
+    local timestamp = table.remove(msg_queue, 1)
+
+    local err = 0.05
+    local current = GameRules.GetGameTime()
+    if math.abs(timestamp - current) <= err then
+        Ability.Toggle(item)
+    elseif timestamp > current + err then
+        table.insert(msg_queue, timestamp)
+    end
+end
+
+-- right click from range units (range creep, range hero, tower)
+function Armlet.OnProjectile(projectile)
+    if not Menu.IsEnabled(option) then return end
+    if not projectile or not projectile.source or not projectile.target then return end
+    if not projectile.isAttack then return end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero then return end
+
+    if projectile.target ~= myHero then return end
+    if Entity.IsSameTeam(projectile.source, myHero) then return end
+
+    local true_damage = NPC.GetTrueDamage(projectile.source) * NPC.GetArmorDamageMultiplier(myHero)
+    if true_damage >= Entity.GetHealth(myHero) then Armlet.Toggle() end
+end
+
+function Armlet.Toggle()
+    local myHero = Heroes.GetLocal()
+    if not myHero then return end
+
+    local item = NPC.GetItem(myHero, "item_armlet", true)
+    if not item then return end
+
+    local current = GameRules.GetGameTime()
+
+    if Ability.GetToggleState(item) then
+        table.insert(msg_queue, current)
+        table.insert(msg_queue, current+0.1)
+    else
+        table.insert(msg_queue, current)
     end
 end
 
