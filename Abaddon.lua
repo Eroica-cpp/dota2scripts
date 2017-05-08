@@ -42,7 +42,7 @@ function Abaddon.OnDraw()
             local physical_damage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
             local magical_damage = coil_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
             local enemyHpLeft = enemyHp - magical_damage
-            local hitsLeft = math.ceil(enemyHpLeft / (physical_damage + 1))
+            local hitsLeft = math.ceil(enemyHpLeft / math.max(physical_damage, 1))
             
             -- draw
             local pos = Entity.GetAbsOrigin(enemy)
