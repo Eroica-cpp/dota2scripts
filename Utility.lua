@@ -1,3 +1,7 @@
+-- Utility.lua (Version 1.0)
+-- Author: Eroica
+-- Release Date: 2017/5/8
+
 local Utility = {}
 
 Utility.AncientCreepNameList = {
