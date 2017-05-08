@@ -1,6 +1,6 @@
--- Armlet.lua (Version 2.0)
+-- Armlet.lua (Version 3.0)
 -- Author: Eroica
--- Release Date: 2017/4/28
+-- Release Date: 2017/5/8
 
 local Utility = require("Utility")
 
