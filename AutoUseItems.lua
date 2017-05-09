@@ -359,6 +359,9 @@ function AutoUseItems.item_lotus_orb(myHero)
     local item = NPC.GetItem(myHero, "item_lotus_orb", true)
     if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
+    -- cast on self first if needed
+    if Utility.NeedToBeSaved(myHero) then Ability.CastTarget(item, myHero); return end
+
     local range = 900
     local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
     if not allyAround or #allyAround <= 0 then return end
