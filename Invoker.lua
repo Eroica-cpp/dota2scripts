@@ -151,6 +151,9 @@ function Invoker.RightClickCombo(myHero, target)
     if Entity.IsSameTeam(myHero, target) then return end
     if not NPC.IsEntityInRange(myHero, target, NPC.GetAttackRange(myHero)) then return end
 
+    -- disable this combo if level is too low
+    if NPC.GetCurrentLevel(myHero) <= 2 then return end
+
     if NPC.IsHero(target) or NPC.IsRoshan(target) then
         -- combo: right click -> cold snap
         if Invoker.CastColdSnap(myHero, target) then return end
@@ -172,7 +175,7 @@ end
 function Invoker.TornadoCombo(myHero, enemy)
     if not myHero or not enemy then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
-    if not Utility.CanCastSpellOn(enemy) then return false end
+    -- if not Utility.CanCastSpellOn(enemy) then return false end
 
     local mod
 
@@ -346,6 +349,9 @@ function Invoker.FixedPositionCombo(myHero, enemy)
     if not myHero or not enemy then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
     if not Utility.CanCastSpellOn(enemy) then return false end
+
+    -- disable this combo if level is too low
+    if NPC.GetCurrentLevel(myHero) <= 2 then return false end
 
     -- NPC.GetMoveSpeed() fails to consider (1) hex (2) ice wall
     local speedThreshold = 250
