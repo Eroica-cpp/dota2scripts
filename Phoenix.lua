@@ -1,14 +1,14 @@
 -- ==================================
 -- File Name : Phoenix.lua
 -- Author    : Eroica
--- Version   : 2.0
--- Date      : 2017.3.21
+-- Version   : 3.0
+-- Date      : 2017.5.12
 -- ==================================
 
 local Phoenix = {}
 
 Phoenix.optionFireSpirit = Menu.AddOption({"Hero Specific","Phoenix"},"Auto Fire Spirit", "auto cast fire spirit while diving if enabled")
-Phoenix.optionSunRay = Menu.AddOption({"Hero Specific","Phoenix"},"Sun Ray Helper", "sun ray sticks to enemy")
+Phoenix.optionSunRay = Menu.AddOption({"Hero Specific","Phoenix"},"Sun Ray Helper", "sun ray sticks to nearest hero to cursor (ally or enemy)")
 
 function Phoenix.OnPrepareUnitOrders(orders)
 	if not Menu.IsEnabled(Phoenix.optionFireSpirit) then return true end
@@ -63,10 +63,10 @@ end
 function Phoenix.SunRay(myHero)
 	if not NPC.HasModifier(myHero, "modifier_phoenix_sun_ray") then return end
 
-	local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
-	if not enemy then return end
+	local npc = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_BOTH)
+	if not npc then return end
 
-	local pos = Entity.GetAbsOrigin(enemy)
+	local pos = Entity.GetAbsOrigin(npc)
 	local vec1 = Entity.GetRotation(myHero):GetForward()
 	local vec2 = pos - Entity.GetAbsOrigin(myHero)
 	local cos_theta = vec1:Dot(vec2) / (vec1:Length() * vec2:Length())
@@ -74,7 +74,7 @@ function Phoenix.SunRay(myHero)
 	-- make sure dont rotate too rapidly
 	if cos_theta <= math.sqrt(2)/2 then return end
 
-	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, enemy, pos, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
+	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, npc, pos, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
 end
 
 function Phoenix.FireSpirit(myHero)

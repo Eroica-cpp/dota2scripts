@@ -167,12 +167,12 @@ function Magnus.AutoEmpower(myHero)
     end
 
     -- for range ally hero
-    for i, ally in ipairs(alliesAround) do
-        if not NPC.HasModifier(ally, "modifier_magnataur_empower") and not NPC.IsIllusion(ally) then
-            Ability.CastTarget(empower, ally)
-            return
-        end
-    end
+    -- for i, ally in ipairs(alliesAround) do
+    --     if not NPC.HasModifier(ally, "modifier_magnataur_empower") and not NPC.IsIllusion(ally) then
+    --         Ability.CastTarget(empower, ally)
+    --         return
+    --     end
+    -- end
 end
 
 function Magnus.RPHelper(myHero)
