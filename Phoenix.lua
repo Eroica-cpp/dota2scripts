@@ -1,9 +1,10 @@
 -- ==================================
 -- File Name : Phoenix.lua
 -- Author    : Eroica
--- Version   : 3.0
+-- Version   : 3.1
 -- Date      : 2017.5.12
 -- ==================================
+local Utility = require("Utility")
 
 local Phoenix = {}
 
@@ -18,13 +19,13 @@ function Phoenix.OnPrepareUnitOrders(orders)
 	if not Entity.IsAbility(orders.ability) then return true end
 	if Ability.GetName(orders.ability) ~= "phoenix_supernova" then return true end
 
-    local myHero = Heroes.GetLocal()
-    if not myHero or NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return true end
+  local myHero = Heroes.GetLocal()
+  if not myHero or NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return true end
 
-    local fire_spirit = NPC.GetAbility(myHero, "phoenix_fire_spirits")
-    local launch_fire_spirit = NPC.GetAbility(myHero, "phoenix_launch_fire_spirit")
-    local supernova = NPC.GetAbility(myHero, "phoenix_supernova")
-	
+  local fire_spirit = NPC.GetAbility(myHero, "phoenix_fire_spirits")
+  local launch_fire_spirit = NPC.GetAbility(myHero, "phoenix_launch_fire_spirit")
+  local supernova = NPC.GetAbility(myHero, "phoenix_supernova")
+
 	local manaCost_supernova = Ability.GetManaCost(supernova)
 	local myMana = NPC.GetMana(myHero)
 
@@ -34,16 +35,16 @@ function Phoenix.OnPrepareUnitOrders(orders)
 
 	if not Ability.IsCastable(launch_fire_spirit, 0) then return true end
 	if not Ability.IsCastable(supernova, myMana) then return true end
-    
-    local range = 1400
-    local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-    for i, enemy in ipairs(enemyHeroes) do
-    	if Ability.IsCastable(launch_fire_spirit, myMana) then
-    		Ability.CastPosition(launch_fire_spirit, Entity.GetAbsOrigin(enemy))
-    	end
-    end
 
-    return true
+  local range = 1400
+  local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+  for i, enemy in ipairs(enemyHeroes) do
+  	if Ability.IsCastable(launch_fire_spirit, myMana) then
+  		Ability.CastPosition(launch_fire_spirit, Entity.GetAbsOrigin(enemy))
+  	end
+  end
+
+  return true
 end
 
 function Phoenix.OnUpdate()
@@ -64,17 +65,10 @@ function Phoenix.SunRay(myHero)
 	if not NPC.HasModifier(myHero, "modifier_phoenix_sun_ray") then return end
 
 	local npc = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_BOTH)
-	if not npc then return end
+	if not npc or not Utility.CanCastSpellOn(npc) then return end
+  if not NPC.IsPositionInRange(npc, Input.GetWorldCursorPos(), 500, 0) then return end
 
-	local pos = Entity.GetAbsOrigin(npc)
-	local vec1 = Entity.GetRotation(myHero):GetForward()
-	local vec2 = pos - Entity.GetAbsOrigin(myHero)
-	local cos_theta = vec1:Dot(vec2) / (vec1:Length() * vec2:Length())
-
-	-- make sure dont rotate too rapidly
-	if cos_theta <= math.sqrt(2)/2 then return end
-
-	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, npc, pos, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
+	Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION, npc, Entity.GetAbsOrigin(npc), nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY, myHero)
 end
 
 function Phoenix.FireSpirit(myHero)
@@ -86,7 +80,7 @@ function Phoenix.FireSpirit(myHero)
 	for i = 1, Heroes.Count() do
 		local npc = Heroes.Get(i)
 		if not NPC.IsIllusion(npc) and not Entity.IsSameTeam(npc, myHero) then
-			
+
 			local enemyPos = Entity.GetAbsOrigin(npc)
 			if not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(npc, myHero, Ability.GetCastRange(fireSpirit)) then
 				Ability.CastPosition(fireSpirit, enemyPos)
