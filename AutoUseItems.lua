@@ -17,19 +17,22 @@ AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use 
 AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "Auto use veil once available")
 AutoUseItems.optionLotus = Menu.AddOption({"Item Specific"}, "Lotus Orb", "(For tinker) auto use lotus orb on self or allies once available")
 AutoUseItems.optionCrest = Menu.AddOption({"Item Specific"}, "Medallion & Crest", "Auto use medallion & crest to save ally")
+AutoUseItems.optionGlimmerCape = Menu.AddOption({"Item Specific"}, "Glimmer Cape", "Auto use Glimmer Cape when channeling spells or ally in danger")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero then return end
 
-    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return end
-    if NPC.HasModifier(myHero, "modifier_teleporting") then return end
-    -- if not NPC.IsVisible(myHero) then return end
-    if NPC.IsChannellingAbility(myHero) then return end
-    if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return end
-
     -- ========================
-    -- Defensive items 
+    -- Items dont't break channeling spell (Shivas, Glimmer Cape, etc)
+    -- ========================
+    if Menu.IsEnabled(AutoUseItems.optionGlimmerCape) and (Utility.IsSuitableToUseItem(myHero) or Utility.IsChannellingAbility(myHero)) then
+        AutoUseItems.item_glimmer_cape(myHero)
+    end
+
+    if not Utility.IsSuitableToUseItem(myHero) then return end
+    -- ========================
+    -- Defensive items
     -- ========================
     if Menu.IsEnabled(AutoUseItems.optionTomeOfKnowledge) then
         AutoUseItems.item_tome_of_knowledge(myHero)
@@ -60,7 +63,7 @@ function AutoUseItems.OnUpdate()
     end
 
     -- ========================
-    -- Aggressive items 
+    -- Aggressive items
     -- ========================
     if Menu.IsEnabled(AutoUseItems.optionSheepstick) and NPC.IsVisible(myHero) then
         AutoUseItems.item_sheepstick(myHero)
@@ -97,7 +100,7 @@ function AutoUseItems.OnPrepareUnitOrders(orders)
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.IsStunned(myHero) then return true end
-    
+
     local soul_ring = NPC.GetItem(myHero, "item_soul_ring", true)
     if not soul_ring or not Ability.IsCastable(soul_ring, 0) then return true end
 
@@ -204,7 +207,7 @@ function AutoUseItems.item_sheepstick(myHero)
     local minDistance = 99999
     local target = nil
     for i, enemy in ipairs(enemyAround) do
-        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
             and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
@@ -231,11 +234,11 @@ function AutoUseItems.item_orchid(myHero)
 
     local range = 900
     local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-    
+
     local minDistance = 99999
     local target = nil
     for i, enemy in ipairs(enemyAround) do
-        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
             and Utility.CanCastSpellOn(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
@@ -261,10 +264,10 @@ function AutoUseItems.item_rod_of_atos(myHero)
     local minDistance = 99999
     local target = nil
     for i, enemy in ipairs(enemyAround) do
-        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
             and Utility.CanCastSpellOn(enemy) and not Utility.IsLotusProtected(enemy)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
-            
+
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
                 minDistance = dis
@@ -325,9 +328,9 @@ function AutoUseItems.item_dagon(myHero)
     local minHp = 99999
     local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, enemy in ipairs(enemyAround) do
-        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) 
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
             and Utility.CanCastSpellOn(enemy) and Utility.IsSafeToCast(myHero, enemy, magic_damage) then
-            
+
             local enemyHp = Entity.GetHealth(enemy)
             if enemyHp < minHp then
                 target = enemy
@@ -386,7 +389,7 @@ function AutoUseItems.item_lotus_orb(myHero)
     for i, ally in ipairs(allyAround) do
         if Entity.IsAlive(ally) and not NPC.IsIllusion(ally) and Utility.CanCastSpellOn(ally)
             and not NPC.HasModifier(ally, "modifier_item_lotus_orb_active") then
-            
+
             Ability.CastTarget(item, ally)
             return
         end
@@ -410,6 +413,27 @@ function AutoUseItems.item_solar_crest(myHero)
 
     for i, ally in ipairs(allyAround) do
         if Utility.NeedToBeSaved(ally) and Utility.CanCastSpellOn(ally) then
+            Ability.CastTarget(item, ally)
+            return
+        end
+    end
+end
+
+-- Auto cast Glimmer Cape to ally or yourself when channeling spell or need to be saved.
+function AutoUseItems.item_glimmer_cape(myHero)
+    local item = NPC.GetItem(myHero, "item_glimmer_cape", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    if Utility.CanCastSpellOn(myHero) and (Utility.NeedToBeSaved(myHero) or Utility.IsChannellingAbility(myHero)) then
+        Ability.CastTarget(item, myHero)
+    end
+
+    local range = 1050
+    local allyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_FRIEND)
+    if not allyAround or #allyAround <= 0 then return end
+
+    for i, ally in ipairs(allyAround) do
+        if Utility.CanCastSpellOn(ally) and (Utility.NeedToBeSaved(ally) or Utility.IsChannellingAbility(ally)) then
             Ability.CastTarget(item, ally)
             return
         end
