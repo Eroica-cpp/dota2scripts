@@ -2,7 +2,7 @@
 -- File Name : Phoenix.lua
 -- Author    : Eroica
 -- Version   : 3.1
--- Date      : 2017.5.12
+-- Date      : 2017.5.16
 -- ==================================
 local Utility = require("Utility")
 
@@ -75,17 +75,17 @@ function Phoenix.FireSpirit(myHero)
 	local dive = NPC.GetAbilityByIndex(myHero, 0)
 	local fireSpirit = NPC.GetAbilityByIndex(myHero, 1)
 
-	if not Ability.IsCastable(fireSpirit, NPC.GetMana(myHero)) or not Ability.IsInAbilityPhase(dive) then return end
+	if not Ability.IsCastable(fireSpirit, NPC.GetMana(myHero)) then return end
+  if not Ability.IsInAbilityPhase(dive) then return end
 
 	for i = 1, Heroes.Count() do
 		local npc = Heroes.Get(i)
-		if not NPC.IsIllusion(npc) and not Entity.IsSameTeam(npc, myHero) then
-
-			local enemyPos = Entity.GetAbsOrigin(npc)
-			if not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) and NPC.IsEntityInRange(npc, myHero, Ability.GetCastRange(fireSpirit)) then
-				Ability.CastPosition(fireSpirit, enemyPos)
-				sleep(0.01)
-			end
+		if not NPC.IsIllusion(npc) and not Entity.IsSameTeam(npc, myHero) and Utility.CanCastSpellOn(npc) and NPC.IsEntityInRange(npc, myHero, Ability.GetCastRange(fireSpirit)) then
+      local speed = 900
+      local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(npc)):Length()
+      local delay = dis / speed
+			Ability.CastPosition(fireSpirit, Utility.GetPredictedPosition(npc, delay))
+			sleep(0.01)
 		end
 	end
 end
