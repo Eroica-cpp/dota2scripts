@@ -10,6 +10,7 @@ local Phoenix = {}
 
 Phoenix.optionFireSpirit = Menu.AddOption({"Hero Specific","Phoenix"},"Auto Fire Spirit", "auto cast fire spirit while diving if enabled")
 Phoenix.optionSunRay = Menu.AddOption({"Hero Specific","Phoenix"},"Sun Ray Helper", "sun ray sticks to nearest hero to cursor (ally or enemy)")
+Phoenix.posList = {}
 
 function Phoenix.OnPrepareUnitOrders(orders)
 	if not Menu.IsEnabled(Phoenix.optionFireSpirit) then return true end
@@ -58,7 +59,6 @@ function Phoenix.OnUpdate()
 	if Menu.IsEnabled(Phoenix.optionSunRay) then
 		Phoenix.SunRay(myHero)
 	end
-
 end
 
 function Phoenix.SunRay(myHero)
@@ -72,28 +72,39 @@ function Phoenix.SunRay(myHero)
 end
 
 function Phoenix.FireSpirit(myHero)
-	local dive = NPC.GetAbilityByIndex(myHero, 0)
-	local fireSpirit = NPC.GetAbilityByIndex(myHero, 1)
+  if not NPC.HasModifier(myHero, "modifier_phoenix_icarus_dive") then Phoenix.posList = {}; return end
 
-	if not Ability.IsCastable(fireSpirit, NPC.GetMana(myHero)) then return end
-  if not Ability.IsInAbilityPhase(dive) then return end
+  local fireSpirit = NPC.GetAbility(myHero, "phoenix_launch_fire_spirit")
+  if not fireSpirit or not Ability.IsCastable(fireSpirit, NPC.GetMana(myHero)) then return end
 
-	for i = 1, Heroes.Count() do
-		local npc = Heroes.Get(i)
-		if not NPC.IsIllusion(npc) and not Entity.IsSameTeam(npc, myHero) and Utility.CanCastSpellOn(npc) and NPC.IsEntityInRange(npc, myHero, Ability.GetCastRange(fireSpirit)) then
+  local enemies = NPC.GetHeroesInRadius(myHero, Ability.GetCastRange(fireSpirit), Enum.TeamType.TEAM_ENEMY)
+  if not enemies or #enemies <= 0 then return end
+
+  for i, npc in ipairs(enemies) do
+    if npc and not NPC.IsIllusion(npc) and Utility.CanCastSpellOn(npc) then
       local speed = 900
       local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(npc)):Length()
       local delay = dis / speed
-			Ability.CastPosition(fireSpirit, Utility.GetPredictedPosition(npc, delay))
-			sleep(0.01)
+      local pos = Utility.GetPredictedPosition(npc, delay)
+
+      if not Phoenix.PositionIsCovered(pos) then
+        Ability.CastPosition(fireSpirit, pos)
+        table.insert(Phoenix.posList, pos)
+        return
+      end
 		end
-	end
+  end
 end
 
-local clock = os.clock
-function sleep(n)  -- seconds
-	local t0 = clock()
-	while clock() - t0 <= n do end
+function Phoenix.PositionIsCovered(pos)
+  if not Phoenix.posList or #Phoenix.posList <= 0 then return false end
+
+  local range = 175
+  for i, vec in ipairs(Phoenix.posList) do
+    if vec and (pos - vec):Length() <= range then return true end
+  end
+
+  return false
 end
 
 return Phoenix
