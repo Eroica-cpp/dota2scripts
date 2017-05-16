@@ -20,9 +20,9 @@ Utility.AncientCreepNameList = {
     "npc_dota_roshan"
 }
 
--- return best position to cast certain spells 
+-- return best position to cast certain spells
 -- eg. axe's call, void's chrono, enigma's black hole
--- input  : unitsAround, radius 
+-- input  : unitsAround, radius
 -- return : positon (a vector)
 function Utility.BestPosition(unitsAround, radius)
     if not unitsAround or #unitsAround <= 0 then return nil end
@@ -30,7 +30,7 @@ function Utility.BestPosition(unitsAround, radius)
 
 	if enemyNum == 1 then return Entity.GetAbsOrigin(unitsAround[1]) end
 
-	-- find all mid points of every two enemy heroes, 
+	-- find all mid points of every two enemy heroes,
 	-- then find out the best position among these.
 	-- O(n^3) complexity
 	local maxNum = 1
@@ -41,7 +41,7 @@ function Utility.BestPosition(unitsAround, radius)
 				local pos1 = Entity.GetAbsOrigin(unitsAround[i])
 				local pos2 = Entity.GetAbsOrigin(unitsAround[j])
 				local mid = pos1:__add(pos2):Scaled(0.5)
-				
+
 				local heroesNum = 0
 				for k = 1, enemyNum do
 					if NPC.IsPositionInRange(unitsAround[k], mid, radius, 0) then
@@ -80,8 +80,8 @@ function Utility.GetMoveSpeed(npc)
     -- when affected by ice wall, assume move speed as 100 for convenience
     if NPC.HasModifier(npc, "modifier_invoker_ice_wall_slow_debuff") then return 100 end
 
-    -- when get hexed,  move speed = 140/100 + bonus_speed 
-    if Utility.GetHexTimeLeft(npc) > 0 then return 140 + bonus_speed end  
+    -- when get hexed,  move speed = 140/100 + bonus_speed
+    if Utility.GetHexTimeLeft(npc) > 0 then return 140 + bonus_speed end
 
     return base_speed + bonus_speed
 end
@@ -127,7 +127,7 @@ function Utility.IsSafeToCast(myHero, enemy, magic_damage)
     local counter = 0
     if NPC.HasModifier(enemy, "modifier_item_lotus_orb_active") then counter = counter + 1 end
     if NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") then counter = counter + 1 end
-    
+
     local reflect_damage = counter * magic_damage * NPC.GetMagicalArmorDamageMultiplier(myHero)
     return Entity.GetHealth(myHero) > reflect_damage
 end
@@ -135,7 +135,7 @@ end
 -- situations that ally need to be saved
 function Utility.NeedToBeSaved(npc)
 	if not npc or NPC.IsIllusion(npc) or not Entity.IsAlive(npc) then return false end
-	
+
 	if NPC.IsStunned(npc) or NPC.IsSilenced(npc) then return true end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_ROOTED) then return true end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_DISARMED) then return true end
@@ -267,7 +267,7 @@ function Utility.IsSuitableToCastSpell(myHero)
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
     if NPC.HasModifier(myHero, "modifier_teleporting") then return false end
     if NPC.IsChannellingAbility(myHero) then return false end
-    
+
     return true
 end
 
@@ -276,8 +276,16 @@ function Utility.IsSuitableToUseItem(myHero)
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
     if NPC.HasModifier(myHero, "modifier_teleporting") then return false end
     if NPC.IsChannellingAbility(myHero) then return false end
-    
+
     return true
+end
+
+-- return true if: (1) channeling ability; (2) TPing
+function Utility.IsChannellingAbility(npc, target)
+    if NPC.HasModifier(npc, "modifier_teleporting") then return true end
+    if NPC.IsChannellingAbility(npc) then return true end
+    
+    return false
 end
 
 function Utility.IsAffectedByDoT(npc)
