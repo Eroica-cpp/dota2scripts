@@ -299,22 +299,29 @@ function Invoker.Interrupt(myHero, enemy)
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
     if not Utility.CanCastSpellOn(enemy) then return false end
 
-    if not NPC.IsChannellingAbility(enemy) and not NPC.HasModifier(enemy, "modifier_teleporting") then return false end
+    if NPC.IsChannellingAbility(enemy) then
+        -- cast cold snap to interrupt
+        if Invoker.CastColdSnap(myHero, enemy) then return true end
 
-    -- cast cold snap to interrupt
-    if Invoker.CastColdSnap(myHero, enemy) then return true end
+        -- cast tornado to interrupt
+        if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return true end
+    end
 
-    -- cast tornado to interrupt
-    if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return true end
+    if NPC.HasModifier(enemy, "modifier_teleporting") then
+        -- cast cold snap to interrupt
+        if Invoker.CastColdSnap(myHero, enemy) then return true end    	
 
-    -- cast sun strike as follow up
-    if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return true end
+        -- Using tornado to cancel TP has been moved to MapHack() part
+    end
 
-    -- cast chaos meteor as follow up
-    if Invoker.CastChaosMeteor(myHero, Entity.GetAbsOrigin(enemy)) then return true end
+    -- -- cast sun strike as follow up
+    -- if Invoker.CastSunStrike(myHero, Entity.GetAbsOrigin(enemy)) then return true end
 
-    -- cast EMP as follow up
-    if Invoker.CastEMP(myHero, Entity.GetAbsOrigin(enemy)) then return true end
+    -- -- cast chaos meteor as follow up
+    -- if Invoker.CastChaosMeteor(myHero, Entity.GetAbsOrigin(enemy)) then return true end
+
+    -- -- cast EMP as follow up
+    -- if Invoker.CastEMP(myHero, Entity.GetAbsOrigin(enemy)) then return true end
 
     return false
 end
