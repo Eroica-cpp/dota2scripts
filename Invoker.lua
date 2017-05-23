@@ -680,6 +680,9 @@ end
 -- After casting a spell , move this spell to second slot 
 -- so as to protect another spell
 function Invoker.ProtectSpell(myHero, spell)
+	-- temporarily disable spell protection to avoid miss switch
+	if true then return end
+
     if not myHero or not spell then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
     if not Invoker.HasInvoked(myHero, spell) then return end
