@@ -284,8 +284,13 @@ function Invoker.MapHack(pos, particleName)
         if not Map.InFountain(pos) and Invoker.CastSunStrike(myHero, pos) then return end
     end
 
-    -- sun strike when enemy is farming neutral camp or doing roshan
-    if Map.InNeutralCamp(pos) or Map.InRoshan(pos) then
+    -- -- sun strike when enemy is farming neutral camp
+    -- if Map.InNeutralCamp(pos) then
+    --     if Invoker.CastSunStrike(myHero, pos) then return end
+    -- end
+
+    -- sun strike when enemy is roshing
+    if Map.InRoshan(pos) then
         if Invoker.CastSunStrike(myHero, pos) then return end
     end
 end
