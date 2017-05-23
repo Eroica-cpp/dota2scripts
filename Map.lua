@@ -36,7 +36,7 @@ Map.RoshanLocation = Vector(-2350, 1800, 160)
 -- valid position can't be like Vector(1.0, 1.0, 1.0) or Vector(350.0, 350.0, 1.0)
 function Map.IsValidPos(pos)
 	if not pos then return false end
-	if pos:GetX() == math.floor(pos:GetX()) and pos:GetY() == math.floor(pos:GetY()) then return false end
+	if pos:GetX() == math.floor(pos:GetX()) or pos:GetY() == math.floor(pos:GetY()) then return false end
 	return true
 end
 
