@@ -36,7 +36,7 @@ local spellName2heroName = {}
 function Detect.OnParticleCreate(particle)
     if not particle or not particle.index then return end
     
-    Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity))
+    -- Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity))
     
     particleInfo[particle.index] = particle.name
 
@@ -50,7 +50,7 @@ function Detect.OnParticleUpdate(particle)
     if not particle or not particle.index then return end
     if not particle.position or not Map.IsValidPos(particle.position) then return end
     
-    Log.Write("2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
+    -- Log.Write("2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
     
     if not particleInfo[particle.index] then return end
 
