@@ -30,30 +30,6 @@ function Invoker.OnUpdate()
     end
 
     Invoker.Iteration(myHero)
-
-    -- if Menu.IsEnabled(optionKillSteal) then
-    --     Invoker.KillSteal(myHero)
-    -- end    
-
-    -- if Menu.IsEnabled(optionInterrupt) then
-    --     Invoker.Interrupt(myHero)
-    -- end  
-
-    -- if Menu.IsEnabled(optionFixedPositionCombo) then
-    --     Invoker.FixedPositionCombo(myHero)
-    -- end  
-
-    -- if Menu.IsEnabled(optionMeteorBlastCombo) then
-    --     Invoker.MeteorBlastCombo(myHero)
-    -- end
-
-    -- if Menu.IsEnabled(optionTornadoCombo) then
-    --     Invoker.TornadoCombo(myHero)
-    -- end
-
-    -- if Menu.IsEnabled(optionColdSnapCombo) then
-    --     Invoker.ColdSnapCombo(myHero)
-    -- end
 end
 
 function Invoker.OnPrepareUnitOrders(orders)
@@ -81,15 +57,16 @@ end
 -- update invoking status
 -- check whether is invoking spell to avoid miss switch instance.
 function Invoker.UpdateInvokingStatus(myHero)
+    -- if one of Q, W, E, R, D, F or F5(ghost walk) is pressed
+    if Input.IsKeyDown(Enum.ButtonCode.KEY_F5) or Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) or Input.IsKeyDown(Enum.ButtonCode.KEY_D) or Input.IsKeyDown(Enum.ButtonCode.KEY_F) then
+        lastInvokeTime = GameRules.GetGameTime()
+    end
+
     local elapse_time = 1
     if math.abs(GameRules.GetGameTime() - lastInvokeTime) > elapse_time then
         isInvokingSpell = false
-    end
-
-    -- if one of Q, W, E, R, D, F or F5(ghost walk) is pressed
-    if Input.IsKeyDown(Enum.ButtonCode.KEY_F5) or Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) or Input.IsKeyDown(Enum.ButtonCode.KEY_D) or Input.IsKeyDown(Enum.ButtonCode.KEY_F) then
+    else
         isInvokingSpell = true
-        lastInvokeTime = GameRules.GetGameTime()
     end
 end
 
@@ -118,27 +95,27 @@ function Invoker.Iteration(myHero)
 end
 
 function Invoker.InstanceHelper(myHero, order)
-	if not myHero or not order then return end
+    if not myHero or not order then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
 
-	-- if about to move
-	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
-		if Entity.GetHealth(myHero) < Entity.GetMaxHealth(myHero) then
-			Invoker.PressKey(myHero, "QQQ")
-		else
-			Invoker.PressKey(myHero, "WWW")
-		end
-	end
+    -- if about to move
+    if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
+        if Entity.GetHealth(myHero) < Entity.GetMaxHealth(myHero) then
+            Invoker.PressKey(myHero, "QQQ")
+        else
+            Invoker.PressKey(myHero, "WWW")
+        end
+    end
 
-	-- if about to attack
-	if order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
-		local E = NPC.GetAbility(myHero, "invoker_exort")
+    -- if about to attack
+    if order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
+        local E = NPC.GetAbility(myHero, "invoker_exort")
         if E and Ability.IsCastable(E, 0) then
             Invoker.PressKey(myHero, "EEE")
         else
             Invoker.PressKey(myHero, "WWW")
         end
-	end
+    end
 end
 
 -- when attacking enemy hero, enemy building, rosh, or farming hard/ancient camp
@@ -213,7 +190,7 @@ function Invoker.MeteorBlastCombo(myHero, enemy)
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
     if not Utility.CanCastSpellOn(enemy) then return false end
 
-	-- check nearby enemy who is affected by chaos meteor
+    -- check nearby enemy who is affected by chaos meteor
     if not NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then return false end
 
     if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return true end
@@ -720,9 +697,9 @@ end
 -- return true if all ordered keys have been pressed successfully
 -- return false otherwise
 function Invoker.PressKey(myHero, keys)
-	if not myHero or not keys then return false end
+    if not myHero or not keys then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
-	if Invoker.GetInstances(myHero) == keys then return true end
+    if Invoker.GetInstances(myHero) == keys then return true end
 
     local Q = NPC.GetAbility(myHero, "invoker_quas")
     local W = NPC.GetAbility(myHero, "invoker_wex")
@@ -738,11 +715,11 @@ function Invoker.PressKey(myHero, keys)
     end
 
     for i = 1, #keys do
-    	local key = keys:sub(i,i)	
-    	if key == "Q" then Ability.CastNoTarget(Q) end
-    	if key == "W" then Ability.CastNoTarget(W) end
-    	if key == "E" then Ability.CastNoTarget(E) end
-    	if key == "R" then Ability.CastNoTarget(R) end
+        local key = keys:sub(i,i)    
+        if key == "Q" then Ability.CastNoTarget(Q) end
+        if key == "W" then Ability.CastNoTarget(W) end
+        if key == "E" then Ability.CastNoTarget(E) end
+        if key == "R" then Ability.CastNoTarget(R) end
     end
 
     return true
