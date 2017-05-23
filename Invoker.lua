@@ -13,7 +13,6 @@ local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
-local optionMapHack = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Map Hack", "use information from particle efftects, to tornado tping enemy, or sun strike enemy if it is tping, farming or roshing.")
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
@@ -270,14 +269,12 @@ end
 -- cast sun strike when enemy is (1) tping; (2) farming neutral creep; (3) roshing
 -- interrupt enemy's tp by tornado
 function Invoker.MapHack(pos, particleName)
-    if not Menu.IsEnabled(optionMapHack) then return end
-
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
 
     -- have to make sure these particles are not from teammate
-    if not pos or not Map.IsValidPos(pos) or Map.IsAlly(myHero, pos) then return end
+    if not pos or Map.IsAlly(myHero, pos) then return end
 
     -- tp effects
     if particleName == "teleport_start" then
