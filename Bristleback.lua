@@ -20,6 +20,10 @@ function Bristleback.OnUpdate()
     if Menu.IsEnabled(optionAutoGoo) then
         Bristleback.AutoGoo(myHero)
     end
+
+    if Menu.IsEnabled(optionAutoQuill) then
+        Bristleback.AutoQuill(myHero)
+    end
 end
 
 function Bristleback.AutoGoo(myHero)
@@ -27,7 +31,7 @@ function Bristleback.AutoGoo(myHero)
     if not goo or not Ability.IsCastable(goo, NPC.GetMana(myHero)) then return end
 
     local range = 600
-    local enemies = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    local enemies = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, npc in ipairs(enemies) do
         if not NPC.IsIllusion(npc) and Utility.CanCastSpellOn(npc) then
             if NPC.HasItem(myHero, "item_ultimate_scepter", true) then
@@ -35,6 +39,19 @@ function Bristleback.AutoGoo(myHero)
             elseif not Utility.IsLotusProtected(npc) then
                 Ability.CastTarget(goo, npc); return
             end
+        end
+    end
+end
+
+function Bristleback.AutoQuill(myHero)
+    local quill = NPC.GetAbility(myHero, "bristleback_quill_spray")
+    if not quill or not Ability.IsCastable(quill, NPC.GetMana(myHero)) then return end
+
+    local range = 700
+    local enemies = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    for i, npc in ipairs(enemies) do
+        if not NPC.IsIllusion(npc) then
+            Ability.CastNoTarget(quill); return
         end
     end
 end
