@@ -10,20 +10,38 @@ local Bristleback = {}
 local optionAutoGoo = Menu.AddOption({"Hero Specific", "Bristleback"}, "Auto Goo", "Auto cast Goo once a enemy is in range")
 local optionAutoQuill = Menu.AddOption({"Hero Specific", "Bristleback"}, "Auto Quill", "Auto cast Quill once enemies are in range")
 local key = Menu.AddKeyOption({"Hero Specific", "Bristleback"}, "Activate Auto Spells Key", Enum.ButtonCode.KEY_E)
-local font = Renderer.LoadFont("Tahoma", 24, Enum.FontWeight.EXTRABOLD)
+local font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
+
+local inAutoSpellsMode = false
 
 function Bristleback.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero or not NPC.GetUnitName(myHero) == "npc_dota_hero_bristleback" then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
 
-    if Menu.IsEnabled(optionAutoGoo) then
+    if Menu.IsKeyDownOnce(key) then
+        inAutoSpellsMode = not inAutoSpellsMode
+	end
+
+    if Menu.IsEnabled(optionAutoGoo) and inAutoSpellsMode then
         Bristleback.AutoGoo(myHero)
     end
 
-    if Menu.IsEnabled(optionAutoQuill) then
+    if Menu.IsEnabled(optionAutoQuill) and inAutoSpellsMode then
         Bristleback.AutoQuill(myHero)
     end
+end
+
+function Bristleback.OnDraw()
+    local myHero = Heroes.GetLocal()
+    if not myHero or not NPC.GetUnitName(myHero) == "npc_dota_hero_bristleback" then return end
+    if not inAutoSpellsMode then return end
+
+    -- draw text when auto spells key is up
+	local pos = Entity.GetAbsOrigin(myHero)
+	local x, y, visible = Renderer.WorldToScreen(pos)
+	Renderer.SetDrawColor(0, 255, 0, 255)
+	Renderer.DrawTextCentered(font, x, y, "Auto", 1)
 end
 
 function Bristleback.AutoGoo(myHero)
