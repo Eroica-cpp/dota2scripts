@@ -21,7 +21,7 @@ function Bristleback.OnUpdate()
 
     if Menu.IsKeyDownOnce(key) then
         inAutoSpellsMode = not inAutoSpellsMode
-	end
+    end
 
     if Menu.IsEnabled(optionAutoGoo) and inAutoSpellsMode then
         Bristleback.AutoGoo(myHero)
@@ -38,10 +38,10 @@ function Bristleback.OnDraw()
     if not inAutoSpellsMode then return end
 
     -- draw text when auto spells key is up
-	local pos = Entity.GetAbsOrigin(myHero)
-	local x, y, visible = Renderer.WorldToScreen(pos)
-	Renderer.SetDrawColor(0, 255, 0, 255)
-	Renderer.DrawTextCentered(font, x, y, "Auto", 1)
+    local pos = Entity.GetAbsOrigin(myHero)
+    local x, y, visible = Renderer.WorldToScreen(pos)
+    Renderer.SetDrawColor(0, 255, 0, 255)
+    Renderer.DrawTextCentered(font, x, y, "Auto", 1)
 end
 
 function Bristleback.AutoGoo(myHero)
