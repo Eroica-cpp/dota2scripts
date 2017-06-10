@@ -1,7 +1,7 @@
 -- File: Bristleback.lua
 -- Author: EroicaCpp (https://eroicacpp.com/dota2/)
--- Version: 1.0
--- Date: June 9, 2017
+-- Version: 1.1
+-- Date: June 10, 2017
 
 local Utility = require("Utility")
 
@@ -49,6 +49,12 @@ function Bristleback.AutoGoo(myHero)
     if not goo or not Ability.IsCastable(goo, NPC.GetMana(myHero)) then return end
 
     local range = 600
+    if NPC.HasItem(myHero, "item_ultimate_scepter", true) then
+        range = 750
+    elseif NPC.HasItem(myHero, "item_aether_lens", true) then
+        range = 600 + 220
+    end
+
     local enemies = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, npc in ipairs(enemies) do
         if not NPC.IsIllusion(npc) and Utility.CanCastSpellOn(npc) then
