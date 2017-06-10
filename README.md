@@ -14,6 +14,7 @@ There are several ways to contribute:
 * Leave a comment below the [project homepage](https://eroicacpp.com/dota2/).
 * Write an [issue](https://github.com/Eroica-cpp/dota2scripts/issues/new).
 
+
 If you like this repo, a star is appreciated.
 
 Licenses
