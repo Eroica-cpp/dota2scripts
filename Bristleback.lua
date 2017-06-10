@@ -12,10 +12,10 @@ local optionAutoQuill = Menu.AddOption({"Hero Specific", "Bristleback"}, "Auto Q
 local key = Menu.AddKeyOption({"Hero Specific", "Bristleback"}, "Activate Auto Spells Key", Enum.ButtonCode.KEY_E)
 local font = Renderer.LoadFont("Tahoma", 24, Enum.FontWeight.EXTRABOLD)
 
-
 function Bristleback.OnUpdate()
     local myHero = Heroes.GetLocal()
-    if not myHero or not NPC.GetUnitName(myHero) ~= "npc_dota_hero_bristleback" then return end
+    if not myHero or not NPC.GetUnitName(myHero) == "npc_dota_hero_bristleback" then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
     if Menu.IsEnabled(optionAutoGoo) then
         Bristleback.AutoGoo(myHero)
@@ -29,8 +29,12 @@ function Bristleback.AutoGoo(myHero)
     local range = 600
     local enemies = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, npc in ipairs(enemies) do
-        if not NPC.IsIllusion(npc) and Utility.CanCastSpellOn(npc) and not Utility.IsLotusProtected(npc) then
-            Ability.CastTarget(goo, npc)
+        if not NPC.IsIllusion(npc) and Utility.CanCastSpellOn(npc) then
+            if NPC.HasItem(myHero, "item_ultimate_scepter", true) then
+                Ability.CastNoTarget(goo); return
+            elseif not Utility.IsLotusProtected(npc) then
+                Ability.CastTarget(goo, npc); return
+            end
         end
     end
 end
