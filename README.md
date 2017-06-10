@@ -1,4 +1,4 @@
-Lua Scripts for Dota 2
+Lua Scripts for DotA 2
 =========
 
 Useful Links
@@ -10,7 +10,7 @@ Useful Links
 Contribute
 ----
 There are several ways to contribute:
-* Create a [pull request](https://github.com/Eroica-cpp/dota2scripts/pulls).
+* Create a [pull request](https://github.com/Eroica-cpp/dota2scripts/compare).
 * Leave a comment below the [project homepage](https://eroicacpp.com/dota2/).
 * Write an [issue](https://github.com/Eroica-cpp/dota2scripts/issues/new).
 
