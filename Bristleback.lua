@@ -16,7 +16,7 @@ local inAutoSpellsMode = false
 
 function Bristleback.OnUpdate()
     local myHero = Heroes.GetLocal()
-    if not myHero or not NPC.GetUnitName(myHero) == "npc_dota_hero_bristleback" then return end
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_bristleback" then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
 
     if Menu.IsKeyDownOnce(key) then
@@ -34,7 +34,7 @@ end
 
 function Bristleback.OnDraw()
     local myHero = Heroes.GetLocal()
-    if not myHero or not NPC.GetUnitName(myHero) == "npc_dota_hero_bristleback" then return end
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_bristleback" then return end
     if not inAutoSpellsMode then return end
 
     -- draw text when auto spells key is up
