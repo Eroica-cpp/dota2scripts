@@ -1,12 +1,14 @@
--- Armlet.lua (Version 3.0)
--- Author: Eroica
--- Release Date: 2017/5/8
+-- File： Armlet.lua
+-- Author: EroicaCpp (https://github.com/Eroica-cpp/dota2scripts)
+-- Version: 3.1
+-- Release Date: 2017/6/17
 
 local Utility = require("Utility")
 
 local Armlet = {}
 
-local option = Menu.AddOption({"Item Specific"}, "Armlet", "Auto toggle armlet")
+local option = Menu.AddOption({"Item Specific", "Armlet"}, "Auto Toggle", "On/Off")
+local optionFarmMode = Menu.AddOption({"Item Specific", "Armlet"}, "Farming Mode", "Toggle on armlet when farming (On/Off)")
 
 local safeThreshold = 550
 local dangerousThreshold = 100
@@ -28,6 +30,10 @@ function Armlet.OnPrepareUnitOrders(orders)
 
     -- toggle on armlet if about to attack
     if not Ability.GetToggleState(item) and (orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET) then
+        -- disable auto farm mode if the option is turned off
+        if not Menu.IsEnabled(optionFarmMode) and orders.target and NPC.IsCreep(orders.target) then
+            return true
+        end
         Ability.Toggle(item)
         lasttime = current
     end
@@ -53,7 +59,7 @@ function Armlet.OnUpdate()
 
     local current = GameRules.GetGameTime()
 
-    if Entity.GetHealth(myHero) <= dangerousThreshold and current - lasttime > 0.6 then 
+    if Entity.GetHealth(myHero) <= dangerousThreshold and current - lasttime > 0.6 then
         Armlet.Toggle()
     end
 
@@ -83,7 +89,7 @@ function Armlet.OnProjectile(projectile)
 
     local true_damage = NPC.GetTrueDamage(projectile.source) * NPC.GetArmorDamageMultiplier(myHero)
     if true_damage + dangerousThreshold >= Entity.GetHealth(myHero) and Entity.GetHealth(myHero) > dangerousThreshold then
-        Armlet.Toggle() 
+        Armlet.Toggle()
     end
 end
 
@@ -101,7 +107,7 @@ function Armlet.OnUnitAnimation(animation)
 
     local true_damage = NPC.GetTrueDamage(animation.unit) * NPC.GetArmorDamageMultiplier(myHero)
     if true_damage + dangerousThreshold >= Entity.GetHealth(myHero) and Entity.GetHealth(myHero) > dangerousThreshold then
-        Armlet.Toggle() 
+        Armlet.Toggle()
     end
 end
 
