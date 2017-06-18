@@ -1,3 +1,8 @@
+-- File: Troll.lua
+-- Author: EroicaCpp (https://github.com/Eroica-cpp/dota2scripts)
+-- Version: 2.0
+-- Release Date: 2017/5/24
+
 local Troll = {}
 
 local optionAutoSwap = Menu.AddOption({"Hero Specific", "Troll Warlord"}, "Auto Swap", "Auto Swap between range and melee")
@@ -17,10 +22,10 @@ function Troll.OnPrepareUnitOrders(orders)
     if not swap or not Ability.IsCastable(swap, 0) then return true end
 
     -- swap to melee when running
-    if not Ability.GetToggleState(swap) and 
-        (orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION 
-            or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET 
-            or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE) 
+    if not Ability.GetToggleState(swap) and
+        (orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION
+            or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET
+            or orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE)
         then
         Ability.Toggle(swap, true)
         return true
@@ -52,12 +57,12 @@ function Troll.OnUpdate()
 
     local swap = NPC.GetAbility(myHero, "troll_warlord_berserkers_rage")
     local axe_melee = NPC.GetAbility(myHero, "troll_warlord_whirling_axes_melee")
-    local axe_ranged = NPC.GetAbility(myHero, "troll_warlord_whirling_axes_ranged")    
+    local axe_ranged = NPC.GetAbility(myHero, "troll_warlord_whirling_axes_ranged")
 
     -- melee axe
     if Menu.IsKeyDownOnce(keyAxeMelee) and Ability.IsCastable(axe_melee, NPC.GetMana(myHero)) then
-        if swap and not Ability.GetToggleState(swap) then 
-            Ability.Toggle(swap) 
+        if swap and not Ability.GetToggleState(swap) then
+            Ability.Toggle(swap)
             Ability.CastNoTarget(axe_melee)
             Ability.Toggle(swap)
         else
@@ -67,8 +72,8 @@ function Troll.OnUpdate()
 
     -- ranged axe
     if Menu.IsKeyDownOnce(keyAxeRanged) and Ability.IsCastable(axe_ranged, NPC.GetMana(myHero)) then
-        if swap and Ability.GetToggleState(swap) then 
-            Ability.Toggle(swap) 
+        if swap and Ability.GetToggleState(swap) then
+            Ability.Toggle(swap)
             Ability.CastPosition(axe_ranged, Input.GetWorldCursorPos())
             Ability.Toggle(swap)
         else
