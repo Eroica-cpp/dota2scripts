@@ -1,3 +1,8 @@
+-- File: Axe.lua
+-- Author: EroicaCpp (https://github.com/Eroica-cpp/dota2scripts)
+-- Version: 1.0
+-- Release Date: 2017/6/26
+
 local Utility = require("Utility")
 
 local Axe = {}
@@ -41,7 +46,7 @@ function Axe.AutoBattleHunger(myHero, orders)
 
     local battle_hunger = NPC.GetAbility(myHero, "axe_battle_hunger")
     if not battle_hunger or not Ability.IsCastable(battle_hunger, NPC.GetMana(myHero)) then return end
-    
+
     if not orders.target or not NPC.IsHero(orders.target) or Entity.IsSameTeam(myHero, orders.target) then return end
     if NPC.HasModifier(orders.target, "modifier_axe_battle_hunger") then return end
     if NPC.HasState(orders.target, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
@@ -95,7 +100,7 @@ function Axe.OnUpdate()
 
 end
 
--- auto initiate when enemy heroes are near 
+-- auto initiate when enemy heroes are near
 -- (this mode can be turn on/off by pressing key)
 function Axe.OnDraw()
 	if not Menu.IsEnabled(Axe.optionAutoInitiate) then return end
