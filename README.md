@@ -3,8 +3,9 @@ Lua Scripts for DotA 2
 
 Useful Links
 ----
-* [Project Homepage (with latest releases)](https://eroicacpp.com/dota2/)
-* [Collection of All Related Posts](https://eroicacpp.com/tag/dota2/)
+* [Project Homepage](https://eroicacpp.com/dota2/)
+* [Latest Releases](https://github.com/Eroica-cpp/dota2scripts/releases)
+* [Collection of Related Posts](https://eroicacpp.com/tag/dota2/)
 * [Source Code (this repo)](https://github.com/Eroica-cpp/dota2scripts)
 
 Contribute
@@ -15,9 +16,9 @@ There are several ways to contribute:
 * Write an [issue](https://github.com/Eroica-cpp/dota2scripts/issues/new).
 
 
-If you like this repo, a star is appreciated.
+If you like this repo, a star would be appreciated.
 
 Licenses
 ----
 * Source code is released under [The MIT License](https://mit-license.org/).
-* Other content are licensed under a [Creative Commons Attribution-NoDerivatives 4.0 International License](https://creativecommons.org/licenses/by-nd/4.0/).
+* Other content are licensed under the [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
