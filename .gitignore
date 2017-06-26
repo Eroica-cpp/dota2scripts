@@ -1,1 +1,5 @@
 test.lua
+
+# ignore lua files written by other authors
+CooldownDisplay.lua
+AbilityAlert.lua
