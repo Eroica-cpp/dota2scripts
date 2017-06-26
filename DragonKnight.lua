@@ -1,3 +1,8 @@
+-- File: DragonKnight.lua
+-- Author: EroicaCpp (https://github.com/Eroica-cpp/dota2scripts)
+-- Version: 1.0
+-- Release Date: 2017/6/26
+
 local Utility = require("Utility")
 
 local DragonKnight = {}
@@ -32,13 +37,13 @@ function DragonKnight.OnDraw()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
-            
+
             local enemyHp = Entity.GetHealth(enemy)
-            local physical_damage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy) 
+            local physical_damage = NPC.GetDamageMultiplierVersus(myHero, enemy) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
             local magical_damage = fire_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
             local enemyHpLeft = enemyHp - magical_damage
             local hitsLeft = math.ceil(enemyHpLeft / (physical_damage + 1))
-            
+
             -- draw
             local pos = Entity.GetAbsOrigin(enemy)
             local x, y, visible = Renderer.WorldToScreen(pos)
