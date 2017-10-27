@@ -28,7 +28,7 @@ function Axe.OnPrepareUnitOrders(orders)
         Axe.AutoBattleHunger(myHero, orders)
     end
 
-	if Menu.IsEnabled(Axe.optionBlinkHelper) then
+    if Menu.IsEnabled(Axe.optionBlinkHelper) then
         Axe.BlinkHelper(myHero, orders)
     end
 
@@ -77,13 +77,13 @@ function Axe.BlinkHelper(myHero, orders)
 
     local pos = Utility.BestPosition(enemyHeroes, call_radius)
     if pos then
-    	Ability.CastPosition(blink, pos)
+        Ability.CastPosition(blink, pos)
     end
 end
 
 -- auto use items when calling enemy heroes (blademail, lotus, etc)
 function Axe.OnUpdate()
-	if not Menu.IsEnabled(Axe.optionAutoItem) then return end
+    if not Menu.IsEnabled(Axe.optionAutoItem) then return end
 
     local myHero = Heroes.GetLocal()
     if not myHero or not NPC.HasModifier(myHero, "modifier_axe_berserkers_call_armor") then return end
@@ -95,33 +95,33 @@ function Axe.OnUpdate()
     local call_radius = 300
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, call_radius, Enum.TeamType.TEAM_ENEMY)
     if #enemyHeroes > 0 then
-	    Utility.PopDefensiveItems(myHero)
-	end
+        Utility.PopDefensiveItems(myHero)
+    end
 
 end
 
 -- auto initiate when enemy heroes are near
 -- (this mode can be turn on/off by pressing key)
 function Axe.OnDraw()
-	if not Menu.IsEnabled(Axe.optionAutoInitiate) then return end
+    if not Menu.IsEnabled(Axe.optionAutoInitiate) then return end
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_axe" then return end
     if (not Entity.IsAlive(myHero)) or NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return end
 
-	if Menu.IsKeyDownOnce(Axe.key) then
-		shouldAutoInitiate = not shouldAutoInitiate
-	end
+    if Menu.IsKeyDownOnce(Axe.key) then
+        shouldAutoInitiate = not shouldAutoInitiate
+    end
 
-	if not shouldAutoInitiate then return end
+    if not shouldAutoInitiate then return end
 
-	-- draw text when auto initiate key is up
-	local pos = Entity.GetAbsOrigin(myHero)
-	local x, y, visible = Renderer.WorldToScreen(pos)
-	Renderer.SetDrawColor(0, 255, 0, 255)
-	Renderer.DrawTextCentered(Axe.font, x, y, "Auto", 1)
+    -- draw text when auto initiate key is up
+    local pos = Entity.GetAbsOrigin(myHero)
+    local x, y, visible = Renderer.WorldToScreen(pos)
+    Renderer.SetDrawColor(0, 255, 0, 255)
+    Renderer.DrawTextCentered(Axe.font, x, y, "Auto", 1)
 
-	if not NPC.HasItem(myHero, "item_blink", true) then return end
+    if not NPC.HasItem(myHero, "item_blink", true) then return end
     local blink = NPC.GetItem(myHero, "item_blink", true)
     if not blink or not Ability.IsCastable(blink, 0) then return end
 
@@ -136,7 +136,7 @@ function Axe.OnDraw()
 
     local pos = Utility.BestPosition(enemyHeroes, call_radius)
     if pos then
-    	Ability.CastPosition(blink, pos)
+        Ability.CastPosition(blink, pos)
     end
     Ability.CastNoTarget(call)
 
