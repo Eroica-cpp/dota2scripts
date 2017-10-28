@@ -17,7 +17,7 @@ end
 
 function Rubick.KillSteal()
     local myHero = Heroes.GetLocal()
-    if not myHero then return end
+    if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
 
     local spell = NPC.GetAbility(myHero, "rubick_fade_bolt")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
@@ -41,7 +41,7 @@ end
 
 function Rubick.AutoTelekinesis()
     local myHero = Heroes.GetLocal()
-    if not myHero then return end
+    if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
     if NPC.GetCurrentLevel(myHero) < 6 then return end
 
     local spell = NPC.GetAbility(myHero, "rubick_telekinesis")
