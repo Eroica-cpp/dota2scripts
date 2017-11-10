@@ -281,10 +281,10 @@ function Utility.IsSuitableToUseItem(myHero)
 end
 
 -- return true if: (1) channeling ability; (2) TPing
-function Utility.IsChannellingAbility(npc, target)
+function Utility.IsChannellingAbility(npc)
     if NPC.HasModifier(npc, "modifier_teleporting") then return true end
     if NPC.IsChannellingAbility(npc) then return true end
-    
+
     return false
 end
 
