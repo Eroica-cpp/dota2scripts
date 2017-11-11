@@ -26,7 +26,7 @@ function Tinker.OneKey(myHero)
 
     local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
     if not enemy or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
-    
+
     -- =====================================
     -- Item section
     -- =====================================
@@ -36,9 +36,9 @@ function Tinker.OneKey(myHero)
 
     -- item : shivas guard
     local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
-    if shiva and Ability.IsCastable(shiva, myMana) then 
+    if shiva and Ability.IsCastable(shiva, myMana) then
         Ability.CastNoTarget(shiva)
-    end    
+    end
 
     -- =====================================
     -- Spell section
@@ -47,7 +47,7 @@ function Tinker.OneKey(myHero)
 
     -- spell : missile
     local missile = NPC.GetAbilityByIndex(myHero, 1)
-    if missile and Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then 
+    if missile and Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then
         Ability.CastNoTarget(missile)
     end
 
@@ -55,9 +55,9 @@ function Tinker.OneKey(myHero)
     local laser = NPC.GetAbilityByIndex(myHero, 0)
     local target = getLaserCastTarget(myHero, enemy)
     if target and laser and Ability.IsCastable(laser, myMana) then
-        Ability.CastTarget(laser, target)    
+        Ability.CastTarget(laser, target)
     end
-    
+
 end
 
 -- 1. Auto Spell for KS
@@ -65,9 +65,9 @@ end
 function Tinker.OnDraw()
 
 	if not Menu.IsEnabled(Tinker.optionEnable) then return end
-	
+
 	local myHero = Heroes.GetLocal()
-	if NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
+	if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
     if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return end
 
 	local myMana = NPC.GetMana(myHero)
@@ -82,7 +82,7 @@ function Tinker.OnDraw()
     if Ability.GetLevel(level_25_laser_damage_talent) > 0 then
         laserDmg = laserDmg + 100
     end
-    
+
     local missileLevel = Ability.GetLevel(missile)
     local missileDmg = 125 + 75 * (missileLevel - 1)
 
@@ -92,23 +92,23 @@ function Tinker.OnDraw()
         if NPC.GetItem(myHero, "item_dagon_" .. i, true) then dagonLevel = i end
     end
     local dagonDmg = 400 + 100 * (dagonLevel - 1)
-    
+
     if not laser or not Ability.IsCastable(laser, myMana) then laserDmg = 0 end
     if not missile or not Ability.IsCastable(missile, myMana) then missileDmg = 0 end
     if not dagon or not Ability.IsCastable(dagon, myMana) then dagonDmg = 0 end
 
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        if not NPC.IsIllusion(enemy) 
-            and not Entity.IsSameTeam(myHero, enemy) 
+        if not NPC.IsIllusion(enemy)
+            and not Entity.IsSameTeam(myHero, enemy)
             and not Entity.IsDormant(enemy)
             and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
-            and Entity.IsAlive(enemy) then		
+            and Entity.IsAlive(enemy) then
 
             missileDmg = missileDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
             dagonDmg = dagonDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
-			
+
 			local enemyHealth = Entity.GetHealth(enemy)
 			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg - dagonDmg
 			local hitsLeft = math.ceil(enemyHealthLeft / (hitDmg + 1))
@@ -119,7 +119,7 @@ function Tinker.OnDraw()
 
             local hasRearm = Ability.GetLevel(rearm) > 0
 			local drawText = (hasRearm and comboLeft<20) and "x"..comboLeft or hitsLeft
-            
+
             if hitsLeft <= 0 or comboLeft <= 0 then
                 Renderer.SetDrawColor(255, 0, 0, 255)
                 Renderer.DrawTextCentered(Tinker.font, x, y, "Kill", 1)
@@ -132,7 +132,7 @@ function Tinker.OnDraw()
             if enemyHealth <= laserDmg and Ability.IsCastable(laser, myMana) then
                 local target = getLaserCastTarget(myHero, enemy)
                 if target then
-                    Ability.CastTarget(laser, target) 
+                    Ability.CastTarget(laser, target)
                     break
                 end
             end
@@ -153,7 +153,7 @@ function Tinker.OnDraw()
                     break
                 end
 			end
-		
+
 		end -- end of the if statement
 
 	end -- end of the for loop
@@ -164,19 +164,19 @@ end
 -- If has agh scepter, return a enemy unit in the cast range of laser that can refract laser to a enemy
 -- If no such enemy or unit, return nil
 function getLaserCastTarget(myHero, enemy)
-    
+
     if not myHero then return nil end
-    
-    local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)    
+
+    local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)
     local laser = NPC.GetAbilityByIndex(myHero, 0)
     local laserCastRange = Ability.GetCastRange(laser) -- Ability.GetCastRange() already considers bonus cast range.
     local laserRefractRange = 650
-    
+
     -- if dont have agh scepter
-    if not hasAghScepter then 
+    if not hasAghScepter then
         if NPC.IsEntityInRange(myHero, enemy, laserCastRange) then
             return enemy
-        else 
+        else
             return nil
         end
     end
@@ -185,8 +185,8 @@ function getLaserCastTarget(myHero, enemy)
     local enemyUnitsAround = NPC.GetUnitsInRadius(myHero, laserCastRange, Enum.TeamType.TEAM_ENEMY)
     for i, npc in ipairs(enemyUnitsAround) do
         if npc and NPC.IsEntityInRange(npc, enemy, laserRefractRange)
-            and NPC.IsEntityInRange(npc, myHero, laserCastRange) 
-            and not NPC.IsStructure(npc) 
+            and NPC.IsEntityInRange(npc, myHero, laserCastRange)
+            and not NPC.IsStructure(npc)
             and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
             return npc
         end
