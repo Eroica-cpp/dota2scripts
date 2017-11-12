@@ -45,7 +45,7 @@ end
 
 function Lion.AutoHex()
     local myHero = Heroes.GetLocal()
-    if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
+    if not myHero or not Lion.IsSuitableToCastSpell(myHero) then return end
     if NPC.GetCurrentLevel(myHero) < 6 then return end
 
     local spell = NPC.GetAbility(myHero, "lion_voodoo")
@@ -66,7 +66,7 @@ end
 
 function Lion.AutoSpike()
     local myHero = Heroes.GetLocal()
-    if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
+    if not myHero or not Lion.IsSuitableToCastSpell(myHero) then return end
 
     local spell = NPC.GetAbility(myHero, "lion_impale")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
@@ -94,6 +94,16 @@ function Lion.AutoSpike()
             end
         end
     end
+end
+
+function Lion.IsSuitableToCastSpell(myHero)
+    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return false end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return false end
+    -- disable this check for mana_drain
+    -- if NPC.IsChannellingAbility(myHero) then return false end
+
+    return true
 end
 
 return Lion
