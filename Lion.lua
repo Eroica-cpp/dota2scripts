@@ -33,7 +33,7 @@ function Lion.AutoHex()
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
-        and not Utility.IsDisabled(enemy) then
+        and not Utility.IsDisabled(enemy) and not NPC.IsLinkensProtected(enemy) then
 
             Ability.CastTarget(spell, enemy)
             return
