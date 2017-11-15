@@ -86,7 +86,7 @@ function Lion.AutoManaDrain()
         if enemy and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
-            if NPC.IsLinkensProtected(enemy) or NPC.IsIllusion(enemy) or Utility.CantMove(enemy) or Utility.IsDisabled(enemy) then
+            if NPC.IsLinkensProtected(enemy) or NPC.IsIllusion(enemy) or Utility.CantMove(enemy) then
                 Ability.CastTarget(spell, enemy)
                 return
             end
