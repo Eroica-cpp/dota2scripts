@@ -6,6 +6,8 @@ local optionAutoTelekinesis = Menu.AddOption({"Hero Specific", "Rubick"}, "Auto 
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Rubick"}, "Kill Steal", "Cast spell on enemy to KS")
 local optionAutoSpellSteal = Menu.AddOption({"Hero Specific", "Rubick"}, "Auto Spell Steal", "Auto steal important spells")
 
+local DontStealTable = {}
+
 function Rubick.OnUpdate()
     if Menu.IsEnabled(optionKillSteal) then
         Rubick.KillSteal()
@@ -83,7 +85,9 @@ function Rubick.AutoSpellSteal()
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
             local spell = Rubick.GetLastSpell(enemy)
-            if spell and Ability.GetName(spell) == "sven_storm_bolt" then
+            if spell and not DontStealTable[Ability.GetName(spell)]
+            and (not slot1 or Ability.GetName(slot1) ~= Ability.GetName(spell))
+            and (not slot2 or Ability.GetName(slot2) ~= Ability.GetName(spell)) then
                 Ability.CastTarget(steal, enemy)
                 return
             end
@@ -99,12 +103,9 @@ function Rubick.GetLastSpell(enemy)
     for i = 0, 24 do
         local ability = NPC.GetAbilityByIndex(enemy, i)
         if ability and Entity.IsAbility(ability) and not Ability.IsHidden(ability) and not Ability.IsAttributes(ability) then
-            local lastUsed = Ability.SecondsSinceLastUse(ability)
-
             -- Ability.SecondsSinceLastUse returns -1 if it isn't on cooldown.
-            if lastUsed == -1 then lastUsed = 999999 end
-
-            if lastUsed < min then
+            local lastUsed = Ability.SecondsSinceLastUse(ability)
+            if lastUsed > 0 and lastUsed < min then
                 res = ability
                 min = lastUsed
             end
