@@ -315,7 +315,7 @@ function Rubick.AutoSpellSteal()
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
             local spell = Rubick.GetLastSpell(enemy)
-            if spell and not StealTable[Ability.GetName(spell)]
+            if spell and StealTable[Ability.GetName(spell)]
             and (not slot1 or Ability.GetName(slot1) ~= Ability.GetName(spell))
             and (not slot2 or Ability.GetName(slot2) ~= Ability.GetName(spell)) then
                 Ability.CastTarget(steal, enemy)
