@@ -5,6 +5,8 @@ local Rubick = {}
 local optionAutoTelekinesis = Menu.AddOption({"Hero Specific", "Rubick"}, "Auto Telekinesis", "Auto cast Telekinesis on any enemy in range once rubick has level 6")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Rubick"}, "Kill Steal", "Cast spell on enemy to KS")
 local optionAutoSpellSteal = Menu.AddOption({"Hero Specific", "Rubick"}, "Auto Spell Steal", "Auto steal important spells")
+local optionQuickCast = Menu.AddOption({"Hero Specific", "Rubick"}, "Quick Cast Spells", "If have certain spells, then cast them quickly.")
+
 
 local StealTable = {}
 StealTable["abaddon_aphotic_shield"] = true
@@ -238,6 +240,99 @@ StealTable["zuus_lightning_bolt"] = true
 StealTable["zuus_cloud"] = true
 StealTable["zuus_thundergods_wrath"] = true
 
+local QuickCastAbilities = {
+    "abyssal_underlord_pit_of_malice",
+    "ancient_apparition_cold_feet",
+    "batrider_flaming_lasso",
+    "bane_nightmare_end",
+    "bloodseeker_rupture",
+    "bounty_hunter_track",
+    "chaos_knight_chaos_bolt",
+    "crystal_maiden_frostbite",
+    "death_prophet_silence",
+    "doom_bringer_doom",
+    "dragon_knight_dragon_tail",
+    "drow_ranger_wave_of_silence",
+    "earthshaker_fissure",
+    "elder_titan_earth_splitter",
+    "enigma_malefice",
+    "enigma_midnight_pulse",
+    "enigma_black_hole",
+    "gyrocopter_homing_missile",
+    "gyrocopter_call_down",
+    "invoker_cold_snap",
+    "invoker_tornado",
+    "invoker_emp",
+    "invoker_chaos_meteor",
+    "invoker_sun_strike",
+    "invoker_deafening_blast",
+    "jakiro_ice_path",
+    "jakiro_macropyre",
+    "juggernaut_omni_slash",
+    "keeper_of_the_light_mana_leak",
+    "kunkka_torrent",
+    "kunkka_x_marks_the_spot",
+    "kunkka_ghostship",
+    "leshrac_split_earth",
+    "lich_chain_frost",
+    "life_stealer_open_wounds",
+    "lina_light_strike_array",
+    "lina_laguna_blade",
+    "lion_impale",
+    "lion_voodoo",
+    "lion_finger_of_death",
+    "mirana_arrow",
+    "monkey_king_boundless_strike",
+    "morphling_adaptive_strike",
+    "naga_siren_ensnare",
+    "night_stalker_void",
+    "night_stalker_crippling_fear",
+    "nyx_assassin_impale",
+    "nyx_assassin_mana_burn",
+    "ogre_magi_fireblast",
+    "ogre_magi_ignite",
+    "ogre_magi_multicast",
+    "phantom_assassin_stifling_dagger",
+    "phantom_lancer_spirit_lance",
+    "pudge_dismember",
+    "pugna_nether_blast",
+    "pugna_life_drain",
+    "queenofpain_sonic_wave",
+    "razor_static_link",
+    "riki_smoke_screen",
+    "shadow_demon_demonic_purge",
+    "shadow_shaman_ether_shock",
+    "shadow_shaman_voodoo",
+    "silencer_last_word",
+    "skeleton_king_hellfire_blast",
+    "skywrath_mage_arcane_bolt",
+    "skywrath_mage_concussive_shot",
+    "skywrath_mage_ancient_seal",
+    "skywrath_mage_mystic_flare",
+    "slardar_amplify_damage",
+    "sniper_assassinate",
+    "spectre_spectral_dagger",
+    "storm_spirit_electric_vortex",
+    "sven_storm_bolt",
+    "techies_land_mines",
+    "techies_stasis_trap",
+    "templar_assassin_trap",
+    "tidehunter_gush",
+    "tinker_laser",
+    "tinker_heat_seeking_missile",
+    "tinker_march_of_the_machines",
+    "tiny_avalanche",
+    "tusk_walrus_punch",
+    "vengefulspirit_magic_missile",
+    "viper_viper_strike",
+    "warlock_fatal_bonds",
+    "warlock_shadow_word",
+    "windrunner_shackleshot",
+    "witch_doctor_paralyzing_cask",
+    "witch_doctor_maledict",
+    "zuus_lightning_bolt"
+}
+
 function Rubick.OnUpdate()
     if Menu.IsEnabled(optionKillSteal) then
         Rubick.KillSteal()
@@ -249,6 +344,10 @@ function Rubick.OnUpdate()
 
     if Menu.IsEnabled(optionAutoSpellSteal) then
         Rubick.AutoSpellSteal()
+    end
+
+    if Menu.IsEnabled(optionQuickCast) then
+        Rubick.QuickCast()
     end
 end
 
@@ -288,7 +387,8 @@ function Rubick.AutoTelekinesis()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
+        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
+        and not Utility.IsDisabled(enemy) then
 
             Ability.CastTarget(spell, enemy)
             return
@@ -325,6 +425,34 @@ function Rubick.AutoSpellSteal()
     end
 end
 
+function Rubick.QuickCast()
+    local myHero = Heroes.GetLocal()
+    if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
+    if NPC.GetUnitName(myHero) ~= "npc_dota_hero_rubick" then return end
+
+    local spell
+    for i = 1, #QuickCastAbilities do
+        if NPC.GetAbility(myHero, QuickCastAbilities[i]) then
+            spell = NPC.GetAbility(myHero, QuickCastAbilities[i])
+        end
+    end
+
+    if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
+    local range = Ability.GetCastRange(spell)
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
+        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
+        and not Utility.IsDisabled(enemy) then
+
+            Ability.CastTarget(spell, enemy)
+            Ability.CastPosition(spell, Utility.GetPredictedPosition(enemy, Ability.GetCastPoint(spell)))
+            return
+        end
+    end
+end
+
 function Rubick.GetLastSpell(enemy)
     if not enemy then return end
 
@@ -335,7 +463,7 @@ function Rubick.GetLastSpell(enemy)
         if ability and Entity.IsAbility(ability) and not Ability.IsHidden(ability) and not Ability.IsAttributes(ability) then
             -- Ability.SecondsSinceLastUse returns -1 if it isn't on cooldown.
             local lastUsed = Ability.SecondsSinceLastUse(ability)
-            if lastUsed > 0 and lastUsed < min then
+            if lastUsed >= 0 and lastUsed < min then
                 res = ability
                 min = lastUsed
             end
