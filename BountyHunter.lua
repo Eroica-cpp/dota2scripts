@@ -3,7 +3,7 @@ local Utility = require("Utility")
 local BountyHunter = {}
 
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Bounty Hunter"}, "Kill Steal", "Kill Steal using toss")
-local optionAutoTrack = Menu.AddOption({"Hero Specific", "Bounty Hunter"}, "Auto Track", "Auto cast track on enemies in range")
+local optionAutoTrack = Menu.AddOption({"Hero Specific", "Bounty Hunter"}, "Auto Track", "Auto cast track on enemies in range or use track to break linken")
 
 function BountyHunter.OnUpdate()
     if Menu.IsEnabled(optionKillSteal) then
@@ -49,8 +49,9 @@ function BountyHunter.AutoTrack()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
-        and BountyHunter.GetTrackTimeLeft(enemy) <= Ability.GetCooldownLength(spell) then
+        and BountyHunter.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
+        and (BountyHunter.GetTrackTimeLeft(enemy) <= Ability.GetCooldownLength(spell)
+        or NPC.IsLinkensProtected(enemy)) then
 
             Ability.CastTarget(spell, enemy)
             return
@@ -73,11 +74,21 @@ function BountyHunter.IsSuitableToCastSpell(myHero)
     return true
 end
 
+function BountyHunter.CanCastSpellOn(npc)
+	if Entity.IsDormant(npc) or not Entity.IsAlive(npc) then return false end
+	if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
+    -- track pierces spell immunity
+    -- if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
+	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
+
+	return true
+end
+
 -- use DFS to find a path
 function BountyHunter.TossTarget(myHero, target, toss, r1, r2, counter)
-    -- set maximum depth as 10 to avoid infinite loops
-    if counter >= 10 then return end
-    if NPC.IsEntityInRange(myHero, target, r1) then Ability.CastTarget(toss, target) return end
+    -- set maximum depth as 3 to avoid infinite loops
+    if counter >= 3 then return end
+    if Utility.CanCastSpellOn(target) and NPC.IsEntityInRange(myHero, target, r1) then Ability.CastTarget(toss, target) return end
 
     if NPC.HasModifier(target, "modifier_bounty_hunter_track") then
         for i, npc in ipairs(NPC.GetUnitsInRadius(target, r2, Enum.TeamType.TEAM_FRIEND)) do
