@@ -14,15 +14,11 @@ local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
 
-local isInvokingSpell = false
-local lastInvokeTime = 0
-local currentInstances = "QWE"
+local currentInstances
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_invoker" then return end
-
-    Invoker.UpdateInvokingStatus(myHero)
 
     if Menu.IsKeyDownOnce(keyGhostWalk) then
         Invoker.CastGhostWalk(myHero)
@@ -43,7 +39,7 @@ function Invoker.OnPrepareUnitOrders(orders)
         Invoker.RightClickCombo(myHero, orders.target)
     end
 
-    if Menu.IsEnabled(optionInstanceHelper) and not isInvokingSpell then
+    if Menu.IsEnabled(optionInstanceHelper) then
         Invoker.InstanceHelper(myHero, orders.order)
     end
 
@@ -52,22 +48,6 @@ function Invoker.OnPrepareUnitOrders(orders)
     end
 
     return true
-end
-
--- update invoking status
--- check whether is invoking spell to avoid miss switch instance.
-function Invoker.UpdateInvokingStatus(myHero)
-    -- if one of Q, W, E, R, D, F or F5(ghost walk) is pressed
-    if Input.IsKeyDown(Enum.ButtonCode.KEY_F5) or Input.IsKeyDown(Enum.ButtonCode.KEY_Q) or Input.IsKeyDown(Enum.ButtonCode.KEY_W) or Input.IsKeyDown(Enum.ButtonCode.KEY_E) or Input.IsKeyDown(Enum.ButtonCode.KEY_R) or Input.IsKeyDown(Enum.ButtonCode.KEY_D) or Input.IsKeyDown(Enum.ButtonCode.KEY_F) then
-        lastInvokeTime = GameRules.GetGameTime()
-    end
-
-    local elapse_time = 1
-    if math.abs(GameRules.GetGameTime() - lastInvokeTime) > elapse_time then
-        isInvokingSpell = false
-    else
-        isInvokingSpell = true
-    end
 end
 
 -- deal all iteration related features, for efficiency
