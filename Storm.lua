@@ -89,7 +89,8 @@ function Storm.AttackHelper()
     if not target or Entity.IsSameTeam(myHero, target) or not Entity.IsHero(target) then return end
     if not Utility.CanCastSpellOn(target) then return end
 
-    local radius = 50 + 75 * Ability.GetLevel(spell) -- Damage Radius: 125/200/275
+    -- 50 + 75 * Ability.GetLevel(spell) -- Damage Radius: 125/200/275
+    local radius = 60 -- 60 seems to be an optimal value.
     local dir = Entity.GetAbsRotation(target):GetForward():Normalized()
     local front_pos = Entity.GetAbsOrigin(target) + dir:Scaled(radius)
     local back_pos = Entity.GetAbsOrigin(target) - dir:Scaled(radius)
