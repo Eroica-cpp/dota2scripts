@@ -16,6 +16,8 @@ local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extensio
 local optionDefend = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Defend", "If enemies are too close, auto cast (1) tornado, (2) blast, (3) cold snap, or (4) ghost walk to escape.")
 
 local currentInstances
+local timer = GameRules.GetGameTime()
+local gap = 0.2
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -707,6 +709,7 @@ function Invoker.PressKey(myHero, keys)
     if not myHero or not keys then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
     if Invoker.GetInstances(myHero) == keys then return true end
+    if GameRules.GetGameTime() - timer <= gap then return false end
 
     local Q = NPC.GetAbility(myHero, "invoker_quas")
     local W = NPC.GetAbility(myHero, "invoker_wex")
@@ -729,6 +732,7 @@ function Invoker.PressKey(myHero, keys)
         if key == "R" then Ability.CastNoTarget(R) end
     end
 
+    timer = GameRules.GetGameTime()
     return true
 end
 
