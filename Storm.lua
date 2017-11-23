@@ -98,7 +98,7 @@ function Storm.AttackHelper()
     if hasAttacked and (not NPC.IsEntityInRange(myHero, target, NPC.GetAttackRange(myHero))
     or not NPC.HasModifier(myHero, "modifier_storm_spirit_overload_debuff")) then
 
-        if (Entity.GetAbsOrigin(myHero) - back_pos):Length() >= radius then
+        if (Entity.GetAbsOrigin(myHero) - front_pos):Length2D() < radius then
             Ability.CastPosition(spell, back_pos)
         else
             Ability.CastPosition(spell, front_pos)
