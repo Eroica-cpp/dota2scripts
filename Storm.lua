@@ -4,6 +4,16 @@ local Storm = {}
 
 local optionAutoRemnant = Menu.AddOption({"Hero Specific", "Storm Spirit"}, "Auto Remnant", "Auto cast remnant if there's an enemy in range")
 local optionAutoVortex = Menu.AddOption({"Hero Specific", "Storm Spirit"}, "Auto Vortex", "Auto vortex any enemy in range")
+local optionAttackHelper = Menu.AddOption({"Hero Specific", "Storm Spirit"}, "Attack Helper", "When right click enemy, auto bolt to maximize damage")
+
+local target
+local timer = GameRules.GetGameTime()
+
+function Storm.OnPrepareUnitOrders(orders)
+    if not orders then return true end
+    target = orders.target
+    return true
+end
 
 function Storm.OnUpdate()
     if Menu.IsEnabled(optionAutoRemnant) then
@@ -12,6 +22,10 @@ function Storm.OnUpdate()
 
     if Menu.IsEnabled(optionAutoVortex) then
         Storm.AutoVortex()
+    end
+
+    if Menu.IsEnabled(optionAttackHelper) then
+        Storm.AttackHelper()
     end
 end
 
@@ -52,6 +66,37 @@ function Storm.AutoVortex()
             return
         end
     end
+end
+
+function Storm.AttackHelper()
+    local myHero = Heroes.GetLocal()
+    if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
+
+    local spell = NPC.GetAbility(myHero, "storm_spirit_ball_lightning")
+    if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
+
+    if not target or Entity.IsSameTeam(myHero, target) or not Entity.IsHero(target) then return end
+    if not Utility.CanCastSpellOn(target) then return end
+
+    local radius = 120 -- 30 + 30 * Ability.GetLevel(spell)
+    local dir = Entity.GetAbsRotation(target):GetForward():Normalized()
+    local front_pos = Entity.GetAbsOrigin(target) + dir:Scaled(radius)
+    local back_pos = Entity.GetAbsOrigin(target) - dir:Scaled(radius)
+
+    if (GameRules.GetGameTime() - timer) > NPC.GetAttackTime(myHero) + Ability.GetCastPoint(spell) + 0.15
+    and (not NPC.IsEntityInRange(myHero, target, NPC.GetAttackRange(myHero))
+    or not NPC.HasModifier(myHero, "modifier_storm_spirit_overload_debuff")) then
+
+        if (Entity.GetAbsOrigin(myHero) - back_pos):Length() >= radius then
+            Ability.CastPosition(spell, back_pos)
+        else
+            Ability.CastPosition(spell, front_pos)
+        end
+
+        timer = GameRules.GetGameTime()
+    end
+
+    Player.AttackTarget(Players.GetLocal(), myHero, target)
 end
 
 return Storm
