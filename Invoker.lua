@@ -154,8 +154,8 @@ function Invoker.TornadoCombo(myHero, enemy)
     local pos =  Entity.GetAbsOrigin(enemy)
     local time_left = math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
 
-    -- 1. cast ice wall
-    if Invoker.CastIceWall(myHero, enemy) then return true end
+    -- -- 1. cast ice wall
+    -- if Invoker.CastIceWall(myHero, enemy) then return true end
 
     -- 2. cast sun strike
     if time_left >= 1 and time_left < 1.7 and Invoker.CastSunStrike(myHero, pos) then return true end
@@ -190,6 +190,12 @@ function Invoker.ColdSnapCombo(myHero, enemy)
     if not Utility.CanCastSpellOn(enemy) then return false end
 
     if not Utility.IsAffectedByDoT(enemy) then return false end
+
+    -- avoid confliction with chaos meteors combo
+    if NPC.HasModifier(enemy, "modifier_invoker_chaos_meteor_burn") then
+        local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
+        if meteor and Ability.IsCastable(meteor, NPC.GetMana(myHero)) then return false end
+    end
 
     if Invoker.CastColdSnap(myHero, enemy) then return true end
 
@@ -453,40 +459,40 @@ function Invoker.CastColdSnap(myHero, target)
     return false
 end
 
--- return true if successfully cast, false otherwise
--- input: target, can be nil
-function Invoker.CastIceWall(myHero, target)
-    if not myHero then return false end
-    if not Utility.IsSuitableToCastSpell(myHero) then return false end
-
-    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
-    if not invoke then return false end
-
-    local ice_wall = NPC.GetAbility(myHero, "invoker_ice_wall")
-    if not ice_wall or not Ability.IsCastable(ice_wall, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
-
-    local range = 300
-    if target and not NPC.IsEntityInRange(myHero, target, range) then return false end
-
-    local angel = 90
-    local dir = (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Rotated(Angle(0,angel,0))
-    local pos = Entity.GetAbsOrigin(myHero) + dir
-
-    if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
-
-        -- turn to direction first
-        if target then
-            Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION, nil, pos, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY , myHero)
-        end
-
-        Ability.CastNoTarget(ice_wall)
-        Invoker.ProtectSpell(myHero, ice_wall)
-        return true
-    end
-
-
-    return false
-end
+-- -- return true if successfully cast, false otherwise
+-- -- input: target, can be nil
+-- function Invoker.CastIceWall(myHero, target)
+--     if not myHero then return false end
+--     if not Utility.IsSuitableToCastSpell(myHero) then return false end
+--
+--     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+--     if not invoke then return false end
+--
+--     local ice_wall = NPC.GetAbility(myHero, "invoker_ice_wall")
+--     if not ice_wall or not Ability.IsCastable(ice_wall, NPC.GetMana(myHero)-Ability.GetManaCost(invoke)) then return false end
+--
+--     local range = 300
+--     if target and not NPC.IsEntityInRange(myHero, target, range) then return false end
+--
+--     local angel = 90
+--     local dir = (Entity.GetAbsOrigin(target) - Entity.GetAbsOrigin(myHero)):Rotated(Angle(0,angel,0))
+--     local pos = Entity.GetAbsOrigin(myHero) + dir
+--
+--     if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
+--
+--         -- turn to direction first
+--         if target then
+--             Player.PrepareUnitOrders(Players.GetLocal(), Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_DIRECTION, nil, pos, nil, Enum.PlayerOrderIssuer.DOTA_ORDER_ISSUER_PASSED_UNIT_ONLY , myHero)
+--         end
+--
+--         Ability.CastNoTarget(ice_wall)
+--         Invoker.ProtectSpell(myHero, ice_wall)
+--         return true
+--     end
+--
+--
+--     return false
+-- end
 
 -- return true if successfully cast, false otherwise
 function Invoker.CastEMP(myHero, pos)
