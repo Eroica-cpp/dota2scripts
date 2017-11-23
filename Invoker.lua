@@ -13,6 +13,7 @@ local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
+local optionDefend = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Defend", "If enemies are too close, auto cast (1) tornado, (2) blast, (3) cold snap, or (4) ghost walk to escape.")
 
 local currentInstances
 
@@ -59,17 +60,19 @@ function Invoker.Iteration(myHero)
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) then
 
-            if Menu.IsEnabled(optionKillSteal) and Invoker.KillSteal(myHero, enemy) then return end
+            if Menu.IsEnabled(optionDefend) then Invoker.Defend(myHero, enemy) end
 
-            if Menu.IsEnabled(optionInterrupt) and Invoker.Interrupt(myHero, enemy) then return end
+            if Menu.IsEnabled(optionKillSteal) then Invoker.KillSteal(myHero, enemy) end
 
-            if Menu.IsEnabled(optionFixedPositionCombo) and Invoker.FixedPositionCombo(myHero, enemy) then return end
+            if Menu.IsEnabled(optionInterrupt) then Invoker.Interrupt(myHero, enemy) end
 
-            if Menu.IsEnabled(optionMeteorBlastCombo) and Invoker.MeteorBlastCombo(myHero, enemy) then return end
+            if Menu.IsEnabled(optionFixedPositionCombo) then Invoker.FixedPositionCombo(myHero, enemy) end
 
-            if Menu.IsEnabled(optionTornadoCombo) and Invoker.TornadoCombo(myHero, enemy) then return end
+            if Menu.IsEnabled(optionMeteorBlastCombo) then Invoker.MeteorBlastCombo(myHero, enemy) end
 
-            if Menu.IsEnabled(optionColdSnapCombo) and Invoker.ColdSnapCombo(myHero, enemy) then return end
+            if Menu.IsEnabled(optionTornadoCombo) then Invoker.TornadoCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionColdSnapCombo) then Invoker.ColdSnapCombo(myHero, enemy) end
         end
     end
 end
@@ -342,28 +345,31 @@ function Invoker.FixedPositionCombo(myHero, enemy)
 end
 
 -- define defensive actions
--- priority: tornado -> blast -> cold snap -> ice wall -> EMP
--- function Invoker.Defend(myHero, source)
---     if not myHero or not source then return end
---     if not Utility.IsSuitableToCastSpell(myHero) then return end
---
---     -- 1. use tornado to defend if available
---     if Invoker.CastTornado(myHero, Entity.GetAbsOrigin(source)) then return end
---
---     -- 2. use deafening blast to defend if available
---     if Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(source)) then return end
---
---     -- 3. use cold snap to defend if available
---     if Invoker.CastColdSnap(myHero, source) then return end
---
---     -- 4. use ice wall to defend if available
---     if Invoker.CastIceWall(myHero, source) then return end
---
---     -- 5. use EMP to defend if available
---     local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(source)):Scaled(0.5)
---     if Invoker.CastEMP(myHero, mid) then return end
---
--- end
+-- priority: tornado -> blast -> cold snap -> ghost walk
+function Invoker.Defend(myHero, enemy)
+    if not myHero or not enemy then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
+
+    -- react if enemy fall into the safe zone
+    local range = 350
+    if not NPC.IsEntityInRange(myHero, enemy, range) then return end
+
+    -- 1. use tornado to defend if available
+    if Utility.CanCastSpellOn(enemy) and Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
+
+    -- 2. use deafening blast to defend if available
+    if Utility.CanCastSpellOn(enemy) and Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
+
+    -- 3. use cold snap to defend if available
+    if Invoker.CastColdSnap(myHero, enemy) then return end
+
+    -- 4. use ghost walk to escape
+    if Invoker.CastGhostWalk(myHero) then return end
+
+    -- -- 5. use EMP to defend if available
+    -- local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(enemy)):Scaled(0.5)
+    -- if Invoker.CastEMP(myHero, mid) then return end
+end
 
 -- return true if successfully cast, false otherwise
 function Invoker.CastTornado(myHero, pos)
