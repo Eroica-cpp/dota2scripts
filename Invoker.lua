@@ -14,6 +14,7 @@ local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
 local optionDefend = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Defend", "If enemies are too close, auto cast (1) tornado, (2) blast, (3) cold snap, or (4) ghost walk to escape.")
+local optionIceWallHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Ice Wall Helper", "Auto cast ice wall if it can affect an enemy.")
 
 local currentInstances
 local timer = GameRules.GetGameTime()
@@ -63,6 +64,8 @@ function Invoker.Iteration(myHero)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and not NPC.IsIllusion(enemy) then
 
             if Menu.IsEnabled(optionDefend) then Invoker.Defend(myHero, enemy) end
+
+            if Menu.IsEnabled(optionIceWallHelper) then Invoker.CastIceWall(myHero, enemy) end
 
             if Menu.IsEnabled(optionKillSteal) then Invoker.KillSteal(myHero, enemy) end
 
@@ -631,6 +634,42 @@ function Invoker.CastGhostWalk(myHero)
         end
 
         Ability.CastNoTarget(ghost_walk)
+        return true
+    end
+
+    return false
+end
+
+-- return true if successfully cast, false otherwise
+function Invoker.CastIceWall(myHero, enemy)
+    if not myHero then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if Entity.IsTurning(myHero) then return false end
+
+    if not Utility.CanCastSpellOn(enemy)
+    and not NPC.HasModifier(enemy, "modifier_invoker_tornado")
+    and not NPC.HasModifier(enemy, "modifier_eul_cyclone")
+    and not NPC.HasModifier(enemy, "modifier_brewmaster_storm_cyclone")
+    then return false end
+
+    local invoke = NPC.GetAbility(myHero, "invoker_invoke")
+    if not invoke then return false end
+
+    local ice_wall = NPC.GetAbility(myHero, "invoker_ice_wall")
+    if not ice_wall or not Ability.IsCastable(ice_wall, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
+
+    local distance = 200
+    local dir = Entity.GetAbsRotation(myHero):GetForward():Normalized()
+    local mid_point = Entity.GetAbsOrigin(myHero) + dir:Scaled(distance)
+    local vec = Entity.GetAbsOrigin(enemy) - mid_point
+    local w_sqrt = dir:Dot2D(vec) * dir:Dot2D(vec)
+    local l_sqrt = vec:Length2DSqr() - w_sqrt
+
+    -- wall_length: 1120, wall_width: 105
+    if w_sqrt > 50 * 50 or l_sqrt > 550 * 550 then return false end
+
+    if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
+        Ability.CastNoTarget(ice_wall)
         return true
     end
 
