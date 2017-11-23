@@ -16,6 +16,7 @@ local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extensio
 
 local isInvokingSpell = false
 local lastInvokeTime = 0
+local currentInstances = "QWE"
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -97,23 +98,25 @@ function Invoker.InstanceHelper(myHero, order)
     if not myHero or not order then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
 
-    -- if about to move
-    if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET then
-        if Entity.GetHealth(myHero) < Entity.GetMaxHealth(myHero) then
-            Invoker.PressKey(myHero, "QQQ")
-        else
-            Invoker.PressKey(myHero, "WWW")
-        end
+    local pattern = "WWW"
+    local E = NPC.GetAbility(myHero, "invoker_exort")
+    if E and Ability.IsCastable(E, 0) then pattern = "EEE" end
+
+    if Invoker.GetInstances(myHero) ~= pattern then
+        currentInstances = Invoker.GetInstances(myHero)
+    end
+
+    -- if about to move or press STOP
+    if order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_POSITION
+    or order == Enum.UnitOrder.DOTA_UNIT_ORDER_MOVE_TO_TARGET
+    or order == Enum.UnitOrder.DOTA_UNIT_ORDER_HOLD_POSITION
+    or order == Enum.UnitOrder.DOTA_UNIT_ORDER_STOP then
+        Invoker.PressKey(myHero, currentInstances)
     end
 
     -- if about to attack
     if order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_MOVE or order == Enum.UnitOrder.DOTA_UNIT_ORDER_ATTACK_TARGET then
-        local E = NPC.GetAbility(myHero, "invoker_exort")
-        if E and Ability.IsCastable(E, 0) then
-            Invoker.PressKey(myHero, "EEE")
-        else
-            Invoker.PressKey(myHero, "WWW")
-        end
+        Invoker.PressKey(myHero, pattern)
     end
 end
 
