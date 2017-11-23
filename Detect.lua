@@ -3,12 +3,12 @@
 local Draw = require("Draw")
 local Dict = require("Dict")
 local Map = require("Map")
-local Invoker = require("Invoker")
+-- local Invoker = require("Invoker")
 
 local Detect = {}
 
 local option = Menu.AddOption({ "Awareness" }, "Detect", "Alerts you when certain abilities are used.")
-local optionInvokerMapHack = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Map Hack", "use information from particle efftects, to tornado tping enemy, or sun strike enemy if it is tping, farming or roshing.")
+-- local optionInvokerMapHack = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Map Hack", "use information from particle efftects, to tornado tping enemy, or sun strike enemy if it is tping, farming or roshing.")
 local optionEnemyAround = Menu.AddOption({ "Awareness" }, "Enemy Around", "Show how many enemy hero around")
 local font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
@@ -27,7 +27,7 @@ local particleHero = {}
 -- For particle effects that cant be tracked by OnParticleUpdateEntity(),
 -- but have name info from OnParticleCreate() and position info from OnParticleUpdate()
 -- (has been replaced by Dict.Phrase2HeroName())
--- spellname -> heroname 
+-- spellname -> heroname
 local spellName2heroName = {}
 
 -- know particle's index, spellname; have chance to know entity
@@ -35,12 +35,12 @@ local spellName2heroName = {}
 -- NPC.GetUnitName(particle.entity) can be useful, like know blink start position, smoke position, etc
 function Detect.OnParticleCreate(particle)
     if not particle or not particle.index then return end
-    
+
     -- Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity))
-    
+
     particleInfo[particle.index] = particle.name
 
-    if particle.entity then 
+    if particle.entity then
         particleHero[particle.index] = NPC.GetUnitName(particle.entity)
     end
 end
@@ -49,20 +49,20 @@ end
 function Detect.OnParticleUpdate(particle)
     if not particle or not particle.index then return end
     if not particle.position or not Map.IsValidPos(particle.position) then return end
-    
+
     -- Log.Write("2. OnParticleUpdate: " .. tostring(particle.index) .. " " .. tostring(particle.position))
-    
+
     if not particleInfo[particle.index] then return end
 
     local spellname = particleInfo[particle.index]
     local name = Dict.Phrase2HeroName(spellname)
     if not name or name == "" then name = particleHero[particle.index] end
-    
+
     Detect.Update(name, nil, particle.position, GameRules.GetGameTime())
 
-    if Menu.IsEnabled(optionInvokerMapHack) then
-        Invoker.MapHack(particle.position, spellname)
-    end
+    -- if Menu.IsEnabled(optionInvokerMapHack) then
+    --     Invoker.MapHack(particle.position, spellname)
+    -- end
 end
 
 -- know particle's index, position, entity
@@ -72,10 +72,10 @@ function Detect.OnParticleUpdateEntity(particle)
     if not particle.position or not Map.IsValidPos(particle.position) then return end
 
     -- Log.Write("3. OnParticleUpdateEntity: " .. tostring(particle.index) .. " " .. NPC.GetUnitName(particle.entity) .. " " .. tostring(particle.position))
-    
+
     Detect.Update(NPC.GetUnitName(particle.entity), particle.entity, particle.position, GameRules.GetGameTime())
 
-    Invoker.MapHack(particle.position, "")
+    -- Invoker.MapHack(particle.position, "")
 end
 
 function Detect.Update(name, entity, pos, time)

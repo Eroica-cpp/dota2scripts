@@ -1,5 +1,5 @@
 local Utility = require("Utility")
-local Invoker = require("Invoker")
+-- local Invoker = require("Invoker")
 local Puck = require("Puck")
 
 local Dodge = {}
@@ -78,7 +78,7 @@ function Dodge.OnUnitAnimation(animation)
 		if animation.sequenceName == "basher_cast4_mana_void_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""; source = animation.unit})
 		end
-	end	
+	end
 
 	-- 2. axe's culling blade (cant catch call's animation)
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_axe" then
@@ -86,7 +86,7 @@ function Dodge.OnUnitAnimation(animation)
 		if animation.sequenceName == "culling_blade_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""; source = animation.unit})
 		end
-	end	
+	end
 
 	-- 3. bane's nightmare and fiend's grip
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_bane" then
@@ -98,8 +98,8 @@ function Dodge.OnUnitAnimation(animation)
 		local radius2 = 800
 		if animation.sequenceName == "fiends_grip_cast" and NPC.IsEntityInRange(myHero, animation.unit, radius2) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""; source = animation.unit})
-		end		
-	end	
+		end
+	end
 
 	-- 4. batrider's lasso
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_batrider" then
@@ -107,7 +107,7 @@ function Dodge.OnUnitAnimation(animation)
 		if animation.sequenceName == "lasso_start_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""; source = animation.unit})
 		end
-	end	
+	end
 
 	-- 5. beastmaster's roar
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_beastmaster" then
@@ -115,7 +115,7 @@ function Dodge.OnUnitAnimation(animation)
 		if animation.sequenceName == "cast4_primal_roar_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""; source = animation.unit})
 		end
-	end	
+	end
 
 	-- 5. bloodseeker's rupture
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_bloodseeker" then
@@ -123,7 +123,7 @@ function Dodge.OnUnitAnimation(animation)
 		if animation.sequenceName == "cast4_rupture_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""; source = animation.unit})
 		end
-	end	
+	end
 
 	-- 6. centaur's stomp
 	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_centaur" then
@@ -143,7 +143,7 @@ function Dodge.OnUnitAnimation(animation)
 		-- local radius2 = 700
 		-- if animation.sequenceName == "chaosbolt_anim" and NPC.IsEntityInRange(myHero, animation.unit, radius) then
 		-- 	Dodge.Update()
-		-- end		
+		-- end
 	end
 
 	-- 8. clock's hook
@@ -245,8 +245,8 @@ function Dodge.OnUnitAnimation(animation)
 	end
 
 	-- 21.5 Kunkka's X mark
-	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_kunkka" 
-		and NPC.HasModifier(myHero, "modifier_kunkka_x_marks_the_spot") 
+	if NPC.GetUnitName(animation.unit) == "npc_dota_hero_kunkka"
+		and NPC.HasModifier(myHero, "modifier_kunkka_x_marks_the_spot")
 		and animation.sequenceName == "x_mark_anim" then
 			Dodge.Update({time = GameRules.GetGameTime(); delay = animation.castpoint; desc = ""; source = animation.unit})
 	end
@@ -624,9 +624,9 @@ function Dodge.OnUpdate()
 	-- for few cases that fail in OnUnitAnimation()
 	for i = 1, Heroes.Count() do
 		local enemy = Heroes.Get(i)
-		if enemy and not NPC.IsIllusion(enemy) 
-			and not Entity.IsSameTeam(myHero, enemy) 
-			and not Entity.IsDormant(enemy) 
+		if enemy and not NPC.IsIllusion(enemy)
+			and not Entity.IsSameTeam(myHero, enemy)
+			and not Entity.IsDormant(enemy)
 			and Entity.IsAlive(enemy) then
 
 			-- axe's call
@@ -648,7 +648,7 @@ function Dodge.OnUpdate()
 			local pos_2 = Entity.GetAbsOrigin(enemy) + direction:Scaled(range_2)
 			local pos_3 = Entity.GetAbsOrigin(enemy) + direction:Scaled(range_3)
 			local radius = 250
-			if (raze_1 and Ability.IsInAbilityPhase(raze_1) and NPC.IsPositionInRange(myHero, pos_1, radius, 0)) 
+			if (raze_1 and Ability.IsInAbilityPhase(raze_1) and NPC.IsPositionInRange(myHero, pos_1, radius, 0))
 				or (raze_2 and Ability.IsInAbilityPhase(raze_2) and NPC.IsPositionInRange(myHero, pos_2, radius, 0))
 				or (raze_3 and Ability.IsInAbilityPhase(raze_3) and NPC.IsPositionInRange(myHero, pos_3, radius, 0))
 				then
@@ -663,7 +663,7 @@ end
 
 function Dodge.TaskManagement(myHero)
 	if not msg_queue or #msg_queue <= 0 then return end
-	
+
 	local info = table.remove(msg_queue, 1)
 	if not info or not info.time or not info.delay then return end
 
@@ -700,7 +700,7 @@ end
 
 function Dodge.Defend(myHero, source)
 	if not myHero or NPC.IsStunned(myHero) then return end
-	
+
 	-- ===========
 	-- Use Items
 	-- ===========
@@ -778,22 +778,22 @@ function Dodge.Defend(myHero, source)
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_ember_spirit" then
 		local fist = NPC.GetAbilityByIndex(myHero, 1)
 		local level = Ability.GetLevel(fist)
-		local cast_range = 700 
+		local cast_range = 700
 		local radius = level > 0 and 250+100*(level-1) or 0
 		local enemyUnits = NPC.GetUnitsInRadius(myHero, cast_range, Enum.TeamType.TEAM_ENEMY)
 		if fist and Ability.IsCastable(fist, myMana) and #enemyUnits > 0 then
 			local pos = Utility.BestPosition(enemyUnits, radius)
-			
-			if pos and NPC.IsPositionInRange(myHero, pos, cast_range, 0) then 
-				Ability.CastPosition(fist, pos) 
+
+			if pos and NPC.IsPositionInRange(myHero, pos, cast_range, 0) then
+				Ability.CastPosition(fist, pos)
 			end
 		end
 	end
 
 	-- invoker's spell: tornado -> blast -> cold snap -> etc ...
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
-		Invoker.Defend(myHero, source)
-	end
+	-- if NPC.GetUnitName(myHero) == "npc_dota_hero_invoker" then
+	-- 	Invoker.Defend(myHero, source)
+	-- end
 
 	-- OD's imprison
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_obsidian_destroyer" then
@@ -801,7 +801,7 @@ function Dodge.Defend(myHero, source)
 		if imprison and Ability.IsCastable(imprison, NPC.GetMana(myHero))
 			and source and NPC.IsEntityInRange(source, myHero, Ability.GetCastRange(imprison))
 			and not Utility.IsLotusProtected(source) then
-			
+
 			Ability.CastTarget(imprison, source)
 		end
 	end
