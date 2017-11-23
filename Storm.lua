@@ -7,12 +7,23 @@ local optionAutoVortex = Menu.AddOption({"Hero Specific", "Storm Spirit"}, "Auto
 local optionAttackHelper = Menu.AddOption({"Hero Specific", "Storm Spirit"}, "Attack Helper", "When right click enemy, auto bolt to maximize damage")
 
 local target
-local timer = GameRules.GetGameTime()
+local hasAttacked = true
 
 function Storm.OnPrepareUnitOrders(orders)
     if not orders then return true end
     target = orders.target
     return true
+end
+
+function Storm.OnProjectile(projectile)
+    if not projectile then return end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero then return end
+
+    if projectile.isAttack and projectile.source == myHero then
+        hasAttacked = true
+    end
 end
 
 function Storm.OnUpdate()
@@ -78,13 +89,12 @@ function Storm.AttackHelper()
     if not target or Entity.IsSameTeam(myHero, target) or not Entity.IsHero(target) then return end
     if not Utility.CanCastSpellOn(target) then return end
 
-    local radius = 120 -- 30 + 30 * Ability.GetLevel(spell)
+    local radius = 50 + 75 * Ability.GetLevel(spell) -- Damage Radius: 125/200/275
     local dir = Entity.GetAbsRotation(target):GetForward():Normalized()
     local front_pos = Entity.GetAbsOrigin(target) + dir:Scaled(radius)
     local back_pos = Entity.GetAbsOrigin(target) - dir:Scaled(radius)
 
-    if (GameRules.GetGameTime() - timer) > NPC.GetAttackTime(myHero) + Ability.GetCastPoint(spell) + 0.15
-    and (not NPC.IsEntityInRange(myHero, target, NPC.GetAttackRange(myHero))
+    if hasAttacked and (not NPC.IsEntityInRange(myHero, target, NPC.GetAttackRange(myHero))
     or not NPC.HasModifier(myHero, "modifier_storm_spirit_overload_debuff")) then
 
         if (Entity.GetAbsOrigin(myHero) - back_pos):Length() >= radius then
@@ -93,7 +103,7 @@ function Storm.AttackHelper()
             Ability.CastPosition(spell, front_pos)
         end
 
-        timer = GameRules.GetGameTime()
+        hasAttacked = false
     end
 
     Player.AttackTarget(Players.GetLocal(), myHero, target)
