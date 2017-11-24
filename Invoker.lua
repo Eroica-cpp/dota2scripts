@@ -18,7 +18,7 @@ local optionIceWallHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"
 
 local currentInstances
 local timer = GameRules.GetGameTime()
-local gap = 0.2
+local gap = 0.1
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -156,20 +156,31 @@ function Invoker.TornadoCombo(myHero, enemy)
 
     if not mod then return false end
 
-    local pos =  Entity.GetAbsOrigin(enemy)
+    local pos = Entity.GetAbsOrigin(enemy)
     local time_left = math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
 
     -- -- 1. cast ice wall
     -- if Invoker.CastIceWall(myHero, enemy) then return true end
 
     -- 2. cast sun strike
-    if time_left >= 1 and time_left < 1.7 and Invoker.CastSunStrike(myHero, pos) then return true end
+    -- delay: 1.7, cast point: 0.05, radius: 175, window: 175/400 = 0.4375
+    if 1.75 - 0.4375 < time_left and time_left < 1.75 and Invoker.CastSunStrike(myHero, pos) then return true end
 
     -- 3. cast chaos meteor
-    if time_left >= 0.5 and time_left < 1.3 and Invoker.CastChaosMeteor(myHero, pos) then return true end
+    -- delay: 1.3, cast point: 0.05, affect radius: 275
+    -- meteors speed: 300, cast range: 700
+    local dir = (pos - Entity.GetAbsOrigin(myHero)):Normalized()
+    local land_pos = pos + dir:Scaled(300 * (time_left - 1.35 - 0.3))
+    local wex_level = Ability.GetLevel(NPC.GetAbility(myHero, "invoker_wex"))
+    local travel_distance = 315  + 150 * wex_level
+    local cast_range = 700
+    if (land_pos - Entity.GetAbsOrigin(myHero)):Length2D() <= cast_range
+    and (land_pos - pos):Length2D() <= travel_distance
+    and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
 
     -- 4. cast EMP
-    if time_left >= 1 and time_left < 2.9 and Invoker.CastEMP(myHero, pos) then return true end
+    -- delay: 2.9, cast point: 0.05, radius: 675, window: 675/400 = 1.6875
+    if 2.95 - 1.6875 < time_left and time_left < 2.95 and Invoker.CastEMP(myHero, pos) then return true end
 
     return false
 end
@@ -367,7 +378,7 @@ function Invoker.Defend(myHero, enemy)
     and Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
 
     -- 2. use deafening blast to defend if available
-    if NPC.IsEntityInRange(myHero, enemy, 350)
+    if NPC.IsEntityInRange(myHero, enemy, 200)
     and Utility.CanCastSpellOn(enemy)
     and Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
 
