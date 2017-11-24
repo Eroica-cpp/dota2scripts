@@ -156,7 +156,7 @@ function Invoker.TornadoCombo(myHero, enemy)
 
     if not mod then return false end
 
-    local pos = Entity.GetAbsOrigin(enemy)
+    local enemy_pos = Entity.GetAbsOrigin(enemy)
     local time_left = math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
 
     -- -- 1. cast ice wall
@@ -164,23 +164,14 @@ function Invoker.TornadoCombo(myHero, enemy)
 
     -- 2. cast sun strike
     -- delay: 1.7, cast point: 0.05, radius: 175, window: 175/400 = 0.4375
-    if 1.75 - 0.4375 < time_left and time_left < 1.75 and Invoker.CastSunStrike(myHero, pos) then return true end
+    if 1.75 - 0.4375 < time_left and time_left < 1.75 and Invoker.CastSunStrike(myHero, enemy_pos) then return true end
 
     -- 3. cast chaos meteor
-    -- delay: 1.3, cast point: 0.05, affect radius: 275
-    -- meteors speed: 300, cast range: 700
-    local dir = (Entity.GetAbsOrigin(myHero) - pos):Normalized()
-    local land_pos = pos + dir:Scaled(300 * (time_left - 1.35))
-    local wex_level = Ability.GetLevel(NPC.GetAbility(myHero, "invoker_wex"))
-    local travel_distance = 315  + 150 * wex_level
-    local cast_range = 700
-    if (land_pos - Entity.GetAbsOrigin(myHero)):Length2D() <= cast_range
-    and (land_pos - pos):Length2D() <= travel_distance
-    and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
+    if Invoker.CastChaosMeteor(myHero, enemy_pos, time_left) then return end
 
     -- 4. cast EMP
     -- delay: 2.9, cast point: 0.05, radius: 675, window: 675/400 = 1.6875
-    if 2.95 - 1.6875 < time_left and time_left < 2.95 and Invoker.CastEMP(myHero, pos) then return true end
+    if 2.95 - 1.6875 < time_left and time_left < 2.95 and Invoker.CastEMP(myHero, enemy_pos) then return true end
 
     return false
 end
@@ -570,22 +561,31 @@ function Invoker.CastSunStrike(myHero, pos)
 end
 
 -- return true if successfully cast, false otherwise
-function Invoker.CastChaosMeteor(myHero, pos)
-    if not myHero or not pos then return false end
+function Invoker.CastChaosMeteor(myHero, enemy_pos, time_left)
+    if not myHero then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
 
     local invoke = NPC.GetAbility(myHero, "invoker_invoke")
     if not invoke then return false end
 
+    local wex = NPC.GetAbility(myHero, "invoker_wex")
+    if not wex then return false end
+
     local meteor = NPC.GetAbility(myHero, "invoker_chaos_meteor")
     if not meteor or not Ability.IsCastable(meteor, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
 
-    local range = 700
-    local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
-    if dis > range then return false end
+    -- delay: 1.3, cast point: 0.05, affect radius: 275, meteors speed: 300
+    local dir = (Entity.GetAbsOrigin(myHero) - enemy_pos):Normalized()
+    local land_pos = enemy_pos + dir:Scaled(300 * (time_left - 1.35))
+
+    local travel_distance = 315  + 150 * Ability.GetLevel(wex)
+    if (land_pos - enemy_pos):Length2D() > travel_distance then return false end
+
+    local cast_range = Ability.GetCastRange(meteor)
+    if (land_pos - Entity.GetAbsOrigin(myHero)):Length2D() > cast_range then return false end
 
     if Invoker.HasInvoked(myHero, meteor) or Invoker.PressKey(myHero, "WEER") then
-        Ability.CastPosition(meteor, pos)
+        Ability.CastPosition(meteor, land_pos)
         Invoker.ProtectSpell(myHero, meteor)
         return true
     end
