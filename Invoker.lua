@@ -361,21 +361,23 @@ function Invoker.Defend(myHero, enemy)
     if not myHero or not enemy then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
 
-    -- react if enemy fall into the safe zone
-    local range = 350
-    if not NPC.IsEntityInRange(myHero, enemy, range) then return end
-
     -- 1. use tornado to defend if available
-    if Utility.CanCastSpellOn(enemy) and Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
+    if NPC.IsEntityInRange(myHero, enemy, 350)
+    and Utility.CanCastSpellOn(enemy)
+    and Invoker.CastTornado(myHero, Entity.GetAbsOrigin(enemy)) then return end
 
     -- 2. use deafening blast to defend if available
-    if Utility.CanCastSpellOn(enemy) and Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
+    if NPC.IsEntityInRange(myHero, enemy, 350)
+    and Utility.CanCastSpellOn(enemy)
+    and Invoker.CastDeafeningBlast(myHero, Entity.GetAbsOrigin(enemy)) then return end
 
     -- 3. use cold snap to defend if available
-    if Invoker.CastColdSnap(myHero, enemy) then return end
+    if NPC.IsEntityInRange(myHero, enemy, 350)
+    and Invoker.CastColdSnap(myHero, enemy) then return end
 
     -- 4. use ghost walk to escape
-    if Invoker.CastGhostWalk(myHero) then return end
+    if NPC.IsEntityInRange(myHero, enemy, 200)
+    and Invoker.CastGhostWalk(myHero) then return end
 
     -- -- 5. use EMP to defend if available
     -- local mid = (Entity.GetAbsOrigin(myHero) + Entity.GetAbsOrigin(enemy)):Scaled(0.5)
@@ -644,7 +646,7 @@ end
 function Invoker.CastIceWall(myHero, enemy)
     if not myHero then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
-    if Entity.IsTurning(myHero) then return false end
+    -- if Entity.IsTurning(myHero) then return false end
 
     if not Utility.CanCastSpellOn(enemy)
     and not NPC.HasModifier(enemy, "modifier_invoker_tornado")
@@ -666,7 +668,7 @@ function Invoker.CastIceWall(myHero, enemy)
     local l_sqrt = vec:Length2DSqr() - w_sqrt
 
     -- wall_length: 1120, wall_width: 105
-    if w_sqrt > 50 * 50 or l_sqrt > 550 * 550 then return false end
+    if w_sqrt > 55 * 55 or l_sqrt > 560 * 560 then return false end
 
     if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
         Ability.CastNoTarget(ice_wall)
