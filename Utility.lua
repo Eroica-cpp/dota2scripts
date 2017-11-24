@@ -238,11 +238,77 @@ function Utility.CantMove(npc)
     return false
 end
 
+-- Reference: https://dota2.gamepedia.com/Stun
+-- black items on the list seems are not included in "modifier_stunned"
+Utility.StunModifiers = {
+    "modifier_stunned",
+    "modifier_bashed",
+    "modifier_bane_fiends_grip",
+    "modifier_rattletrap_hookshot",
+    "modifier_winter_wyvern_winters_curse_aura",
+    "modifier_necrolyte_reapers_scythe"
+}
+
+-- Reference: https://dota2.gamepedia.com/Sleep
+Utility.SleepModifiers = {
+    "modifier_bane_nightmare",
+    "modifier_elder_titan_echo_stomp",
+    "modifier_naga_siren_song_of_the_siren"
+}
+
+-- Reference: https://dota2.gamepedia.com/Root
+Utility.RootModifiers = {
+    "modifier_crystal_maiden_frostbite",
+    "modifier_dark_troll_warlord_ensnare",
+    "modifier_ember_spirit_searing_chains",
+    "modifier_meepo_earthbind",
+    "modifier_naga_siren_ensnare",
+    "modifier_oracle_fortunes_end_purge",
+    "modifier_rod_of_atos_debuff",
+    "modifier_lone_druid_spirit_bear_entangle_effect",
+    "modifier_techies_stasis_trap_stunned",
+    "modifier_treant_natures_guise_root",
+    "modifier_treant_overgrowth",
+    "modifier_abyssal_underlord_pit_of_malice_ensare"
+}
+
+-- Reference: https://dota2.gamepedia.com/Taunt
+Utility.TauntModifiers = {
+    "modifier_axe_berserkers_call",
+    "modifier_legion_commander_duel",
+    "modifier_winter_wyvern_winters_curse"
+}
+
 -- only able to get stun modifier. no specific modifier for root or hex.
 function Utility.GetStunTimeLeft(npc)
     local mod = NPC.GetModifier(npc, "modifier_stunned")
     if not mod then return 0 end
     return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
+end
+
+-- time left to be fixed in a position (stunned, sleeped, rooted, or taunted)
+function Utility.GetFixTimeLeft(npc)
+    for i, val in ipairs(Utility.StunModifiers) do
+        local mod = NPC.GetModifier(npc, val)
+        if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
+    end
+
+    for i, val in ipairs(Utility.SleepModifiers) do
+        local mod = NPC.GetModifier(npc, val)
+        if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
+    end
+
+    for i, val in ipairs(Utility.RootModifiers) do
+        local mod = NPC.GetModifier(npc, val)
+        if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
+    end
+
+    for i, val in ipairs(Utility.TauntModifiers) do
+        local mod = NPC.GetModifier(npc, val)
+        if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
+    end
+
+    return 0
 end
 
 -- hex only has three types: sheepstick, lion's hex, shadow shaman's hex
