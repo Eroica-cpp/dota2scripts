@@ -169,8 +169,8 @@ function Invoker.TornadoCombo(myHero, enemy)
     -- 3. cast chaos meteor
     -- delay: 1.3, cast point: 0.05, affect radius: 275
     -- meteors speed: 300, cast range: 700
-    local dir = (pos - Entity.GetAbsOrigin(myHero)):Normalized()
-    local land_pos = pos + dir:Scaled(300 * (time_left - 1.35 - 0.3))
+    local dir = (Entity.GetAbsOrigin(myHero) - pos):Normalized()
+    local land_pos = pos + dir:Scaled(300 * (time_left - 1.35))
     local wex_level = Ability.GetLevel(NPC.GetAbility(myHero, "invoker_wex"))
     local travel_distance = 315  + 150 * wex_level
     local cast_range = 700
