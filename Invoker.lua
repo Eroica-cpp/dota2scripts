@@ -387,7 +387,8 @@ function Invoker.Defend(myHero, enemy)
     and Invoker.CastColdSnap(myHero, enemy) then return end
 
     -- 4. use ghost walk to escape
-    if NPC.IsEntityInRange(myHero, enemy, 200)
+    if (Utility.CanCastSpellOn(enemy) or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE))
+    and NPC.IsEntityInRange(myHero, enemy, 200)
     and Invoker.CastGhostWalk(myHero) then return end
 
     -- -- 5. use EMP to defend if available

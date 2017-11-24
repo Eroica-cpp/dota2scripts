@@ -699,7 +699,7 @@ function Dodge.Update(info)
 end
 
 function Dodge.Defend(myHero, source)
-	if not myHero or NPC.IsStunned(myHero) then return end
+	if not myHero or not Utility.IsSuitableToUseItem(myHero) then return end
 
 	-- ===========
 	-- Use Items
