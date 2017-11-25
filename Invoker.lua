@@ -8,7 +8,8 @@ local optionRightClickCombo = Menu.AddOption({"Hero Specific", "Invoker Extensio
 local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Meteor & Blast Combo", "cast deafening blast after chaos meteor")
 local optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Cold Snap Combo", "cast cold snap on enemy who is affected by DoT, like chaos meteor, urn, ice wall, etc.")
 local optionTornadoCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Eul/Tornado Combo", "Auto cast ice wall, chaos meteor, sun strike, EMP with eul/tornado")
-local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible")
+local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on fixed enemies.")
+local optionSlowedCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Slowed Combo", "Auto cast sun strike, chaos meteor, EMP on slowed enemies.")
 local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
@@ -18,7 +19,7 @@ local optionIceWallHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"
 
 local currentInstances
 local timer = GameRules.GetGameTime()
-local gap = 0.1
+local gap = 0.2 -- 0.2s seems to be a proper timing, 0.1s might cause issuese like break invisability.
 
 function Invoker.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -72,6 +73,8 @@ function Invoker.Iteration(myHero)
             if Menu.IsEnabled(optionInterrupt) then Invoker.Interrupt(myHero, enemy) end
 
             if Menu.IsEnabled(optionFixedPositionCombo) then Invoker.FixedPositionCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionSlowedCombo) then Invoker.SlowedCombo(myHero, enemy) end
 
             if Menu.IsEnabled(optionMeteorBlastCombo) then Invoker.MeteorBlastCombo(myHero, enemy) end
 
@@ -331,9 +334,7 @@ function Invoker.Interrupt(myHero, enemy)
     return false
 end
 
--- Auto cast sun strike, chaos meteor, EMP on stunned/rooted/taunted enemy if possible
--- Auto cast these spells on enemy who is slower then threshold
--- priority: chaos meteor -> EMP -> sun strike
+-- Auto cast sun strike, chaos meteor, EMP on fixed enemies (rooted, stunned, taunted, or slept).
 function Invoker.FixedPositionCombo(myHero, enemy)
     if not myHero or not enemy then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
@@ -342,10 +343,8 @@ function Invoker.FixedPositionCombo(myHero, enemy)
     -- disable this combo if level is too low
     if NPC.GetCurrentLevel(myHero) <= 2 then return false end
 
-    -- NPC.GetMoveSpeed() fails to consider (1) hex (2) ice wall
-    local speedThreshold = 250
     local time_left = Utility.GetFixTimeLeft(enemy)
-    if time_left <= 0 and Utility.GetMoveSpeed(enemy) >= speedThreshold then return false end
+    if time_left <= 0 then return false end
 
     -- cast chaos meteor on fixed enemies
     -- delay: 1.3, cast point: 0.05, affect radius: 275, meteors speed: 300
@@ -379,12 +378,40 @@ function Invoker.FixedPositionCombo(myHero, enemy)
         if time_left > delay and Invoker.CastEMP(myHero, land_pos) then return true end
     end
 
-    -- cast sun strike on stunned/rooted enemy
+    -- cast sun strike on fixed enemies
     -- local pos = Utility.GetPredictedPosition(enemy, 1.7)
     local delay = 1.75
     local radius = 175
     local pos = Entity.GetAbsOrigin(enemy)
     if (time_left + radius/400 > delay) and Invoker.CastSunStrike(myHero, pos) then return true end
+
+    return false
+end
+
+-- Auto cast sun strike, chaos meteor, EMP on slowed enemies.
+function Invoker.SlowedCombo(myHero, enemy)
+    if not myHero or not enemy then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
+
+    -- disable this combo if level is too low
+    if NPC.GetCurrentLevel(myHero) <= 2 then return false end
+
+    -- NPC.GetMoveSpeed() fails to consider (1) hex (2) ice wall
+    local speedThreshold = 250
+    if Utility.GetMoveSpeed(enemy) >= speedThreshold then return false end
+
+    -- sun strike, delay: 1.7
+    local pos = Utility.GetPredictedPosition(enemy, 1.75)
+    if Invoker.CastSunStrike(myHero, pos) then return true end
+
+    -- chaos meteor, delay: 1.3
+    local pos = Utility.GetPredictedPosition(enemy, 1.35)
+    if Invoker.CastChaosMeteor(myHero, pos) then return true end
+
+    -- EMP, delay: 2.9
+    local pos = Utility.GetPredictedPosition(enemy, 2.95)
+    if Invoker.CastEMP(myHero, pos) then return true end
 
     return false
 end
@@ -658,6 +685,7 @@ function Invoker.CastIceWall(myHero, enemy)
 
     local ice_wall = NPC.GetAbility(myHero, "invoker_ice_wall")
     if not ice_wall or not Ability.IsCastable(ice_wall, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
+    if Ability.GetLevel(NPC.GetAbility(myHero, "invoker_quas")) < 2 then return false end
 
     local distance = 200
     local dir = Entity.GetAbsRotation(myHero):GetForward():Normalized()
