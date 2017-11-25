@@ -347,9 +347,22 @@ function Invoker.FixedPositionCombo(myHero, enemy)
     local time_left = Utility.GetFixTimeLeft(enemy)
     if time_left <= 0 and Utility.GetMoveSpeed(enemy) >= speedThreshold then return false end
 
-    -- cast chaos meteor on stunned/rooted enemy
+    -- cast chaos meteor on a fixed enemy
+    -- delay: 1.3, cast point: 0.05, affect radius: 275, meteors speed: 300
     -- local pos = Utility.GetPredictedPosition(enemy, 1.3)
-    if Invoker.CastChaosMeteor(myHero, Entity.GetAbsOrigin(enemy), 0) then return true end
+    local travel_distance = 0
+    if NPC.HasAbility(myHero, "invoker_wex") then
+        travel_distance = 315 + 150 * Ability.GetLevel(NPC.GetAbility(myHero, "invoker_wex"))
+    end
+    if NPC.IsEntityInRange(myHero, enemy, 700) then
+        local land_pos = Entity.GetAbsOrigin(enemy)
+        if time_left > 1.35 and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
+    elseif NPC.IsEntityInRange(myHero, enemy, 700 + travel_distance) then
+        local diff_vec = Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)
+        local land_pos = Entity.GetAbsOrigin(myHero) + diff_vec:Normalized():Scaled(700)
+        local traval_time = (diff_vec:Length2D() - 700) / 300
+        if (time_left > 1.35 + traval_time) and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
+    end
 
     -- cast EMP on stunned/rooted enemy
     local pos = Utility.GetPredictedPosition(enemy, 2.9)
