@@ -421,6 +421,7 @@ end
 function Invoker.Defend(myHero, enemy)
     if not myHero or not enemy then return end
     if not Utility.IsSuitableToCastSpell(myHero) then return end
+    if Utility.IsDisabled(enemy) then return end
 
     -- 1. use tornado to defend if available
     if NPC.IsEntityInRange(myHero, enemy, 350)
