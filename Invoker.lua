@@ -347,30 +347,44 @@ function Invoker.FixedPositionCombo(myHero, enemy)
     local time_left = Utility.GetFixTimeLeft(enemy)
     if time_left <= 0 and Utility.GetMoveSpeed(enemy) >= speedThreshold then return false end
 
-    -- cast chaos meteor on a fixed enemy
+    -- cast chaos meteor on fixed enemies
     -- delay: 1.3, cast point: 0.05, affect radius: 275, meteors speed: 300
-    -- local pos = Utility.GetPredictedPosition(enemy, 1.3)
+    local delay = 1.35
+    local range = 700
     local travel_distance = 0
     if NPC.HasAbility(myHero, "invoker_wex") then
         travel_distance = 315 + 150 * Ability.GetLevel(NPC.GetAbility(myHero, "invoker_wex"))
     end
-    if NPC.IsEntityInRange(myHero, enemy, 700) then
+    if NPC.IsEntityInRange(myHero, enemy, range) then
         local land_pos = Entity.GetAbsOrigin(enemy)
-        if time_left > 1.35 and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
-    elseif NPC.IsEntityInRange(myHero, enemy, 700 + travel_distance) then
+        if time_left > delay and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
+    elseif NPC.IsEntityInRange(myHero, enemy, range + travel_distance) then
         local diff_vec = Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)
-        local land_pos = Entity.GetAbsOrigin(myHero) + diff_vec:Normalized():Scaled(700)
-        local traval_time = (diff_vec:Length2D() - 700) / 300
-        if (time_left > 1.35 + traval_time) and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
+        local land_pos = Entity.GetAbsOrigin(myHero) + diff_vec:Normalized():Scaled(range)
+        local traval_time = (diff_vec:Length2D() - range) / 300
+        if (time_left > delay + traval_time) and Invoker.CastChaosMeteor(myHero, land_pos) then return true end
     end
 
-    -- cast EMP on stunned/rooted enemy
-    local pos = Utility.GetPredictedPosition(enemy, 2.9)
-    if Invoker.CastEMP(myHero, pos) then return true end
+    -- cast EMP on fixed enemies
+    -- delay: 2.9, cast point: 0.05, range: 950, affect radius: 675
+    local range = 950
+    local radius = 675
+    local delay = 2.95
+    if NPC.IsEntityInRange(myHero, enemy, range) then
+        local land_pos = Entity.GetAbsOrigin(enemy)
+        if (time_left + radius/400 > delay) and Invoker.CastEMP(myHero, land_pos) then return true end
+    elseif NPC.IsEntityInRange(myHero, enemy, range + radius) then
+        local diff_vec = Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)
+        local land_pos = Entity.GetAbsOrigin(myHero) + diff_vec:Normalized():Scaled(range)
+        if time_left > delay and Invoker.CastEMP(myHero, land_pos) then return true end
+    end
 
     -- cast sun strike on stunned/rooted enemy
-    local pos = Utility.GetPredictedPosition(enemy, 1.7)
-    if Invoker.CastSunStrike(myHero, pos) then return true end
+    -- local pos = Utility.GetPredictedPosition(enemy, 1.7)
+    local delay = 1.75
+    local radius = 175
+    local pos = Entity.GetAbsOrigin(enemy)
+    if (time_left + radius/400 > delay) and Invoker.CastSunStrike(myHero, pos) then return true end
 
     return false
 end
