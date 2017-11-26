@@ -6,7 +6,8 @@ local Invoker = {}
 local keyGhostWalk = Menu.AddKeyOption({"Hero Specific", "Invoker Extension"}, "Ghost Walk Key", Enum.ButtonCode.KEY_F5)
 local optionRightClickCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Right Click Combo", "cast cold snap, alacrity or forge spirit when right click enemy hero or building")
 local optionMeteorBlastCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Meteor & Blast Combo", "cast deafening blast after chaos meteor")
-local optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Cold Snap Combo", "cast cold snap on enemy who is affected by DoT, like chaos meteor, urn, ice wall, etc.")
+local optionDoTCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "DoT Combo", "cast cold snap on enemy who is affected by DoT, like chaos meteor, urn, ice wall, etc.")
+local optionColdSnapCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Cold Snap Combo", "if someone is affected by cold snap, cast sun strike and EMP")
 local optionTornadoCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Eul/Tornado Combo", "Auto cast ice wall, chaos meteor, sun strike, EMP with eul/tornado")
 local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Fixed Position Combo", "Auto cast sun strike, chaos meteor, EMP on fixed enemies.")
 local optionSlowedCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Slowed Combo", "Auto cast sun strike, chaos meteor, EMP on slowed enemies.")
@@ -83,7 +84,7 @@ function Invoker.Iteration(myHero)
 
             if Menu.IsEnabled(optionTornadoCombo) then Invoker.TornadoCombo(myHero, enemy) end
 
-            if Menu.IsEnabled(optionColdSnapCombo) then Invoker.ColdSnapCombo(myHero, enemy) end
+            if Menu.IsEnabled(optionDoTCombo) then Invoker.DoTCombo(myHero, enemy) end
         end
     end
 end
@@ -201,7 +202,7 @@ function Invoker.MeteorBlastCombo(myHero, enemy)
 end
 
 -- cast cold snap on enemy who is affected by DoT
-function Invoker.ColdSnapCombo(myHero, enemy)
+function Invoker.DoTCombo(myHero, enemy)
     if not myHero or not enemy then return false end
     if not Utility.IsSuitableToCastSpell(myHero) then return false end
     if not Utility.CanCastSpellOn(enemy) then return false end
@@ -217,6 +218,9 @@ function Invoker.ColdSnapCombo(myHero, enemy)
     if Invoker.CastColdSnap(myHero, enemy) then return true end
 
     return false
+end
+
+function Invoker.ColdSnapCombo(myHero, enemy)
 end
 
 -- auto cast deafening blast, tornado or sun strike to predicted position for kill steal
@@ -485,9 +489,9 @@ function Invoker.CastTornado(myHero, pos)
     if dis > travel_distance then return false end
     if dis > range then pos = Entity.GetAbsOrigin(myHero) + dir:Scaled(range/dis) end
 
-    if Invoker.HasInvoked(myHero, tornado) or Invoker.PressKey(myHero, "QWWR") then
+    if (Invoker.HasInvoked(myHero, tornado) or Invoker.PressKey(myHero, "QWWR"))
+    and Invoker.ProtectSpell(myHero, tornado) then
         Ability.CastPosition(tornado, pos)
-        Invoker.ProtectSpell(myHero, tornado)
         return true
     end
 
@@ -509,9 +513,9 @@ function Invoker.CastDeafeningBlast(myHero, pos)
     local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
     if dis > range then return false end
 
-    if Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER") then
+    if (Invoker.HasInvoked(myHero, blast) or Invoker.PressKey(myHero, "QWER"))
+    and Invoker.ProtectSpell(myHero, blast) then
         Ability.CastPosition(blast, pos)
-        Invoker.ProtectSpell(myHero, blast)
         return true
     end
 
@@ -534,9 +538,9 @@ function Invoker.CastColdSnap(myHero, target)
     local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(target)):Length()
     if dis > range then return false end
 
-    if Invoker.HasInvoked(myHero, cold_snap) or Invoker.PressKey(myHero, "QQQR") then
+    if (Invoker.HasInvoked(myHero, cold_snap) or Invoker.PressKey(myHero, "QQQR"))
+    and Invoker.ProtectSpell(myHero, cold_snap) then
         Ability.CastTarget(cold_snap, target)
-        Invoker.ProtectSpell(myHero, cold_snap)
         return true
     end
 
@@ -558,9 +562,9 @@ function Invoker.CastEMP(myHero, pos)
     local dis = (Entity.GetAbsOrigin(myHero) - pos):Length()
     if dis > range then return false end
 
-    if Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR") then
+    if (Invoker.HasInvoked(myHero, emp) or Invoker.PressKey(myHero, "WWWR"))
+    and Invoker.ProtectSpell(myHero, emp) then
         Ability.CastPosition(emp, pos)
-        Invoker.ProtectSpell(myHero, emp)
         return true
     end
 
@@ -580,9 +584,9 @@ function Invoker.CastAlacrity(myHero, target)
     local alacrity = NPC.GetAbility(myHero, "invoker_alacrity")
     if not alacrity or not Ability.IsCastable(alacrity, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
 
-    if Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER") then
+    if (Invoker.HasInvoked(myHero, alacrity) or Invoker.PressKey(myHero, "WWER"))
+    and Invoker.ProtectSpell(myHero, alacrity) then
         Ability.CastTarget(alacrity, myHero)
-        Invoker.ProtectSpell(myHero, alacrity)
         return true
     end
 
@@ -600,9 +604,9 @@ function Invoker.CastForgeSpirit(myHero)
     local forge_spirit = NPC.GetAbility(myHero, "invoker_forge_spirit")
     if not forge_spirit or not Ability.IsCastable(forge_spirit, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
 
-    if Invoker.HasInvoked(myHero, forge_spirit) or Invoker.PressKey(myHero, "QEER") then
+    if (Invoker.HasInvoked(myHero, forge_spirit) or Invoker.PressKey(myHero, "QEER"))
+    and Invoker.ProtectSpell(myHero, forge_spirit) then
         Ability.CastNoTarget(forge_spirit)
-        Invoker.ProtectSpell(myHero, forge_spirit)
         return true
     end
 
@@ -625,9 +629,9 @@ function Invoker.CastSunStrike(myHero, pos)
     local enemies = NPCs.InRadius(pos, radius, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
     if enemies and #enemies >= 2 then return false end
 
-    if Invoker.HasInvoked(myHero, sun_strike) or Invoker.PressKey(myHero, "EEER") then
+    if (Invoker.HasInvoked(myHero, sun_strike) or Invoker.PressKey(myHero, "EEER"))
+    and Invoker.ProtectSpell(myHero, sun_strike) then
         Ability.CastPosition(sun_strike, pos)
-        Invoker.ProtectSpell(myHero, sun_strike)
         return true
     end
 
@@ -648,9 +652,9 @@ function Invoker.CastChaosMeteor(myHero, pos)
     local cast_range = Ability.GetCastRange(meteor)
     if (pos - Entity.GetAbsOrigin(myHero)):Length2D() > cast_range then return false end
 
-    if Invoker.HasInvoked(myHero, meteor) or Invoker.PressKey(myHero, "WEER") then
+    if (Invoker.HasInvoked(myHero, meteor) or Invoker.PressKey(myHero, "WEER"))
+    and Invoker.ProtectSpell(myHero, meteor) then
         Ability.CastPosition(meteor, pos)
-        Invoker.ProtectSpell(myHero, meteor)
         return true
     end
 
@@ -668,7 +672,8 @@ function Invoker.CastGhostWalk(myHero)
     local ghost_walk = NPC.GetAbility(myHero, "invoker_ghost_walk")
     if not ghost_walk or not Ability.IsCastable(ghost_walk, NPC.GetMana(myHero) - Ability.GetManaCost(invoke)) then return false end
 
-    if Invoker.HasInvoked(myHero, ghost_walk) or Invoker.PressKey(myHero, "QQWR") then
+    if (Invoker.HasInvoked(myHero, ghost_walk) or Invoker.PressKey(myHero, "QQWR"))
+    and Invoker.ProtectSpell(myHero, ghost_walk) then
         local ratio = 0.8
         if Entity.GetHealth(myHero) >= ratio * Entity.GetMaxHealth(myHero) then
             Invoker.PressKey(myHero, "WWW")
@@ -712,7 +717,8 @@ function Invoker.CastIceWall(myHero, enemy)
     -- wall_length: 1120, wall_width: 105
     if w_sqrt > 55 * 55 or l_sqrt > 560 * 560 then return false end
 
-    if Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER") then
+    if (Invoker.HasInvoked(myHero, ice_wall) or Invoker.PressKey(myHero, "QQER"))
+    and Invoker.ProtectSpell(myHero, ice_wall) then
         Ability.CastNoTarget(ice_wall)
         return true
     end
@@ -760,30 +766,33 @@ end
 -- After casting a spell , move this spell to second slot
 -- so as to protect another spell
 function Invoker.ProtectSpell(myHero, spell)
-	-- temporarily disable spell protection to avoid miss switch
-	if true then return end
+	-- temporarily disable spell protection due to performance issues
+	if true then return true end
 
-    if not myHero or not spell then return end
-    if not Utility.IsSuitableToCastSpell(myHero) then return end
-    if not Invoker.HasInvoked(myHero, spell) then return end
+    if not myHero or not spell then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Invoker.HasInvoked(myHero, spell) then return false end
 
     local spell_1 = NPC.GetAbilityByIndex(myHero, 3)
     local spell_2 = NPC.GetAbilityByIndex(myHero, 4)
-    if not spell_1 or not spell_2 then return end
-    if Ability.GetName(spell) == Ability.GetName(spell_2) then return end
+    if not spell_1 or not spell_2 then return false end
+    if not Ability.IsCastable(spell_2, NPC.GetMana(myHero)) then return false end
+    if Ability.GetName(spell) == Ability.GetName(spell_2) then return false end
 
     local name = Ability.GetName(spell_2)
 
-    if name == "invoker_cold_snap" then Invoker.PressKey(myHero, "QQQR") end
-    if name == "invoker_ghost_walk" then Invoker.PressKey(myHero, "QQWR") end
-    if name == "invoker_tornado" then Invoker.PressKey(myHero, "QWWR") end
-    if name == "invoker_emp" then Invoker.PressKey(myHero, "WWWR") end
-    if name == "invoker_alacrity" then Invoker.PressKey(myHero, "WWER") end
-    if name == "invoker_chaos_meteor" then Invoker.PressKey(myHero, "WEER") end
-    if name == "invoker_sun_strike" then Invoker.PressKey(myHero, "EEER") end
-    if name == "invoker_forge_spirit" then Invoker.PressKey(myHero, "QEER") end
-    if name == "invoker_ice_wall" then Invoker.PressKey(myHero, "QQER") end
-    if name == "invoker_deafening_blast" then Invoker.PressKey(myHero, "QWER") end
+    if name == "invoker_cold_snap" then Invoker.PressKey(myHero, "QQQR"); return true end
+    if name == "invoker_ghost_walk" then Invoker.PressKey(myHero, "QQWR"); return true end
+    if name == "invoker_tornado" then Invoker.PressKey(myHero, "QWWR"); return true end
+    if name == "invoker_emp" then Invoker.PressKey(myHero, "WWWR"); return true end
+    if name == "invoker_alacrity" then Invoker.PressKey(myHero, "WWER"); return true end
+    if name == "invoker_chaos_meteor" then Invoker.PressKey(myHero, "WEER"); return true end
+    if name == "invoker_sun_strike" then Invoker.PressKey(myHero, "EEER"); return true end
+    if name == "invoker_forge_spirit" then Invoker.PressKey(myHero, "QEER"); return true end
+    if name == "invoker_ice_wall" then Invoker.PressKey(myHero, "QQER"); return true end
+    if name == "invoker_deafening_blast" then Invoker.PressKey(myHero, "QWER"); return true end
+
+    return false
 end
 
 -- return true if all ordered keys have been pressed successfully
