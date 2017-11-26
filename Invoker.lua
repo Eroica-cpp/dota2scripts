@@ -85,6 +85,8 @@ function Invoker.Iteration(myHero)
             if Menu.IsEnabled(optionTornadoCombo) then Invoker.TornadoCombo(myHero, enemy) end
 
             if Menu.IsEnabled(optionDoTCombo) then Invoker.DoTCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionColdSnapCombo) then Invoker.ColdSnapCombo(myHero, enemy) end
         end
     end
 end
@@ -220,7 +222,26 @@ function Invoker.DoTCombo(myHero, enemy)
     return false
 end
 
+-- If someone is affected by cold snap, then cast EMP.
 function Invoker.ColdSnapCombo(myHero, enemy)
+    -- if not myHero or not enemy then return false end
+    -- if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    -- if not Utility.CanCastSpellOn(enemy) then return false end
+    --
+    -- local mod = NPC.GetModifier(enemy, "modifier_invoker_cold_snap")
+    -- if not mod then return false end
+    -- local time_left = math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
+    -- local time_used = math.max(GameRules.GetGameTime() - Modifier.GetCreationTime(mod), 0)
+    --
+    -- -- EMP, delay: 2.9, radius: 675
+    -- local delay = 2.95
+    -- local escape_time = 675 / 400
+    -- if time_left + 675/400 < delay or time_used < 0.5 then return false end
+    --
+    -- local pos = Utility.GetPredictedPosition(enemy, 0.5)
+    -- if Invoker.CastEMP(myHero, pos) then return true end
+
+    return false
 end
 
 -- auto cast deafening blast, tornado or sun strike to predicted position for kill steal
@@ -386,7 +407,6 @@ function Invoker.FixedPositionCombo(myHero, enemy)
     end
 
     -- cast sun strike on fixed enemies
-    -- local pos = Utility.GetPredictedPosition(enemy, 1.7)
     local delay = 1.75
     local radius = 175
     local pos = Entity.GetAbsOrigin(enemy)
