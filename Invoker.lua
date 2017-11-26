@@ -391,6 +391,17 @@ function Invoker.FixedPositionCombo(myHero, enemy)
     return false
 end
 
+-- Auto cast cold snap to break linken sphere.
+function Invoker.LinkenBreaker(myHero, enemy)
+    if not myHero or not enemy then return false end
+    if not Utility.IsSuitableToCastSpell(myHero) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
+
+    if Utility.IsLinkensProtected(enemy) and Invoker.CastColdSnap(myHero, enemy) then return true end
+
+    return false
+end
+
 -- Auto cast sun strike, chaos meteor, EMP on slowed enemies.
 function Invoker.SlowedCombo(myHero, enemy)
     if not myHero or not enemy then return false end
