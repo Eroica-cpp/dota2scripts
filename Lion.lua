@@ -33,7 +33,7 @@ function Lion.AutoHex()
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
-        and not Utility.IsDisabled(enemy) and not NPC.IsLinkensProtected(enemy) then
+        and not Utility.IsDisabled(enemy) and not Utility.IsLinkensProtected(enemy) then
 
             Ability.CastTarget(spell, enemy)
             return
@@ -86,7 +86,7 @@ function Lion.AutoManaDrain()
         if enemy and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
-            if NPC.IsLinkensProtected(enemy) or NPC.IsIllusion(enemy) or Utility.CantMove(enemy) then
+            if Utility.IsLinkensProtected(enemy) or NPC.IsIllusion(enemy) or Utility.CantMove(enemy) then
                 Ability.CastTarget(spell, enemy)
                 return
             end

@@ -98,6 +98,16 @@ function Utility.IsLotusProtected(npc)
 	return false
 end
 
+-- extend NPC.IsLinkensProtected(), check AM's aghs case
+function Utility.IsLinkensProtected(npc)
+    local shield = NPC.GetAbility(npc, "antimage_spell_shield")
+	if shield and Ability.IsReady(shield) and NPC.HasItem(npc, "item_ultimate_scepter", true) then
+		return true
+	end
+
+    return NPC.IsLinkensProtected(npc)
+end
+
 -- return true if this npc is disabled, return false otherwise
 function Utility.IsDisabled(npc)
 	if not Entity.IsAlive(npc) then return true end

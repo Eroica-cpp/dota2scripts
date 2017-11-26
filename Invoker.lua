@@ -12,6 +12,7 @@ local optionFixedPositionCombo = Menu.AddOption({"Hero Specific", "Invoker Exten
 local optionSlowedCombo = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Slowed Combo", "Auto cast sun strike, chaos meteor, EMP on slowed enemies.")
 local optionInstanceHelper = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Instance Helper", "auto switch instances, EEE when attacking, WWW when running")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Kill Steal", "auto cast deafening blast, tornado or sun strike to predicted position to KS")
+local optionLinkenBreaker = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Linken Breaker", "auto cast cold snap to break linken sphere")
 local optionInterrupt = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Interrupt", "Auto interrupt enemy's tp or channelling spell with tornado or cold snap")
 local optionSpellProtection = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Spell Protection", "Protect uncast spell by moving casted spell to second slot")
 local optionDefend = Menu.AddOption({"Hero Specific", "Invoker Extension"}, "Defend", "If enemies are too close, auto cast (1) tornado, (2) blast, (3) cold snap, or (4) ghost walk to escape.")
@@ -75,6 +76,8 @@ function Invoker.Iteration(myHero)
             if Menu.IsEnabled(optionFixedPositionCombo) then Invoker.FixedPositionCombo(myHero, enemy) end
 
             if Menu.IsEnabled(optionSlowedCombo) then Invoker.SlowedCombo(myHero, enemy) end
+
+            if Menu.IsEnabled(optionLinkenBreaker) then Invoker.LinkenBreaker(myHero, enemy) end
 
             if Menu.IsEnabled(optionMeteorBlastCombo) then Invoker.MeteorBlastCombo(myHero, enemy) end
 

@@ -208,7 +208,7 @@ function AutoUseItems.item_sheepstick(myHero)
     local target = nil
     for i, enemy in ipairs(enemyAround) do
         if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
-            and Utility.CanCastSpellOn(enemy) and not NPC.IsLinkensProtected(enemy)
+            and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
             and not Utility.IsLotusProtected(enemy) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
@@ -294,7 +294,7 @@ function AutoUseItems.item_abyssal_blade(myHero)
     local target = nil
     for i, enemy in ipairs(enemyAround) do
         if not NPC.IsIllusion(enemy) and not NPC.IsStunned(enemy)
-        and not Utility.IsLotusProtected(enemy) and not NPC.IsLinkensProtected(enemy) then
+        and not Utility.IsLotusProtected(enemy) and not Utility.IsLinkensProtected(enemy) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
                 minDistance = dis

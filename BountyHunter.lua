@@ -51,7 +51,7 @@ function BountyHunter.AutoTrack()
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and BountyHunter.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
         and (BountyHunter.GetTrackTimeLeft(enemy) <= Ability.GetCooldownLength(spell)
-        or NPC.IsLinkensProtected(enemy)) then
+        or Utility.IsLinkensProtected(enemy)) then
 
             Ability.CastTarget(spell, enemy)
             return
