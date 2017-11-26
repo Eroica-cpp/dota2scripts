@@ -6,7 +6,7 @@ local AutoUseItems = {}
 AutoUseItems.optionSoulRing = Menu.AddOption({"Item Specific"}, "Soul Ring", "Auto use soul ring before casting spells or items")
 AutoUseItems.optionTomeOfKnowledge = Menu.AddOption({"Item Specific"}, "Tome of Knowledge", "Auto purchase tome of knowledge once available")
 AutoUseItems.optionMidas = Menu.AddOption({"Item Specific"}, "Hand of Midas", "Auto use midas on high XP creeps once available")
-AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, or battle fury to deward")
+AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto use quelling blade, iron talen, battle fury, or tango to deward")
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
 AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", "Auto use sheepstick on enemy hero once available")
@@ -143,14 +143,18 @@ function AutoUseItems.deward(myHero)
     local item1 = NPC.GetItem(myHero, "item_quelling_blade", true)
     local item2 = NPC.GetItem(myHero, "item_iron_talon", true)
     local item3 = NPC.GetItem(myHero, "item_bfury", true)
+    local item4 = NPC.GetItem(myHero, "item_tango", true)
+    local item5 = NPC.GetItem(myHero, "item_tango_single", true)
 
     local item = nil
     if item1 and Ability.IsCastable(item1, 0) then item = item1 end
     if item2 and Ability.IsCastable(item2, 0) then item = item2 end
     if item3 and Ability.IsCastable(item3, 0) then item = item3 end
+    if item4 and Ability.IsCastable(item4, 0) then item = item4 end
+    if item5 and Ability.IsCastable(item5, 0) then item = item5 end
     if not item then return end
 
-    local range = Ability.GetCastRange(item) -- 450
+    local range = 450
     local wards = NPC.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, npc in ipairs(wards) do
         if NPC.GetUnitName(npc) == "npc_dota_observer_wards" or NPC.GetUnitName(npc) == "npc_dota_sentry_wards" then
