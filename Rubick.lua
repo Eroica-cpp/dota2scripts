@@ -355,7 +355,7 @@ function Rubick.KillSteal()
     local spell = NPC.GetAbility(myHero, "rubick_fade_bolt")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
 
-    local range = Utility.GetCastRange(spell)
+    local range = Utility.GetCastRange(myHero, spell)
     local damage = 80 * Ability.GetLevel(spell)
 
     for i = 1, Heroes.Count() do
@@ -379,7 +379,7 @@ function Rubick.AutoTelekinesis()
 
     local spell = NPC.GetAbility(myHero, "rubick_telekinesis")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
-    local range = Utility.GetCastRange(spell)
+    local range = Utility.GetCastRange(myHero, spell)
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
@@ -399,7 +399,7 @@ function Rubick.AutoSpellSteal()
 
     local steal = NPC.GetAbility(myHero, "rubick_spell_steal")
     if not steal or not Ability.IsCastable(steal, NPC.GetMana(myHero)) then return end
-    local range = Utility.GetCastRange(steal)
+    local range = Utility.GetCastRange(myHero, steal)
 
     -- don't steal if currently has stolen spells available
     local slot1 = NPC.GetAbilityByIndex(myHero, 3)
@@ -435,7 +435,7 @@ function Rubick.QuickCast()
     end
 
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
-    local range = Utility.GetCastRange(spell)
+    local range = Utility.GetCastRange(myHero, spell)
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
