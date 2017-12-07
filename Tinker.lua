@@ -3,6 +3,7 @@ local Utility = require("Utility")
 local Tinker = {}
 
 Tinker.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell for KS", "On/Off")
+Tinker.optionBlinkAway = Menu.AddOption({"Hero Specific", "Tinker"}, "Blink Away", "Blink away if enemies are too close")
 Tinker.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 Tinker.optionOneKeySpell = Menu.AddOption({"Hero Specific", "Tinker"}, "One Key Spell", "On/Off")
 Tinker.key = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "One Key Spell Key", Enum.ButtonCode.KEY_D)
@@ -17,11 +18,13 @@ function Tinker.OnUpdate()
     if Menu.IsEnabled(Tinker.optionOneKeySpell) and Menu.IsKeyDown(Tinker.key) then
         Tinker.OneKey(myHero)
 	end
+
+	if Menu.IsEnabled(Tinker.optionBlinkAway) then
+        Tinker.BlinkAway(myHero)
+	end
 end
 
 function Tinker.OneKey(myHero)
-    if not myHero then return end
-
 	local myMana = NPC.GetMana(myHero)
     if myMana <= Tinker.manaThreshold then return end
 
@@ -51,6 +54,25 @@ function Tinker.OneKey(myHero)
 				Ability.CastNoTarget(missile)
 			end
         end
+	end
+end
+
+function Tinker.BlinkAway(myHero)
+	if not Utility.IsSuitableToUseItem(myHero) then return end
+
+	local item = NPC.GetItem(myHero, "item_blink", true)
+	if not item or not Ability.IsCastable(item, 0) then return end
+
+	local radius = 400
+	local range = 1190 -- Utility.GetCastRange(myHero, item) doesn't work well for items
+
+	local enemies = NPC.GetUnitsInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
+	for i, enemy in ipairs(enemies) do
+		if Entity.IsHero(enemy) then
+			local pos = Entity.GetAbsOrigin(myHero) + Utility.GetSafeDirection(myHero):Scaled(range)
+			Ability.CastPosition(item, pos)
+			return
+		end
 	end
 end
 

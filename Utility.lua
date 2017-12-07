@@ -446,12 +446,12 @@ end
 
 function Utility.GetSafeDirection(myHero)
     local mid = Vector()
-    local pos = Entity.GetAbsRotation(myHero):GetForward()
+    local pos = Entity.GetAbsOrigin(myHero)
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) then
-            mid = mid + Entity.GetAbsRotation(enemy):GetForward()
+            mid = mid + Entity.GetAbsOrigin(enemy)
         end
 	end
 
