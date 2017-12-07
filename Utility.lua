@@ -444,4 +444,19 @@ function Utility.GetCastRange(myHero, ability)
     return range
 end
 
+function Utility.GetSafeDirection(myHero)
+    local mid = Vector()
+    local pos = Entity.GetAbsRotation(myHero):GetForward()
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) then
+            mid = mid + Entity.GetAbsRotation(enemy):GetForward()
+        end
+	end
+
+    mid:Set(mid:GetX()/Heroes.Count(), mid:GetY()/Heroes.Count(), mid:GetZ()/Heroes.Count())
+    return (pos + pos - mid):Normalized()
+end
+
 return Utility
