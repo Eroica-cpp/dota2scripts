@@ -1,3 +1,5 @@
+local Utility = require("Utility")
+
 local Tinker = {}
 
 Tinker.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell for KS", "On/Off")
@@ -17,47 +19,40 @@ function Tinker.OnUpdate()
 	end
 end
 
--- using mutex or lastUsedAbility seemingly doesnt work.
 function Tinker.OneKey(myHero)
-    if not myHero or NPC.IsStunned(myHero) then return end
+    if not myHero then return end
 
-    local myMana = NPC.GetMana(myHero)
+	local myMana = NPC.GetMana(myHero)
     if myMana <= Tinker.manaThreshold then return end
 
-    local enemy = Input.GetNearestHeroToCursor(Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
-    if not enemy or NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return end
 
-    -- =====================================
-    -- Item section
-    -- =====================================
-    -- item : hex (has been moved to AutoUseItems module)
-
-    -- item : dagon (has been moved to AutoUseItems module)
-
-    -- item : shivas guard
+	-- item : shivas guard
     local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
-    if shiva and Ability.IsCastable(shiva, myMana) then
+    if shiva and Ability.IsCastable(shiva, myMana) and Utility.IsSuitableToUseItem(myHero) then
         Ability.CastNoTarget(shiva)
     end
 
-    -- =====================================
-    -- Spell section
-    -- =====================================
-    if NPC.IsSilenced(myHero) then return end
+	if not Utility.IsSuitableToCastSpell(myHero) then return end
 
-    -- spell : missile
-    local missile = NPC.GetAbilityByIndex(myHero, 1)
-    if missile and Ability.IsCastable(missile, myMana) then -- and NPC.IsEntityInRange(enemy, myHero, Ability.GetCastRange(missile)) then
-        Ability.CastNoTarget(missile)
-    end
+	local laser = NPC.GetAbility(myHero, "tinker_laser")
+	local laser_range = Utility.GetCastRange(laser)
+	local missile = NPC.GetAbility(myHero, "tinker_heat_seeking_missile")
+	local missile_range = Utility.GetCastRange(missile)
 
-    -- spell : laser (has to cast laser at last because casting laser has animation delay)
-    local laser = NPC.GetAbilityByIndex(myHero, 0)
-    local target = getLaserCastTarget(myHero, enemy)
-    if target and laser and Ability.IsCastable(laser, myMana) then
-        Ability.CastTarget(laser, target)
-    end
+	for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not Entity.IsSameTeam(myHero, enemy) and Utility.CanCastSpellOn(enemy) then
 
+			local target = Tinker.GetLaserCastTarget(myHero, enemy)
+			if target and laser and Ability.IsCastable(laser, NPC.GetMana(myHero)) then
+				Ability.CastTarget(laser, target)
+			end
+
+			if missile and Ability.IsCastable(missile, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(missile)) then
+				Ability.CastNoTarget(missile)
+			end
+        end
+	end
 end
 
 -- 1. Auto Spell for KS
@@ -68,12 +63,12 @@ function Tinker.OnDraw()
 
 	local myHero = Heroes.GetLocal()
 	if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_tinker" then return end
-    if NPC.IsSilenced(myHero) or NPC.IsStunned(myHero) then return end
+    if not Utility.IsSuitableToCastSpell(myHero) then return end
 
 	local myMana = NPC.GetMana(myHero)
-	local laser = NPC.GetAbilityByIndex(myHero, 0)
-	local missile = NPC.GetAbilityByIndex(myHero, 1)
-    local rearm = NPC.GetAbilityByIndex(myHero, 3)
+	local laser = NPC.GetAbility(myHero, "tinker_laser")
+	local missile = NPC.GetAbility(myHero, "tinker_heat_seeking_missile")
+    local rearm = NPC.GetAbility(myHero, "tinker_rearm")
 
     local laserLevel = Ability.GetLevel(laser)
     local laserDmg = 80 * laserLevel
@@ -99,11 +94,8 @@ function Tinker.OnDraw()
 
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        if not NPC.IsIllusion(enemy)
-            and not Entity.IsSameTeam(myHero, enemy)
-            and not Entity.IsDormant(enemy)
-            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE)
-            and Entity.IsAlive(enemy) then
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
+		and Utility.CanCastSpellOn(enemy) then
 
             missileDmg = missileDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
             dagonDmg = dagonDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
@@ -130,7 +122,7 @@ function Tinker.OnDraw()
 
             -- auto cast laser for KS
             if enemyHealth <= laserDmg and Ability.IsCastable(laser, myMana) then
-                local target = getLaserCastTarget(myHero, enemy)
+                local target = Tinker.GetLaserCastTarget(myHero, enemy)
                 if target then
                     Ability.CastTarget(laser, target)
                     break
@@ -138,7 +130,7 @@ function Tinker.OnDraw()
             end
 
             -- auto cast missile for KS
-            if enemyHealth < missileDmg and Ability.IsCastable(missile, myMana) and NPC.IsEntityInRange(myHero, enemy, Ability.GetCastRange(missile)) then
+            if enemyHealth < missileDmg and Ability.IsCastable(missile, myMana) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(myHero, missile)) then
                 Ability.CastNoTarget(missile)
                 break
             end
@@ -146,52 +138,37 @@ function Tinker.OnDraw()
             -- auto cast both laser and missile for KS
 			local comboManaCost = Ability.GetManaCost(laser) + Ability.GetManaCost(missile)
             if enemyHealthLeft <= 0 and comboManaCost <= myMana and Ability.IsCastable(laser, myMana) and Ability.IsCastable(missile, myMana) then
-                local target = getLaserCastTarget(myHero, enemy)
+                local target = Tinker.GetLaserCastTarget(myHero, enemy)
                 if target then
     				Ability.CastNoTarget(missile)
     				Ability.CastTarget(laser, target)
                     break
                 end
 			end
-
 		end -- end of the if statement
-
 	end -- end of the for loop
-
 end
 
 -- If exists, return the enemy hero in the cast range of laser
 -- If has agh scepter, return a enemy unit in the cast range of laser that can refract laser to a enemy
 -- If no such enemy or unit, return nil
-function getLaserCastTarget(myHero, enemy)
+function Tinker.GetLaserCastTarget(myHero, enemy)
+    if not myHero or not enemy then return end
 
-    if not myHero then return nil end
-
-    local hasAghScepter = NPC.HasItem(myHero, "item_ultimate_scepter", true)
-    local laser = NPC.GetAbilityByIndex(myHero, 0)
-    local laserCastRange = Ability.GetCastRange(laser) -- Ability.GetCastRange() already considers bonus cast range.
+    local laser = NPC.GetAbility(myHero, "tinker_laser")
+    local laserCastRange = Utility.GetCastRange(myHero, laser)
     local laserRefractRange = 650
 
-    -- if dont have agh scepter
-    if not hasAghScepter then
-        if NPC.IsEntityInRange(myHero, enemy, laserCastRange) then
-            return enemy
-        else
-            return nil
-        end
-    end
+	if NPC.IsEntityInRange(myHero, enemy, laserCastRange) then return enemy end
+    if not NPC.HasItem(myHero, "item_ultimate_scepter", true) then return end
 
-    -- if have agh scepter
-    local enemyUnitsAround = NPC.GetUnitsInRadius(myHero, laserCastRange, Enum.TeamType.TEAM_ENEMY)
+    local enemyUnitsAround = NPC.GetUnitsInRadius(enemy, laserRefractRange, Enum.TeamType.TEAM_FRIEND)
     for i, npc in ipairs(enemyUnitsAround) do
-        if npc and NPC.IsEntityInRange(npc, enemy, laserRefractRange)
-            and NPC.IsEntityInRange(npc, myHero, laserCastRange)
-            and not NPC.IsStructure(npc)
-            and not NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then
+        if npc and NPC.IsEntityInRange(npc, myHero, laserCastRange)
+            and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) then
             return npc
         end
     end
-
 end
 
 return Tinker
