@@ -35,9 +35,8 @@ function Tinker.OneKey(myHero)
 	if not Utility.IsSuitableToCastSpell(myHero) then return end
 
 	local laser = NPC.GetAbility(myHero, "tinker_laser")
-	local laser_range = Utility.GetCastRange(laser)
 	local missile = NPC.GetAbility(myHero, "tinker_heat_seeking_missile")
-	local missile_range = Utility.GetCastRange(missile)
+	local missile_radius = 2500
 
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
@@ -48,7 +47,7 @@ function Tinker.OneKey(myHero)
 				Ability.CastTarget(laser, target)
 			end
 
-			if missile and Ability.IsCastable(missile, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(missile)) then
+			if missile and Ability.IsCastable(missile, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, missile_radius) then
 				Ability.CastNoTarget(missile)
 			end
         end
@@ -130,7 +129,8 @@ function Tinker.OnDraw()
             end
 
             -- auto cast missile for KS
-            if enemyHealth < missileDmg and Ability.IsCastable(missile, myMana) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(myHero, missile)) then
+			local missile_radius = 2500
+            if enemyHealth < missileDmg and Ability.IsCastable(missile, myMana) and NPC.IsEntityInRange(myHero, enemy, missile_radius) then
                 Ability.CastNoTarget(missile)
                 break
             end
