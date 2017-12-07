@@ -98,7 +98,6 @@ end
 -- 1. Auto Spell for KS
 -- 2. Killable awareness (laser + missile + dagon)
 function Tinker.OnDraw()
-
 	if not Menu.IsEnabled(Tinker.optionEnable) then return end
 
 	local myHero = Heroes.GetLocal()
@@ -121,11 +120,19 @@ function Tinker.OnDraw()
     local missileLevel = Ability.GetLevel(missile)
     local missileDmg = 125 + 75 * (missileLevel - 1)
 
-    local dagon = NPC.GetItem(myHero, "item_dagon", true)
-    local dagonLevel = dagon and 1 or 0
-    for i = 2, 5 do
-        if NPC.GetItem(myHero, "item_dagon_" .. i, true) then dagonLevel = i end
-    end
+	local dagon, dagonDmg
+    local item1 = NPC.GetItem(myHero, "item_dagon", true)
+    local item2 = NPC.GetItem(myHero, "item_dagon_2", true)
+    local item3 = NPC.GetItem(myHero, "item_dagon_3", true)
+    local item4 = NPC.GetItem(myHero, "item_dagon_4", true)
+    local item5 = NPC.GetItem(myHero, "item_dagon_5", true)
+
+    if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then dagon = item1; dagonLevel = 1 end
+    if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then dagon = item2; dagonLevel = 2 end
+    if item3 and Ability.IsCastable(item3, NPC.GetMana(myHero)) then dagon = item3; dagonLevel = 3 end
+    if item4 and Ability.IsCastable(item4, NPC.GetMana(myHero)) then dagon = item4; dagonLevel = 4 end
+    if item5 and Ability.IsCastable(item5, NPC.GetMana(myHero)) then dagon = item5; dagonLevel = 5 end
+
     local dagonDmg = 400 + 100 * (dagonLevel - 1)
 
     if not laser or not Ability.IsCastable(laser, myMana) then laserDmg = 0 end
@@ -137,27 +144,26 @@ function Tinker.OnDraw()
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
 		and Utility.CanCastSpellOn(enemy) then
 
-            missileDmg = missileDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
-            dagonDmg = dagonDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            local real_missileDmg = missileDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            local real_dagonDmg = dagonDmg * NPC.GetMagicalArmorDamageMultiplier(enemy)
 			local hitDmg = NPC.GetDamageMultiplierVersus(myHero, enemy) * (NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy))
 
 			local enemyHealth = Entity.GetHealth(enemy)
-			local enemyHealthLeft = enemyHealth - laserDmg - missileDmg - dagonDmg
+			local enemyHealthLeft = enemyHealth - laserDmg - real_missileDmg - real_dagonDmg
 			local hitsLeft = math.ceil(enemyHealthLeft / (hitDmg + 1))
-            local comboLeft = math.ceil(enemyHealth / (laserDmg + missileDmg + dagonDmg + 1))
+            local comboLeft = math.ceil(enemyHealth / (laserDmg + real_missileDmg + real_dagonDmg + 1))
 
 			local pos = Entity.GetAbsOrigin(enemy)
 			local x, y, visible = Renderer.WorldToScreen(pos)
 
             local hasRearm = Ability.GetLevel(rearm) > 0
-			local drawText = (hasRearm and comboLeft<20) and "x"..comboLeft or hitsLeft
 
-            if hitsLeft <= 0 or comboLeft <= 0 then
+            if hitsLeft <= 0 or comboLeft <= 1 then
                 Renderer.SetDrawColor(255, 0, 0, 255)
                 Renderer.DrawTextCentered(Tinker.font, x, y, "Kill", 1)
-            else
+			elseif hasRearm and comboLeft < 20 then
                 Renderer.SetDrawColor(0, 255, 0, 255)
-    			Renderer.DrawTextCentered(Tinker.font, x, y, drawText, 1)
+    			Renderer.DrawTextCentered(Tinker.font, x, y, "x"..comboLeft, 1)
             end
 
             -- auto cast laser for KS
@@ -165,7 +171,7 @@ function Tinker.OnDraw()
                 local target = Tinker.GetLaserCastTarget(myHero, enemy)
                 if target then
                     Ability.CastTarget(laser, target)
-                    break
+                    return
                 end
             end
 
@@ -173,7 +179,7 @@ function Tinker.OnDraw()
 			local missile_radius = 2500
             if enemyHealth < missileDmg and Ability.IsCastable(missile, myMana) and NPC.IsEntityInRange(myHero, enemy, missile_radius) then
                 Ability.CastNoTarget(missile)
-                break
+                return
             end
 
             -- auto cast both laser and missile for KS
@@ -183,7 +189,7 @@ function Tinker.OnDraw()
                 if target then
     				Ability.CastNoTarget(missile)
     				Ability.CastTarget(laser, target)
-                    break
+                    return
                 end
 			end
 		end -- end of the if statement
