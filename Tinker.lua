@@ -41,6 +41,21 @@ function Tinker.OneKey(myHero)
 	local missile = NPC.GetAbility(myHero, "tinker_heat_seeking_missile")
 	local missile_radius = 2500
 
+	local dagon
+    local item1 = NPC.GetItem(myHero, "item_dagon", true)
+    local item2 = NPC.GetItem(myHero, "item_dagon_2", true)
+    local item3 = NPC.GetItem(myHero, "item_dagon_3", true)
+    local item4 = NPC.GetItem(myHero, "item_dagon_4", true)
+    local item5 = NPC.GetItem(myHero, "item_dagon_5", true)
+
+    if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then dagon = item1 end
+    if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then dagon = item2 end
+    if item3 and Ability.IsCastable(item3, NPC.GetMana(myHero)) then dagon = item3 end
+    if item4 and Ability.IsCastable(item4, NPC.GetMana(myHero)) then dagon = item4 end
+    if item5 and Ability.IsCastable(item5, NPC.GetMana(myHero)) then dagon = item5 end
+
+	local dagon_range = Utility.GetCastRange(myHero, dagon)
+
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and Utility.CanCastSpellOn(enemy) then
@@ -52,6 +67,10 @@ function Tinker.OneKey(myHero)
 
 			if missile and Ability.IsCastable(missile, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, missile_radius) then
 				Ability.CastNoTarget(missile)
+			end
+
+			if dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, dagon_range) then
+				Ability.CastTarget(dagon, target)
 			end
         end
 	end

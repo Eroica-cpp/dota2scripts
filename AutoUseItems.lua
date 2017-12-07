@@ -13,7 +13,7 @@ AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", 
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
 AutoUseItems.optionAbyssal = Menu.AddOption({"Item Specific"}, "Abyssal Blade", "Auto use abyssal blade on enemy hero once available")
-AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon on enemy hero once available")
+AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon to KS or break linkens")
 AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "Auto use veil once available")
 AutoUseItems.optionLotus = Menu.AddOption({"Item Specific"}, "Lotus Orb", "(For tinker) auto use lotus orb on self or allies once available")
 AutoUseItems.optionCrest = Menu.AddOption({"Item Specific"}, "Medallion & Crest", "Auto use medallion & crest to save ally")
@@ -330,23 +330,17 @@ function AutoUseItems.item_dagon(myHero)
     local range = Utility.GetCastRange(myHero, item) -- 600 + 50 * (level - 1)
     local magic_damage = 400 + 100 * (level - 1)
 
-    local target
-    local minHp = 99999
     local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, enemy in ipairs(enemyAround) do
-        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
-            and Utility.CanCastSpellOn(enemy) and Utility.IsSafeToCast(myHero, enemy, magic_damage) then
+        if enemy and not NPC.IsIllusion(enemy) and Utility.CanCastSpellOn(enemy) and Utility.IsSafeToCast(myHero, enemy, magic_damage) then
 
             local enemyHp = Entity.GetHealth(enemy)
-            if enemyHp < minHp then
-                target = enemy
-                minHp = enemyHp
+            local true_damage = magic_damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            if enemyHp < true_damage or Utility.IsLinkensProtected(enemy) then
+                Ability.CastTarget(item, enemy)
             end
         end
     end
-
-    -- cast dagon on enemy with lowest HP in range
-    if target then Ability.CastTarget(item, target) end
 end
 
 function AutoUseItems.item_veil_of_discord(myHero)
