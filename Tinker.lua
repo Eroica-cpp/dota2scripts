@@ -58,7 +58,7 @@ function Tinker.OneKey(myHero)
 end
 
 function Tinker.BlinkAway(myHero)
-	if not Utility.IsSuitableToUseItem(myHero) then return end
+	if not Tinker.IsSuitableToUseItem(myHero) then return end
 
 	local item = NPC.GetItem(myHero, "item_blink", true)
 	if not item or not Ability.IsCastable(item, 0) then return end
@@ -191,6 +191,15 @@ function Tinker.GetLaserCastTarget(myHero, enemy)
             return npc
         end
     end
+end
+
+function Tinker.IsSuitableToUseItem(myHero)
+    if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return false end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
+    -- if NPC.HasModifier(myHero, "modifier_teleporting") then return false end
+    -- if NPC.IsChannellingAbility(myHero) then return false end
+
+    return true
 end
 
 return Tinker
