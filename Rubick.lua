@@ -7,6 +7,8 @@ local optionKillSteal = Menu.AddOption({"Hero Specific", "Rubick"}, "Kill Steal"
 local optionAutoSpellSteal = Menu.AddOption({"Hero Specific", "Rubick"}, "Auto Spell Steal", "Auto steal important spells")
 local optionQuickCast = Menu.AddOption({"Hero Specific", "Rubick"}, "Quick Cast Spells", "If have certain spells, then cast them quickly.")
 
+-- stolen spell name -> timestamp
+local StolenSpells = {}
 
 local StealTable = {}
 StealTable["abaddon_aphotic_shield"] = true
@@ -195,7 +197,7 @@ StealTable["spirit_breaker_charge_of_darkness"] = true
 StealTable["spirit_breaker_nether_strike"] = true
 StealTable["storm_spirit_electric_vortex"] = true
 StealTable["storm_spirit_ball_lightning"] = true
-StealTable["sven_gods_strength"] = true
+StealTable["sven_storm_bolt"] = true
 StealTable["sven_warcry"] = true
 StealTable["techies_land_mines"] = true
 StealTable["techies_stasis_trap"] = true
@@ -255,6 +257,7 @@ local QuickCastAbilities = {
     "drow_ranger_wave_of_silence",
     "earthshaker_fissure",
     "elder_titan_earth_splitter",
+    "ember_spirit_flame_guard",
     "enigma_malefice",
     "enigma_midnight_pulse",
     "enigma_black_hole",
@@ -311,6 +314,7 @@ local QuickCastAbilities = {
     "spectre_spectral_dagger",
     "storm_spirit_electric_vortex",
     "sven_storm_bolt",
+    "sven_warcry",
     "techies_land_mines",
     "techies_stasis_trap",
     "templar_assassin_trap",
@@ -416,8 +420,11 @@ function Rubick.AutoSpellSteal()
             local spell = Rubick.GetLastSpell(enemy)
             if spell and StealTable[Ability.GetName(spell)]
             and (not slot1 or Ability.GetName(slot1) ~= Ability.GetName(spell))
-            and (not slot2 or Ability.GetName(slot2) ~= Ability.GetName(spell)) then
+            and (not slot2 or Ability.GetName(slot2) ~= Ability.GetName(spell))
+            and (not StolenSpells[Ability.GetName(spell)]
+            or GameRules.GetGameTime() - StolenSpells[Ability.GetName(spell)] > Ability.GetCooldownLength(spell)) then
                 Ability.CastTarget(steal, enemy)
+                StolenSpells[Ability.GetName(spell)] = GameRules.GetGameTime()
                 return
             end
         end
@@ -437,6 +444,8 @@ function Rubick.QuickCast()
     end
 
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
+    Ability.CastNoTarget(spell)
+
     local range = Utility.GetCastRange(myHero, spell)
 
     for i = 1, Heroes.Count() do
