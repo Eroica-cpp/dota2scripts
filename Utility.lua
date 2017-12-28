@@ -421,27 +421,29 @@ function Utility.IsAffectedByDoT(npc)
     return false
 end
 
+-- standard APIs have fixed this issue
 function Utility.GetCastRange(myHero, ability)
-    if not myHero or not ability then return 0 end
-
-    local range = Ability.GetCastRange(ability)
-
-    if NPC.HasItem(myHero, "item_aether_lens", true) then
-        range = range + 250
-    end
-
-    for i = 0, 24 do
-        local ability = NPC.GetAbilityByIndex(myHero, i)
-        if ability and Ability.GetLevel(ability) > 0 then
-            local bonus_name = Ability.GetName(ability)
-            if string.find(bonus_name, "special_bonus_cast_range") then
-                local diff = tonumber(string.match(bonus_name, "[0-9]+"))
-                range = range + diff
-            end
-        end
-    end
-
-    return range
+    return Ability.GetCastRange(ability)
+    -- if not myHero or not ability then return 0 end
+    --
+    -- local range = Ability.GetCastRange(ability)
+    --
+    -- if NPC.HasItem(myHero, "item_aether_lens", true) then
+    --     range = range + 250
+    -- end
+    --
+    -- for i = 0, 24 do
+    --     local ability = NPC.GetAbilityByIndex(myHero, i)
+    --     if ability and Ability.GetLevel(ability) > 0 then
+    --         local bonus_name = Ability.GetName(ability)
+    --         if string.find(bonus_name, "special_bonus_cast_range") then
+    --             local diff = tonumber(string.match(bonus_name, "[0-9]+"))
+    --             range = range + diff
+    --         end
+    --     end
+    -- end
+    --
+    -- return range
 end
 
 function Utility.GetSafeDirection(myHero)
