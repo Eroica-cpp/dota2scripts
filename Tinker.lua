@@ -28,7 +28,6 @@ function Tinker.OneKey(myHero)
 	local myMana = NPC.GetMana(myHero)
     if myMana <= Tinker.manaThreshold then return end
 
-
 	-- item : shivas guard
     local shiva = NPC.GetItem(myHero, "item_shivas_guard", true)
     if shiva and Ability.IsCastable(shiva, myMana) and Utility.IsSuitableToUseItem(myHero) then
@@ -54,14 +53,12 @@ function Tinker.OneKey(myHero)
     if item4 and Ability.IsCastable(item4, NPC.GetMana(myHero)) then dagon = item4 end
     if item5 and Ability.IsCastable(item5, NPC.GetMana(myHero)) then dagon = item5 end
 
-	local dagon_range = Utility.GetCastRange(myHero, dagon)
-
 	for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and Utility.CanCastSpellOn(enemy) then
 
 			local target = Tinker.GetLaserCastTarget(myHero, enemy)
-			if target and laser and Ability.IsCastable(laser, NPC.GetMana(myHero)) then
+			if target and laser and Ability.IsCastable(laser, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(myHero, laser)) then
 				Ability.CastTarget(laser, target)
 			end
 
@@ -69,7 +66,7 @@ function Tinker.OneKey(myHero)
 				Ability.CastNoTarget(missile)
 			end
 
-			if dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, dagon_range) then
+			if dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(myHero, dagon)) then
 				Ability.CastTarget(dagon, target)
 			end
         end

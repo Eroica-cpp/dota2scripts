@@ -1,4 +1,4 @@
-local Invoker = require("Invoker")
+-- local Invoker = require("Invoker")
 
 local LastHit = {}
 
@@ -41,7 +41,7 @@ function LastHit.OnDraw()
 
 			local x, y, visible = Renderer.WorldToScreen(Entity.GetAbsOrigin(npc))
 			local size = 10
-			
+
 			if Entity.GetHealth(npc) <= oneHitDamage then
 				Renderer.SetDrawColor(255, 0, 0, 150)
 				Renderer.DrawFilledRect(x-size, y-size, 2*size, 2*size)
