@@ -3,7 +3,7 @@ local Utility = require("Utility")
 local Tinker = {}
 
 Tinker.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell for KS", "On/Off")
-Tinker.optionBlinkAway = Menu.AddOption({"Hero Specific", "Tinker"}, "Blink Away", "Blink away if enemies are too close")
+Tinker.optionBlinkAway = Menu.AddOption({"Hero Specific", "Tinker"}, "Blink Away", "Blink to mouse position right after casting laser")
 Tinker.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 Tinker.optionOneKeySpell = Menu.AddOption({"Hero Specific", "Tinker"}, "One Key Spell", "On/Off")
 Tinker.key = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "One Key Spell Key", Enum.ButtonCode.KEY_D)
@@ -57,17 +57,17 @@ function Tinker.OneKey(myHero)
         local enemy = Heroes.Get(i)
         if enemy and not Entity.IsSameTeam(myHero, enemy) and Utility.CanCastSpellOn(enemy) then
 
-			local target = Tinker.GetLaserCastTarget(myHero, enemy)
-			if target and laser and Ability.IsCastable(laser, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(myHero, laser)) then
-				Ability.CastTarget(laser, target)
+			if dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(myHero, dagon)) then
+				Ability.CastTarget(dagon, enemy)
 			end
 
 			if missile and Ability.IsCastable(missile, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, missile_radius) then
 				Ability.CastNoTarget(missile)
 			end
 
-			if dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(myHero, dagon)) then
-				Ability.CastTarget(dagon, target)
+			local target = Tinker.GetLaserCastTarget(myHero, enemy)
+			if target and laser and Ability.IsCastable(laser, NPC.GetMana(myHero)) and NPC.IsEntityInRange(myHero, enemy, Utility.GetCastRange(myHero, laser)) then
+				Ability.CastTarget(laser, target)
 			end
         end
 	end
@@ -79,14 +79,14 @@ function Tinker.BlinkAway(myHero)
 	local item = NPC.GetItem(myHero, "item_blink", true)
 	if not item or not Ability.IsCastable(item, 0) then return end
 
-	local radius = 400
-	local range = 1190 -- Utility.GetCastRange(myHero, item) doesn't work well for items
+	local laser = NPC.GetAbility(myHero, "tinker_laser")
+	if not laser or Ability.IsReady(laser) then return end
 
-	local enemies = NPC.GetUnitsInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
-	for i, enemy in ipairs(enemies) do
-		if Entity.IsHero(enemy) then
-			local pos = Entity.GetAbsOrigin(myHero) + Utility.GetSafeDirection(myHero):Scaled(range)
-			Ability.CastPosition(item, pos)
+
+	for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+		if enemy and not Entity.IsSameTeam(myHero, enemy) and NPC.HasModifier(enemy, "modifier_tinker_laser_blind") then
+			Ability.CastPosition(item, Input.GetWorldCursorPos())
 			return
 		end
 	end
