@@ -117,13 +117,14 @@ function Tinker.OnDraw()
     local missileLevel = Ability.GetLevel(missile)
     local missileDmg = 125 + 75 * (missileLevel - 1)
 
-	local dagon, dagonDmg
+	local dagon
     local item1 = NPC.GetItem(myHero, "item_dagon", true)
     local item2 = NPC.GetItem(myHero, "item_dagon_2", true)
     local item3 = NPC.GetItem(myHero, "item_dagon_3", true)
     local item4 = NPC.GetItem(myHero, "item_dagon_4", true)
     local item5 = NPC.GetItem(myHero, "item_dagon_5", true)
 
+	local dagonLevel = 0
     if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then dagon = item1; dagonLevel = 1 end
     if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then dagon = item2; dagonLevel = 2 end
     if item3 and Ability.IsCastable(item3, NPC.GetMana(myHero)) then dagon = item3; dagonLevel = 3 end
