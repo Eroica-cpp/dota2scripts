@@ -2,7 +2,8 @@ local Utility = require("Utility")
 
 local Tinker = {}
 
-Tinker.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Auto Use Spell for KS", "On/Off")
+Tinker.optionEnable = Menu.AddOption({"Hero Specific", "Tinker"}, "Kill Steal", "Auto use spells or dagon for KS")
+Tinker.optionLastHitHarass = Menu.AddOption({"Hero Specific", "Tinker"}, "Harass last hitting", "Auto cast laser to harass enemies' last hitting")
 Tinker.optionBlinkAway = Menu.AddOption({"Hero Specific", "Tinker"}, "Blink Away", "Blink to mouse position right after casting laser")
 Tinker.font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 Tinker.optionOneKeySpell = Menu.AddOption({"Hero Specific", "Tinker"}, "One Key Spell", "On/Off")
@@ -10,6 +11,25 @@ Tinker.key = Menu.AddKeyOption({ "Hero Specific","Tinker" }, "One Key Spell Key"
 
 Tinker.manaThreshold = 75
 Tinker.healthThreshold = 50
+
+function Tinker.OnUnitAnimation(animation)
+	if not Menu.IsEnabled(Tinker.optionLastHitHarass) then return end
+	if not animation then return end
+
+	local myHero = Heroes.GetLocal()
+	if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
+
+	local laser = NPC.GetAbility(myHero, "tinker_laser")
+	if not laser or not Ability.IsCastable(laser, NPC.GetMana(myHero)) then return end
+
+	if not animation.unit or not NPC.IsHero(animation.unit) or Entity.IsSameTeam(myHero, animation.unit) then return end
+	if NPC.IsIllusion(animation.unit) or not Utility.CanCastSpellOn(animation.unit) then return end
+	if not NPC.IsEntityInRange(myHero, animation.unit, Utility.GetCastRange(myHero, laser)) then return end
+
+	if animation.sequenceName and string.match(animation.sequenceName, "attack.*anim") then
+		Ability.CastTarget(laser, animation.unit)
+	end
+end
 
 function Tinker.OnUpdate()
 	local myHero = Heroes.GetLocal()
