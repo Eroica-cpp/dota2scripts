@@ -3,7 +3,7 @@ local Utility = require("Utility")
 local Lion = {}
 
 local optionAutoHex = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Hex", "Auto hex any enemy in range once lion has level 6")
-local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy (1) is TPing; (2) channelling; or (3) being stunned or hexed with proper timing")
+local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) being stunned or hexed with proper timing")
 local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain (1) stuned/hexed/taunted enemy; (2) illusion")
 
 function Lion.OnUpdate()
@@ -48,6 +48,7 @@ function Lion.AutoSpike()
     local spell = NPC.GetAbility(myHero, "lion_impale")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
     local range = Ability.GetCastRange(spell)
+    local damage = 20 + 60 * Ability.GetLevel(spell)
     local speed = 1600
 
     for i = 1, Heroes.Count() do
@@ -64,8 +65,16 @@ function Lion.AutoSpike()
             -- spike the enemy who is being stunned or hexed with proper timing
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             local delay = 0.3 + dis/speed
+
             if (Utility.GetHexTimeLeft(enemy) - 0.1 < delay and delay < Utility.GetHexTimeLeft(enemy) + 0.1)
             or (Utility.GetStunTimeLeft(enemy) - 0.1 < delay and delay < Utility.GetStunTimeLeft(enemy) + 0.1) then
+                Ability.CastPosition(spell, Utility.GetPredictedPosition(enemy, delay))
+                return
+            end
+
+            -- spike the enemy who is in low HP (for kill steal)
+            local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            if true_damage >= Entity.GetHealth(enemy) then
                 Ability.CastPosition(spell, Utility.GetPredictedPosition(enemy, delay))
                 return
             end
