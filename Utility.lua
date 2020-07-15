@@ -137,7 +137,8 @@ function Utility.IsSafeToCast(myHero, enemy, magic_damage)
     local counter = 0
     if NPC.HasModifier(enemy, "modifier_item_lotus_orb_active") then counter = counter + 1 end
     if NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") then counter = counter + 1 end
-    if NPC.HasModifier(enemy, "modifier_antimage_spell_shield") then counter = counter + 1 end
+    if NPC.HasModifier(enemy, "modifier_antimage_counterspell")
+        or NPC.HasModifier(enemy, "modifier_antimage_counterspell_passive") then counter = counter + 1 end
 
     local reflect_damage = counter * magic_damage * NPC.GetMagicalArmorDamageMultiplier(myHero)
     return Entity.GetHealth(myHero) > reflect_damage
