@@ -101,10 +101,9 @@ end
 -- extend NPC.IsLinkensProtected(), check AM's aghs case
 -- Update (July 14, 2020): remove AM aghs check, update for new version
 function Utility.IsLinkensProtected(npc)
-    local shield = NPC.GetAbility(npc, "antimage_spell_shield")
-	if shield and Ability.IsReady(shield) then
-		return true
-	end
+    if NPC.HasModifier(enemy, "modifier_antimage_spell_shield") then
+        return true
+    end
 
     return NPC.IsLinkensProtected(npc)
 end
@@ -138,8 +137,7 @@ function Utility.IsSafeToCast(myHero, enemy, magic_damage)
     local counter = 0
     if NPC.HasModifier(enemy, "modifier_item_lotus_orb_active") then counter = counter + 1 end
     if NPC.HasModifier(enemy, "modifier_item_blade_mail_reflect") then counter = counter + 1 end
-    -- TODO need to test whether antimage_spell_shield is the correct skill identifier
-    if NPC.HasModifier(enemy, "antimage_spell_shield") then counter = counter + 1 end
+    if NPC.HasModifier(enemy, "modifier_antimage_spell_shield") then counter = counter + 1 end
 
     local reflect_damage = counter * magic_damage * NPC.GetMagicalArmorDamageMultiplier(myHero)
     return Entity.GetHealth(myHero) > reflect_damage
