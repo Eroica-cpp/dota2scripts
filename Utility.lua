@@ -101,7 +101,7 @@ end
 -- extend NPC.IsLinkensProtected(), check AM's aghs case
 -- Update (July 14, 2020): remove AM aghs check, update for new version
 function Utility.IsLinkensProtected(npc)
-    if NPC.HasModifier(enemy, "modifier_antimage_spell_shield") then
+    if NPC.HasModifier(npc, "modifier_antimage_spell_shield") then
         return true
     end
 
