@@ -1,4 +1,5 @@
 test.lua
+tags
 
 # ignore lua files written by other authors
 CooldownDisplay.lua
