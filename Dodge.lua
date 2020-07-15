@@ -721,6 +721,14 @@ function Dodge.Defend(myHero, source)
 
 	local myMana = NPC.GetMana(myHero)
 
+	-- antimage's shell
+	if NPC.GetUnitName(myHero) == "npc_dota_hero_antimage" then
+		local shell = NPC.GetAbilityByIndex(myHero, 2)
+		if shell and Ability.IsCastable(shell, myMana) then
+			Ability.CastNoTarget(shell)
+		end
+	end
+
 	-- life stealer's rage
 	if NPC.GetUnitName(myHero) == "npc_dota_hero_life_stealer" then
 		local rage = NPC.GetAbilityByIndex(myHero, 0)
