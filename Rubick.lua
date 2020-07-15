@@ -369,7 +369,8 @@ function Rubick.KillSteal()
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
             local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
-            if true_damage >= Entity.GetHealth(enemy) or Utility.IsLinkensProtected(enemy) then
+            if (true_damage >= Entity.GetHealth(enemy) or Utility.IsLinkensProtected(enemy))
+                and Utility.IsSafeToCast(myHero, enemy, true_damage) then
                 Ability.CastTarget(spell, enemy)
                 return
             end
