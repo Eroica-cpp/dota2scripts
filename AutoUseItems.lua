@@ -244,7 +244,7 @@ function AutoUseItems.item_heavens_halberd(myHero)
     local target = nil
     for i, enemy in ipairs(enemyAround) do
         if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
-            and Utility.CanCastSpellOn(enemy) then
+            and Utility.CanCastSpellOn(enemy) and Utility.PhysicalCoreHeroes[NPC.GetUnitName(enemy)] then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
                 minDistance = dis
