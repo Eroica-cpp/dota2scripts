@@ -20,6 +20,58 @@ Utility.AncientCreepNameList = {
     "npc_dota_roshan"
 }
 
+Utility.PhysicalCoreHeroes = {
+    "npc_dota_hero_abaddon",
+    "npc_dota_hero_alchemist",
+    "npc_dota_hero_antimage",
+    "npc_dota_hero_arc_warden",
+    "npc_dota_hero_bloodseeker",
+    "npc_dota_hero_broodmother",
+    "npc_dota_hero_chaos_knight",
+    "npc_dota_hero_clinkz",
+    "npc_dota_hero_dragon_knight",
+    "npc_dota_hero_drow_ranger",
+    "npc_dota_hero_faceless_void",
+    "npc_dota_hero_furion",
+    "npc_dota_hero_gyrocopter",
+    "npc_dota_hero_huskar",
+    "npc_dota_hero_invoker",
+    "npc_dota_hero_juggernaut",
+    "npc_dota_hero_kunkka",
+    "npc_dota_hero_legion_commander",
+    "npc_dota_hero_life_stealer",
+    "npc_dota_hero_lina",
+    "npc_dota_hero_lone_druid",
+    "npc_dota_hero_luna",
+    "npc_dota_hero_lycan",
+    "npc_dota_hero_medusa",
+    "npc_dota_hero_mirana",
+    "npc_dota_hero_morphling",
+    "npc_dota_hero_nevermore",
+    "npc_dota_hero_night_stalker",
+    "npc_dota_hero_obsidian_destroyer",
+    "npc_dota_hero_phantom_assassin",
+    "npc_dota_hero_phantom_lancer",
+    "npc_dota_hero_queenofpain",
+    "npc_dota_hero_razor",
+    "npc_dota_hero_riki",
+    "npc_dota_hero_silencer",
+    "npc_dota_hero_slardar",
+    "npc_dota_hero_slark",
+    "npc_dota_hero_sniper",
+    "npc_dota_hero_spectre",
+    "npc_dota_hero_storm_spirit",
+    "npc_dota_hero_sven",
+    "npc_dota_hero_templar_assassin",
+    "npc_dota_hero_terrorblade",
+    "npc_dota_hero_tiny",
+    "npc_dota_hero_troll_warlord",
+    "npc_dota_hero_ursa",
+    "npc_dota_hero_viper",
+    "npc_dota_hero_weaver",
+    "npc_dota_hero_windrunner"
+}
+
 -- return best position to cast certain spells
 -- eg. axe's call, void's chrono, enigma's black hole
 -- input  : unitsAround, radius
