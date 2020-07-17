@@ -10,6 +10,7 @@ AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto us
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
 AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", "Auto use sheepstick on enemy hero once available")
+AutoUseItems.optionHeavens = Menu.AddOption({"Item Specific"}, "Heavens", "Auto use heavens on selected enemy hero (e.g., PA, AM) once available")
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
 AutoUseItems.optionAbyssal = Menu.AddOption({"Item Specific"}, "Abyssal Blade", "Auto use abyssal blade on enemy hero once available")
@@ -67,6 +68,10 @@ function AutoUseItems.OnUpdate()
     -- ========================
     if Menu.IsEnabled(AutoUseItems.optionSheepstick) and NPC.IsVisible(myHero) then
         AutoUseItems.item_sheepstick(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionHeavens) and NPC.IsVisible(myHero) then
+        AutoUseItems.item_heavens_halberd(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionOrchid) and NPC.IsVisible(myHero) then
@@ -223,6 +228,32 @@ function AutoUseItems.item_sheepstick(myHero)
     end
 
     -- cast sheepstick on nearest enemy in range
+    if target then Ability.CastTarget(item, target) end
+end
+
+-- Auto use sheepstick on enemy hero once available
+-- Doesn't use on enemy who is lotus orb protected or AM with aghs.
+function AutoUseItems.item_heavens_halberd(myHero)
+    local item = NPC.GetItem(myHero, "item_heavens_halberd", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    local range = Utility.GetCastRange(myHero, item) -- 600
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+    local minDistance = 99999
+    local target = nil
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
+            and Utility.CanCastSpellOn(enemy) then
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            if dis < minDistance then
+                minDistance = dis
+                target = enemy
+            end
+        end
+    end
+
+    -- cast item_heavens_halberd on nearest key enemy in range
     if target then Ability.CastTarget(item, target) end
 end
 
