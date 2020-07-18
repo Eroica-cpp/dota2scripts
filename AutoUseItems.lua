@@ -84,7 +84,7 @@ function AutoUseItems.OnUpdate()
     end
 
     if Menu.IsEnabled(AutoUseItems.optionShivas) and NPC.IsVisible(myHero) then
-        AutoUseItems.item_recipe_shivas_guard(myHero)
+        AutoUseItems.item_shivas_guard(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionAbyssal) and NPC.IsVisible(myHero) then
@@ -322,8 +322,8 @@ function AutoUseItems.item_rod_of_atos(myHero)
 end
 
 -- Auto use Shiva's Guard once enemy is within range
-function AutoUseItems.item_recipe_shivas_guard(myHero)
-    local item = NPC.GetItem(myHero, "item_recipe_shivas_guard", true)
+function AutoUseItems.item_shivas_guard(myHero)
+    local item = NPC.GetItem(myHero, "item_shivas_guard", true)
     if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
 
     local radius = 900
