@@ -13,6 +13,7 @@ AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", 
 AutoUseItems.optionHeavens = Menu.AddOption({"Item Specific"}, "Heavens", "Auto use heavens on selected enemy hero (e.g., PA, AM) once available")
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
+AutoUseItems.optionShivas = Menu.AddOption({"Item Specific"}, "Shiva's Guard", "Auto use Shivas once enemy is within range")
 AutoUseItems.optionAbyssal = Menu.AddOption({"Item Specific"}, "Abyssal Blade", "Auto use abyssal blade on enemy hero once available")
 AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon to KS or break linkens")
 AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "Auto use veil once available")
@@ -80,6 +81,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionAtos) and NPC.IsVisible(myHero) then
         AutoUseItems.item_rod_of_atos(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionShivas) and NPC.IsVisible(myHero) then
+        AutoUseItems.item_recipe_shivas_guard(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionAbyssal) and NPC.IsVisible(myHero) then
@@ -314,6 +319,23 @@ function AutoUseItems.item_rod_of_atos(myHero)
 
     -- cast rod of atos on nearest enemy in range
     if target then Ability.CastTarget(item, target) end
+end
+
+-- Auto use Shiva's Guard once enemy is within range
+function AutoUseItems.item_recipe_shivas_guard(myHero)
+    local item = NPC.GetItem(myHero, "item_recipe_shivas_guard", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    local radius = 900
+    local enemyAround = NPC.GetHeroesInRadius(myHero, radius, Enum.TeamType.TEAM_ENEMY)
+
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) and Utility.CanCastSpellOn(enemy)
+            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
+            Ability.CastNoTarget(item)
+            return
+        end
+    end
 end
 
 -- Auto use abyssal blade on enemy hero once available
