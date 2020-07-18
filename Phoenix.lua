@@ -33,7 +33,7 @@ function Phoenix.OnPrepareUnitOrders(orders)
     local manaCost_supernova = Ability.GetManaCost(supernova)
     local manaCost_heavens   = Ability.GetManaCost(heavens)
 
-    local range = Ability.GetCastRange(myHero, heavens) -- 600
+    local range = Ability.GetCastRange(heavens) -- 600
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, enemy in ipairs(enemyHeroes) do
         if heavens and Ability.IsCastable(heavens, myMana - manaCost_supernova)
@@ -52,7 +52,7 @@ function Phoenix.OnPrepareUnitOrders(orders)
     if not Ability.IsCastable(launch_fire_spirit, 0) then return true end
     if not Ability.IsCastable(supernova, myMana) then return true end
 
-    local range = Ability.GetCastRange(myHero, launch_fire_spirit) -- 1400
+    local range = Ability.GetCastRange(launch_fire_spirit) -- 1400
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, enemy in ipairs(enemyHeroes) do
         if Ability.IsCastable(launch_fire_spirit, myMana) then
