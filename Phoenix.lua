@@ -12,6 +12,7 @@ Phoenix.optionFireSpirit = Menu.AddOption({"Hero Specific","Phoenix"},"Auto Fire
 Phoenix.optionSunRay = Menu.AddOption({"Hero Specific","Phoenix"},"Sun Ray Helper", "sun ray sticks to nearest hero to cursor (ally or enemy)")
 Phoenix.posList = {}
 
+-- auto case fire spirit and use heavens right before supernova
 function Phoenix.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(Phoenix.optionFireSpirit) then return true end
     if not orders or not orders.ability then return true end
@@ -23,24 +24,38 @@ function Phoenix.OnPrepareUnitOrders(orders)
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.IsStunned(myHero) or NPC.IsSilenced(myHero) then return true end
 
-    local fire_spirit = NPC.GetAbility(myHero, "phoenix_fire_spirits")
+    local fire_spirit        = NPC.GetAbility(myHero, "phoenix_fire_spirits")
     local launch_fire_spirit = NPC.GetAbility(myHero, "phoenix_launch_fire_spirit")
-    local supernova = NPC.GetAbility(myHero, "phoenix_supernova")
+    local heavens            = NPC.GetItem(myHero, "item_heavens_halberd", true)
+    local supernova          = NPC.GetAbility(myHero, "phoenix_supernova")
 
+    local myMana             = NPC.GetMana(myHero)
     local manaCost_supernova = Ability.GetManaCost(supernova)
-    local myMana = NPC.GetMana(myHero)
+    local manaCost_heavens   = Ability.GetManaCost(heavens)
 
-    if Ability.IsCastable(fire_spirit, myMana-manaCost_supernova) then
+    local range = Ability.GetCastRange(myHero, heavens) -- 600
+    local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+    for i, enemy in ipairs(enemyHeroes) do
+        if heavens and Ability.IsCastable(heavens, myMana - manaCost_supernova)
+            and not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
+            and Utility.CanCastSpellOn(enemy) then
+            Ability.CastTarget(heavens, enemy)
+            myMana = myMana - manaCost_heavens
+            break
+        end
+    end
+
+    if Ability.IsCastable(fire_spirit, myMana - manaCost_supernova) then
         Ability.CastNoTarget(fire_spirit)
     end
 
     if not Ability.IsCastable(launch_fire_spirit, 0) then return true end
     if not Ability.IsCastable(supernova, myMana) then return true end
 
-    local range = 1400
+    local range = Ability.GetCastRange(myHero, launch_fire_spirit) -- 1400
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
     for i, enemy in ipairs(enemyHeroes) do
-          if Ability.IsCastable(launch_fire_spirit, myMana) then
+        if Ability.IsCastable(launch_fire_spirit, myMana) then
             Ability.CastPosition(launch_fire_spirit, Entity.GetAbsOrigin(enemy))
         end
     end
