@@ -90,7 +90,7 @@ end
 
 function Phoenix.FireSpirit(myHero)
     -- only auto cast fire spirit when diving or using sun ray
-    if not NPC.HasModifier(myHero, "modifier_phoenix_icarus_dive") and not NPC.HasModifier(myHero, "modifier_phoenix_sun") then return end
+    if not NPC.HasModifier(myHero, "modifier_phoenix_icarus_dive") and not NPC.HasModifier(myHero, "modifier_phoenix_sun_ray") then return end
 
     local fireSpirit = NPC.GetAbility(myHero, "phoenix_launch_fire_spirit")
     if not fireSpirit or not Ability.IsCastable(fireSpirit, NPC.GetMana(myHero)) then return end
