@@ -361,7 +361,7 @@ function Rubick.KillSteal()
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
 
     local range = Utility.GetCastRange(myHero, spell)
-    local damage = 80 * Ability.GetLevel(spell)
+    local damage = 25 + 75 * Ability.GetLevel(spell) -- damage update in version 7.27b
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
