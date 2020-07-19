@@ -31,7 +31,10 @@ function Phoenix.OnPrepareUnitOrders(orders)
 
     local myMana             = NPC.GetMana(myHero)
     local manaCost_supernova = Ability.GetManaCost(supernova)
-    local manaCost_heavens   = Ability.GetManaCost(heavens)
+    local manaCost_heavens   = 0
+    if heavens then
+        Ability.GetManaCost(heavens)
+    end
 
     local range = Ability.GetCastRange(heavens) -- 600
     local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
