@@ -31,20 +31,19 @@ function Phoenix.OnPrepareUnitOrders(orders)
 
     local myMana             = NPC.GetMana(myHero)
     local manaCost_supernova = Ability.GetManaCost(supernova)
-    local manaCost_heavens   = 0
-    if heavens then
-        Ability.GetManaCost(heavens)
-    end
 
-    local range = Ability.GetCastRange(heavens) -- 600
-    local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
-    for i, enemy in ipairs(enemyHeroes) do
-        if heavens and Ability.IsCastable(heavens, myMana - manaCost_supernova)
-            and not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
-            and Utility.CanCastSpellOn(enemy) then
-            Ability.CastTarget(heavens, enemy)
-            myMana = myMana - manaCost_heavens
-            break
+    if heavens then
+        local manaCost_heavens = Ability.GetManaCost(heavens)
+        local range = Ability.GetCastRange(heavens) -- 600
+        local enemyHeroes = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+        for i, enemy in ipairs(enemyHeroes) do
+            if heavens and Ability.IsCastable(heavens, myMana - manaCost_supernova)
+                and not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
+                and Utility.CanCastSpellOn(enemy) then
+                Ability.CastTarget(heavens, enemy)
+                myMana = myMana - manaCost_heavens
+                break
+            end
         end
     end
 
