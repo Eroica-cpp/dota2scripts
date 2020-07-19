@@ -119,11 +119,11 @@ end
 
 function Phoenix.ShouldCastFireSpiritOn(enemy)
     if NPC.HasModifier(enemy, "modifier_phoenix_fire_spirit_burn") then return false end
-    if NPC.IsIllusion(npc) then return false end
-    if not Utility.CanCastSpellOn(npc) then return end
+    if NPC.IsIllusion(enemy) then return false end
+    if not Utility.CanCastSpellOn(enemy) then return false end
 
-    if not Phoenix.castedEnemyList[NPC.GetUnitName(npc)] then return true end
-    if GameRules.GetGameTime() - Phoenix.castedEnemyList[NPC.GetUnitName(npc)] > 1400/900 then return true end
+    if not Phoenix.castedEnemyList[NPC.GetUnitName(enemy)] then return true end
+    if GameRules.GetGameTime() - Phoenix.castedEnemyList[NPC.GetUnitName(enemy)] > 1400/900 then return true end
 
     return false
 end
