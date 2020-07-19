@@ -8,9 +8,10 @@ local Utility = require("Utility")
 
 local Phoenix = {}
 
-Phoenix.optionFireSpirit = Menu.AddOption({"Hero Specific","Phoenix"},"Auto Fire Spirit", "auto cast fire spirit while diving if enabled")
+Phoenix.optionFireSpirit = Menu.AddOption({"Hero Specific","Phoenix"},"Auto Fire Spirit", "auto cast fire spirit")
 Phoenix.optionSunRay = Menu.AddOption({"Hero Specific","Phoenix"},"Sun Ray Helper", "sun ray sticks to nearest hero to cursor (ally or enemy)")
 Phoenix.posList = {}
+Phoenix.castedEnemyList = {}
 
 -- auto case fire spirit and use heavens right before supernova
 function Phoenix.OnPrepareUnitOrders(orders)
@@ -87,7 +88,7 @@ function Phoenix.SunRay(myHero)
 end
 
 function Phoenix.FireSpirit(myHero)
-    if not NPC.HasModifier(myHero, "modifier_phoenix_icarus_dive") then Phoenix.posList = {}; return end
+    -- if not NPC.HasModifier(myHero, "modifier_phoenix_icarus_dive") then Phoenix.posList = {}; return end
 
     local fireSpirit = NPC.GetAbility(myHero, "phoenix_launch_fire_spirit")
     if not fireSpirit or not Ability.IsCastable(fireSpirit, NPC.GetMana(myHero)) then return end
@@ -96,21 +97,38 @@ function Phoenix.FireSpirit(myHero)
     if not enemies or #enemies <= 0 then return end
 
     for i, npc in ipairs(enemies) do
-        if npc and not NPC.IsIllusion(npc) and Utility.CanCastSpellOn(npc) then
+        if not Ability.IsCastable(fireSpirit, NPC.GetMana(myHero)) then break end
+
+        if npc and Phoenix.ShouldCastFireSpiritOn(npc) then
             local speed = 900
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(npc)):Length()
             local delay = dis / speed
             local pos = Utility.GetPredictedPosition(npc, delay)
 
-            if not Phoenix.PositionIsCovered(pos) then
-                Ability.CastPosition(fireSpirit, pos)
-                table.insert(Phoenix.posList, pos)
-                return
-            end
+            Ability.CastPosition(fireSpirit, pos)
+            Phoenix.castedEnemyList[NPC.GetUnitName(npc)] = GameRules.GetGameTime()
+
+            -- if not Phoenix.PositionIsCovered(pos) then
+            --     Ability.CastPosition(fireSpirit, pos)
+            --     table.insert(Phoenix.posList, pos)
+            --     return
+            -- end
         end
     end
 end
 
+function Phoenix.ShouldCastFireSpiritOn(enemy)
+    if NPC.HasModifier(enemy, "modifier_phoenix_fire_spirit_burn") then return false end
+    if NPC.IsIllusion(npc) then return false end
+    if not Utility.CanCastSpellOn(npc) then return end
+
+    if not Phoenix.castedEnemyList[NPC.GetUnitName(npc)] then return true end
+    if GameRules.GetGameTime() - Phoenix.castedEnemyList[NPC.GetUnitName(npc)] > 1400/900 then return true end
+
+    return false
+end
+
+-- Deprecated function
 function Phoenix.PositionIsCovered(pos)
     if not Phoenix.posList or #Phoenix.posList <= 0 then return false end
 
