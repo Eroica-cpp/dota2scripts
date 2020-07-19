@@ -123,7 +123,9 @@ function Phoenix.ShouldCastFireSpiritOn(enemy)
     if not Utility.CanCastSpellOn(enemy) then return false end
 
     if not Phoenix.castedEnemyList[NPC.GetUnitName(enemy)] then return true end
-    if GameRules.GetGameTime() - Phoenix.castedEnemyList[NPC.GetUnitName(enemy)] > 1400/900 then return true end
+
+    local delay = 1400 / 900 + 1
+    if GameRules.GetGameTime() - Phoenix.castedEnemyList[NPC.GetUnitName(enemy)] > delay then return true end
 
     return false
 end
