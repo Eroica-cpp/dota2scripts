@@ -35,7 +35,11 @@ function Lion.AutoHex()
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
         and not Utility.IsDisabled(enemy) and not Utility.IsLinkensProtected(enemy) then
 
-            Ability.CastTarget(spell, enemy)
+            if NPC.GetCurrentLevel(myHero) < 30 then
+                Ability.CastTarget(spell, enemy)
+            else
+                Ability.CastPosition(spell, Entity.GetAbsOrigin(enemy))
+            end
             return
         end
     end
