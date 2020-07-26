@@ -4,7 +4,7 @@ local Lion = {}
 
 local optionAutoHex = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Hex", "Auto hex any enemy in range once lion has level 6")
 local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) being stunned or hexed with proper timing")
-local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain (1) stuned/hexed/taunted enemy; (2) illusion")
+local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain to break (1) linken (or AM's shell); (2) illusion")
 
 function Lion.OnUpdate()
     if Menu.IsEnabled(optionAutoHex) then
@@ -99,7 +99,7 @@ function Lion.AutoManaDrain()
         if enemy and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
-            if Utility.IsLinkensProtected(enemy) or NPC.IsIllusion(enemy) or Utility.CantMove(enemy) then
+            if Utility.IsLinkensProtected(enemy) or NPC.IsIllusion(enemy) then
                 Ability.CastTarget(spell, enemy)
                 return
             end
