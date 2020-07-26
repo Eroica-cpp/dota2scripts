@@ -23,7 +23,7 @@ end
 function Lion.AutoHex()
     local myHero = Heroes.GetLocal()
     if not myHero or not Lion.IsSuitableToCastSpell(myHero) then return end
-    if NPC.GetCurrentLevel(myHero) < 6 then return end
+    -- if NPC.GetCurrentLevel(myHero) < 6 then return end
 
     local spell = NPC.GetAbility(myHero, "lion_voodoo")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
