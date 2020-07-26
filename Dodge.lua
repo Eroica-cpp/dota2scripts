@@ -706,13 +706,13 @@ function Dodge.Defend(myHero, source)
 	-- ===========
 	Utility.PopDefensiveItems(myHero)
 
-	-- Eul's Scepter
-	local item = NPC.GetItem(myHero, "item_cyclone", true)
-	if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
-		if source and NPC.IsEntityInRange(source, myHero, Ability.GetCastRange(item)) and not Utility.IsLotusProtected(source) then
-			Ability.CastTarget(item, source)
-		end
-	end
+	-- -- Eul's Scepter
+	-- local item = NPC.GetItem(myHero, "item_cyclone", true)
+	-- if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
+	-- 	if source and NPC.IsEntityInRange(source, myHero, Ability.GetCastRange(item)) and not Utility.IsLotusProtected(source) then
+	-- 		Ability.CastTarget(item, source)
+	-- 	end
+	-- end
 
 	-- ===========
 	-- Cast Spell
@@ -722,27 +722,22 @@ function Dodge.Defend(myHero, source)
 	local myMana = NPC.GetMana(myHero)
 
 	-- antimage's shell
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_antimage" then
-		local shell = NPC.GetAbilityByIndex(myHero, 2)
-		if shell and Ability.IsCastable(shell, myMana) then
-			Ability.CastNoTarget(shell)
-		end
+	-- TODO: the spell name of AM's shell is incorrect
+	local shell = NPC.GetAbility(myHero, "antimage_spell_shield")
+	if shell and Ability.IsCastable(shell, myMana) then
+		Ability.CastNoTarget(shell)
 	end
 
 	-- life stealer's rage
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_life_stealer" then
-		local rage = NPC.GetAbilityByIndex(myHero, 0)
-		if rage and Ability.IsCastable(rage, myMana) then
-			Ability.CastNoTarget(rage)
-		end
+	local rage = NPC.GetAbility(myHero, "life_stealer_rage")
+	if rage and Ability.IsCastable(rage, myMana) then
+		Ability.CastNoTarget(rage)
 	end
 
 	-- juggernaut's spin
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_juggernaut" then
-		local spin = NPC.GetAbilityByIndex(myHero, 0)
-		if spin and Ability.IsCastable(spin, myMana) then
-			Ability.CastNoTarget(spin)
-		end
+	local spin = NPC.GetAbility(myHero, "juggernaut_blade_fury")
+	if spin and Ability.IsCastable(spin, myMana) then
+		Ability.CastNoTarget(spin)
 	end
 
 	-- puck's defensive behaviors. It is defined in Puck.Defend()
@@ -751,50 +746,40 @@ function Dodge.Defend(myHero, source)
 	end
 
 	-- weaver's shukuchi
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_weaver" then
-		local shukuchi = NPC.GetAbilityByIndex(myHero, 1)
-		if shukuchi and Ability.IsCastable(shukuchi, myMana) then
-			Ability.CastNoTarget(shukuchi)
-		end
+	local shukuchi = NPC.GetAbility(myHero, "weaver_shukuchi")
+	if shukuchi and Ability.IsCastable(shukuchi, myMana) then
+		Ability.CastNoTarget(shukuchi)
 	end
 
 	-- omni's repel
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_omniknight" then
-		local repel = NPC.GetAbilityByIndex(myHero, 1)
-		if repel and Ability.IsCastable(repel, myMana) then
-			Ability.CastTarget(repel, myHero)
-		end
+	local repel = NPC.GetAbility(myHero, "omniknight_repel")
+	if repel and Ability.IsCastable(repel, myMana) then
+		Ability.CastTarget(repel, myHero)
 	end
 
 	-- nyx's carapace
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_nyx_assassin" then
-		local carapace = NPC.GetAbilityByIndex(myHero, 2)
-		if carapace and Ability.IsCastable(carapace, myMana) then
-			Ability.CastNoTarget(carapace)
-		end
+	local carapace = NPC.GetAbility(myHero, "nyx_assassin_spiked_carapace")
+	if carapace and Ability.IsCastable(carapace, myMana) then
+		Ability.CastNoTarget(carapace)
 	end
 
 	-- slark's dark pact
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_slark" then
-		local pact = NPC.GetAbilityByIndex(myHero, 0)
-		if pact and Ability.IsCastable(pact, myMana) then
-			Ability.CastNoTarget(pact)
-		end
+	local pact = NPC.GetAbility(myHero, "slark_dark_pact")
+	if pact and Ability.IsCastable(pact, myMana) then
+		Ability.CastNoTarget(pact)
 	end
 
 	-- ember's fist (T)
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_ember_spirit" then
-		local fist = NPC.GetAbilityByIndex(myHero, 1)
+	local fist = NPC.GetAbility(myHero, "ember_spirit_sleight_of_fist")
+	if fist and Ability.IsCastable(fist, myMana) then
 		local level = Ability.GetLevel(fist)
-		local cast_range = 700
+		local cast_range = Utility.GetCastRange(myHero, fist)
 		local radius = level > 0 and 250+100*(level-1) or 0
 		local enemyUnits = NPC.GetUnitsInRadius(myHero, cast_range, Enum.TeamType.TEAM_ENEMY)
-		if fist and Ability.IsCastable(fist, myMana) and #enemyUnits > 0 then
-			local pos = Utility.BestPosition(enemyUnits, radius)
+		local pos = Utility.BestPosition(enemyUnits, radius)
 
-			if pos and NPC.IsPositionInRange(myHero, pos, cast_range, 0) then
-				Ability.CastPosition(fist, pos)
-			end
+		if pos and NPC.IsPositionInRange(myHero, pos, cast_range, 0) then
+			Ability.CastPosition(fist, pos)
 		end
 	end
 
@@ -804,14 +789,12 @@ function Dodge.Defend(myHero, source)
 	-- end
 
 	-- OD's imprison
-	if NPC.GetUnitName(myHero) == "npc_dota_hero_obsidian_destroyer" then
-		local imprison = NPC.GetAbilityByIndex(myHero, 1)
-		if imprison and Ability.IsCastable(imprison, NPC.GetMana(myHero))
-			and source and NPC.IsEntityInRange(source, myHero, Ability.GetCastRange(imprison))
-			and not Utility.IsLotusProtected(source) then
+	local imprison = NPC.GetAbility(myHero, "obsidian_destroyer_astral_imprisonment")
+	if imprison and Ability.IsCastable(imprison, NPC.GetMana(myHero))
+		and source and NPC.IsEntityInRange(source, myHero, Ability.GetCastRange(imprison))
+		and not Utility.IsLotusProtected(source) then
 
-			Ability.CastTarget(imprison, source)
-		end
+		Ability.CastTarget(imprison, source)
 	end
 end
 
