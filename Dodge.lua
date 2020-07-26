@@ -722,11 +722,14 @@ function Dodge.Defend(myHero, source)
 	local myMana = NPC.GetMana(myHero)
 
 	-- antimage's shell
-	-- TODO: the spell name of AM's shell is incorrect
-	local shell = NPC.GetAbility(myHero, "antimage_spell_shield")
+	local shell = NPC.GetAbility(myHero, "antimage_counterspell")
 	if shell and Ability.IsCastable(shell, myMana) then
 		Ability.CastNoTarget(shell)
 	end
+
+	-- TODO: test code to get ability name
+	-- local ability = NPC.GetAbilityByIndex(myHero, 2)
+	-- Log.Write(Ability.GetName(ability))
 
 	-- life stealer's rage
 	local rage = NPC.GetAbility(myHero, "life_stealer_rage")
