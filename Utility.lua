@@ -141,7 +141,7 @@ end
 function Utility.IsLotusProtected(npc)
 	if NPC.HasModifier(npc, "modifier_item_lotus_orb_active") then return true end
 
-	local shield = NPC.GetAbility(npc, "antimage_spell_shield")
+	local shield = NPC.GetAbility(npc, "modifier_antimage_counterspell")
 	if shield and Ability.IsReady(shield) and NPC.HasItem(npc, "item_ultimate_scepter", true) then
 		return true
 	end
@@ -152,7 +152,7 @@ end
 -- extend NPC.IsLinkensProtected(), check AM's aghs case
 -- Update (July 14, 2020): remove AM aghs check, update for new version
 function Utility.IsLinkensProtected(npc)
-    if NPC.HasModifier(npc, "modifier_antimage_spell_shield") then
+    if NPC.HasModifier(npc, "modifier_antimage_counterspell") then
         return true
     end
 
