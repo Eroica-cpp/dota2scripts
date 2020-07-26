@@ -406,6 +406,17 @@ function Rubick.AutoTelekinesis()
     end
 end
 
+-- return true if can cast spell on this npc, return false otherwise
+-- Rubick version of CanCastSpellOn() is able to steal skill from BKB
+function Rubick.CanCastSpellOn(npc)
+    if Entity.IsDormant(npc) or not Entity.IsAlive(npc) then return false end
+    if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
+    -- if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
+    -- if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
+
+    return true
+end
+
 function Rubick.AutoSpellSteal()
     local myHero = Heroes.GetLocal()
     if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
@@ -422,7 +433,7 @@ function Rubick.AutoSpellSteal()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
+        and Rubick.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
         and not Utility.IsLinkensProtected(enemy) then
 
             local spell = Rubick.GetLastSpell(enemy)
