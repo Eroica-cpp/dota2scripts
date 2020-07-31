@@ -20,6 +20,7 @@ AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "
 AutoUseItems.optionLotus = Menu.AddOption({"Item Specific"}, "Lotus Orb", "(For tinker) auto use lotus orb on self or allies once available")
 AutoUseItems.optionCrest = Menu.AddOption({"Item Specific"}, "Medallion & Crest", "Auto use medallion & crest to save ally")
 AutoUseItems.optionGlimmerCape = Menu.AddOption({"Item Specific"}, "Glimmer Cape", "Auto use Glimmer Cape when channeling spells or ally in danger")
+AutoUseItems.optionGhost = Menu.AddOption({"Item Specific"}, "Ghost Scepter", "Auto use ghost scepter to avoid damage from physical cores")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -62,6 +63,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionCrest) then
         AutoUseItems.item_solar_crest(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionGhost) then
+        AutoUseItems.item_ghost(myHero)
     end
 
     -- ========================
@@ -468,6 +473,34 @@ function AutoUseItems.item_solar_crest(myHero)
         if Utility.NeedToBeSaved(ally) and Utility.CanCastSpellOn(ally) then
             Ability.CastTarget(item, ally)
             return
+        end
+    end
+end
+
+-- Auto use ghost scepter to avoid damage from physical cores
+function AutoUseItems.item_ghost(myHero)
+    local item1 = NPC.GetItem(myHero, "item_ghost", true)
+    local item2 = NPC.GetItem(myHero, "item_ethereal_blade", true)
+
+    if (not item1 or not Ability.IsCastable(item1, NPC.GetMana(myHero)))
+    and (not item2 or not Ability.IsCastable(item2, NPC.GetMana(myHero)))
+    then return end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
+        and not Utility.IsDisabled(enemy) and Utility.PhysicalCoreHeroes[NPC.GetUnitName(enemy)]
+        and NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(enemy)) and not NPC.IsRanged(enemy) then
+
+            if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then
+                Ability.CastNoTarget(item1)
+                return
+            end
+            
+            if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then
+                Ability.CastTarget(item2, myHero)
+                return
+            end
         end
     end
 end
