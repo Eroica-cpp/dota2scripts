@@ -140,11 +140,7 @@ end
 -- return true if is protected by lotus orb or AM's aghs
 function Utility.IsLotusProtected(npc)
 	if NPC.HasModifier(npc, "modifier_item_lotus_orb_active") then return true end
-
-	local shield = NPC.GetAbility(npc, "modifier_antimage_counterspell")
-	if shield and Ability.IsReady(shield) and NPC.HasItem(npc, "item_ultimate_scepter", true) then
-		return true
-	end
+    if NPC.HasModifier(npc, "modifier_antimage_counterspell") then return true end
 
 	return false
 end

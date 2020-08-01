@@ -399,7 +399,8 @@ function Rubick.AutoTelekinesis()
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
-        and not Utility.IsDisabled(enemy) and not Utility.IsLinkensProtected(enemy) then
+        and not Utility.IsDisabled(enemy) and not Utility.IsLinkensProtected(enemy)
+        and not Utility.IsLotusProtected(enemy) then
 
             Ability.CastTarget(spell, enemy)
             return
