@@ -22,15 +22,20 @@ function BountyHunter.KillSteal()
     local spell = NPC.GetAbility(myHero, "bounty_hunter_shuriken_toss")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
 
-    local range = Ability.GetCastRange(spell)
-    if NPC.HasItem(myHero, "item_ultimate_scepter", true) then
-    	range = range + 250
-    end
-
-
     local level = Ability.GetLevel(spell)
     local damage = 75 * (level + 1)
     if NPC.GetCurrentLevel(myHero) >= 15 then damage = damage + 50 end
+
+    local range = Ability.GetCastRange(spell)
+    if NPC.HasItem(myHero, "item_ultimate_scepter", true) then
+    	range = range + 250
+
+    	local jinada = NPC.GetAbility(myHero, "bounty_hunter_jinada")
+    	if jinada then
+    		jinada_damage = 80 + 30 * Ability.GetLevel(jinada)
+    		damage = damage + jinada_damage
+    	end
+    end
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
