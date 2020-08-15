@@ -495,6 +495,22 @@ function Utility.GetCastRange(myHero, ability)
     -- return range
 end
 
+function Utility.GetRealDamage(myHero, enemy, damage)
+    local spell_amplifier = 1
+
+    if NPC.HasModifier(enemy, "modifier_item_veil_of_discord_debuff") then
+        spell_amplifier = spell_amplifier + 0.18
+    end
+
+    local rubick_arcane_supremacy = NPC.GetAbility(myHero, "rubick_arcane_supremacy")
+    if rubick_arcane_supremacy then
+        spell_amplifier = spell_amplifier + 0.1 + 0.04 * Ability.GetLevel(rubick_arcane_supremacy)
+    end
+
+    real_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy) * spell_amplifier
+    return real_damage
+end
+
 function Utility.GetSafeDirection(myHero)
     local mid = Vector()
     local pos = Entity.GetAbsOrigin(myHero)

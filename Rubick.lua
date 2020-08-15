@@ -363,21 +363,16 @@ function Rubick.KillSteal()
     local spell = NPC.GetAbility(myHero, "rubick_fade_bolt")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
 
-    local damage_amplifier = 1
-    local aura = NPC.GetAbilityByIndex(myHero, 2)
-    if aura and Ability.GetLevel(aura) >= 1 then
-        damage_amplifier = 1 + 0.1 + 0.04 * Ability.GetLevel(aura)
-    end
-
     local range = Utility.GetCastRange(myHero, spell)
-    local damage = damage_amplifier * (25 + 75 * Ability.GetLevel(spell)) -- damage update in version 7.27b
+    local damage = 25 + 75 * Ability.GetLevel(spell) -- damage update in version 7.27b
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
-            local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            -- local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            local true_damage = Utility.GetRealDamage(myHero, enemy, damage)
             if (true_damage >= Entity.GetHealth(enemy) or Utility.IsLinkensProtected(enemy))
                 and Utility.IsSafeToCast(myHero, enemy, true_damage) then
                 Ability.CastTarget(spell, enemy)
