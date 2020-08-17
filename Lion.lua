@@ -3,6 +3,7 @@ local Utility = require("Utility")
 local Lion = {}
 
 local optionAutoHex = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Hex", "Auto hex any enemy in range once lion has level 6")
+local optionKillSteal = Menu.AddOption({"Hero Specific", "Lion"}, "Auto KS (upgraded version)", "Auto kill steal using finger of death and/or ethereal blade.")
 local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) being stunned or hexed with proper timing")
 local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain to break (1) linken (or AM's shell); (2) illusion")
 
@@ -11,12 +12,60 @@ function Lion.OnUpdate()
         Lion.AutoHex()
     end
 
+    if Menu.IsEnabled(optionKillSteal) then
+        Lion.KillSteal()
+    end
+
     if Menu.IsEnabled(optionAutoSpike) then
         Lion.AutoSpike()
     end
 
     if Menu.IsEnabled(optionAutoManaDrain) then
         Lion.AutoManaDrain()
+    end
+end
+
+-- KS using finger of death together with ethereal blade
+function Lion.KillSteal()
+    local myHero = Heroes.GetLocal()
+    if not myHero or not Lion.IsSuitableToCastSpell(myHero) then return end
+
+    local spell = NPC.GetAbility(myHero, "lion_finger_of_death")
+    if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
+    local range = Ability.GetCastRange(spell)
+
+    local base_damage = 0
+    if NPC.HasItem(myHero, "item_ultimate_scepter", true) or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
+    	base_damage = 725 + 150 * (Ability.GetLevel(spell) - 1)
+    else
+    	base_damage = 600 + 125 * (Ability.GetLevel(spell) - 1)
+    end
+
+    local additional_damage = 0
+    local mod = NPC.GetModifier(myHero, "modifier_lion_finger_of_death_kill_counter")
+    if mod then
+    	kill_counter = Modifier.GetStackCount(mod)
+    	if NPC.GetCurrentLevel(myHero) >= 20 then
+    		additional_damage = 60 * kill_counter
+    	else
+    		additional_damage = 40 * kill_counter
+    	end
+    end
+
+    local total_damage = base_damage + additional_damage
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
+        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
+
+            local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
+            if (true_damage >= Entity.GetHealth(enemy) or Utility.IsLinkensProtected(enemy))
+                and Utility.IsSafeToCast(myHero, enemy, true_damage) then
+                Ability.CastTarget(spell, enemy)
+                return
+            end
+        end
     end
 end
 
