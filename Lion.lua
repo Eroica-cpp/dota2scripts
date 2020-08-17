@@ -54,17 +54,33 @@ function Lion.KillSteal()
 
     local total_damage = base_damage + additional_damage
 
+    local ethereal_base_damage = 0
+    local ethereal_amplified_damage = 0
+    local item = NPC.GetItem(myHero, "item_ethereal_blade", true)
+    if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
+    	ethereal_base_damage = 125 + 1.5 * Hero.GetIntellectTotal(myHero)
+    	ethereal_amplified_damage = 0.4 * total_damage
+    end 
+
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
+        and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
-            local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
-            if (true_damage >= Entity.GetHealth(enemy) or Utility.IsLinkensProtected(enemy))
-                and Utility.IsSafeToCast(myHero, enemy, true_damage) then
-                Ability.CastTarget(spell, enemy)
+    		local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
+            if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage) then
+	            Ability.CastTarget(spell, enemy)
                 return
             end
+
+        	if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
+        		true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
+	            if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage) then
+	            	Ability.CastTarget(item, enemy)
+    	            Ability.CastTarget(spell, enemy)
+	                return
+	            end
+        	end
         end
     end
 end
