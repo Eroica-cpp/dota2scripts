@@ -77,7 +77,7 @@ function Lion.KillSteal()
                 return
             end
 
-            if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
+            if item and Ability.IsCastable(item, NPC.GetMana(myHero) - Ability.GetManaCost(spell)) then
                 true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
                 if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage) then
 
