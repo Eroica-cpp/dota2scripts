@@ -7,6 +7,9 @@ local optionKillSteal = Menu.AddOption({"Hero Specific", "Lion"}, "Auto KS (upgr
 local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) being stunned or hexed with proper timing")
 local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain to break (1) linken (or AM's shell); (2) illusion")
 
+local KS_target
+local KS_time
+
 function Lion.OnUpdate()
     if Menu.IsEnabled(optionAutoHex) then
         Lion.AutoHex()
@@ -14,6 +17,7 @@ function Lion.OnUpdate()
 
     if Menu.IsEnabled(optionKillSteal) then
         Lion.KillSteal()
+        Lion.KillStealHelper()
     end
 
     if Menu.IsEnabled(optionAutoSpike) then
@@ -36,20 +40,20 @@ function Lion.KillSteal()
 
     local base_damage = 0
     if NPC.HasItem(myHero, "item_ultimate_scepter", true) or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
-    	base_damage = 725 + 150 * (Ability.GetLevel(spell) - 1)
+        base_damage = 725 + 150 * (Ability.GetLevel(spell) - 1)
     else
-    	base_damage = 600 + 125 * (Ability.GetLevel(spell) - 1)
+        base_damage = 600 + 125 * (Ability.GetLevel(spell) - 1)
     end
 
     local additional_damage = 0
     local mod = NPC.GetModifier(myHero, "modifier_lion_finger_of_death_kill_counter")
     if mod then
-    	kill_counter = Modifier.GetStackCount(mod)
-    	if NPC.GetCurrentLevel(myHero) >= 20 then
-    		additional_damage = 60 * kill_counter
-    	else
-    		additional_damage = 40 * kill_counter
-    	end
+        kill_counter = Modifier.GetStackCount(mod)
+        if NPC.GetCurrentLevel(myHero) >= 20 then
+            additional_damage = 60 * kill_counter
+        else
+            additional_damage = 40 * kill_counter
+        end
     end
 
     local total_damage = base_damage + additional_damage
@@ -58,8 +62,8 @@ function Lion.KillSteal()
     local ethereal_amplified_damage = 0
     local item = NPC.GetItem(myHero, "item_ethereal_blade", true)
     if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
-    	ethereal_base_damage = 125 + 1.5 * Hero.GetIntellectTotal(myHero)
-    	ethereal_amplified_damage = 0.4 * total_damage
+        ethereal_base_damage = 125 + 1.5 * Hero.GetIntellectTotal(myHero)
+        ethereal_amplified_damage = 0.4 * total_damage
     end 
 
     for i = 1, Heroes.Count() do
@@ -67,21 +71,44 @@ function Lion.KillSteal()
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
-    		local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
+            local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
             if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage) then
-	            Ability.CastTarget(spell, enemy)
+                Ability.CastTarget(spell, enemy)
                 return
             end
 
-        	if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
-        		true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
-	            if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage) then
-	            	Ability.CastTarget(item, enemy)
-    	            Ability.CastTarget(spell, enemy)
-	                return
-	            end
-        	end
+            if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
+                true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
+                if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage) then
+
+                    Ability.CastTarget(item, enemy)
+
+                    local distance = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+                    local delay = distance / 1275     -- The projectile of ethereal blade travels at a speed of 1275.
+                    local cast_point = 0.3             -- the cast point of finger of death
+                    local offset = 0.1
+
+                    KS_target = enemy
+                    KS_time = GameRules.GetGameTime() + delay - cast_point + offset
+                    return
+                end
+            end
         end
+    end
+end
+
+function Lion.KillStealHelper()
+    if not KS_target or not KS_time then return end
+    local myHero = Heroes.GetLocal()
+    if not myHero or not Lion.IsSuitableToCastSpell(myHero) then return end
+
+    local spell = NPC.GetAbility(myHero, "lion_finger_of_death")
+    if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
+    local range = Ability.GetCastRange(spell)
+
+    if GameRules.GetGameTime() - 0.05 <= KS_time and KS_time <= GameRules.GetGameTime() + 0.05 
+    and Utility.CanCastSpellOn(KS_target) and not Utility.IsLinkensProtected(KS_target) and NPC.IsEntityInRange(myHero, KS_target, range) then
+        Ability.CastTarget(spell, KS_target)
     end
 end
 
