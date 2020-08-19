@@ -502,6 +502,34 @@ function Utility.GetRealDamage(myHero, enemy, damage)
         spell_amplifier = spell_amplifier + 0.18
     end
 
+    if NPC.HasItem(myHero, "item_kaya", true) then
+        spell_amplifier = spell_amplifier + 0.08
+    end
+
+    if NPC.HasItem(myHero, "item_bloodstone", true) then
+        spell_amplifier = spell_amplifier + 0.08
+    end
+
+    if NPC.HasItem(myHero, "item_nether_shawl", false) then
+        spell_amplifier = spell_amplifier + 0.08
+    end
+
+    if NPC.HasItem(myHero, "item_timeless_relic", false) then
+        spell_amplifier = spell_amplifier + 0.15
+    end
+
+    if NPC.HasItem(myHero, "item_yasha_and_kaya", true) then
+        spell_amplifier = spell_amplifier + 0.16
+    end
+
+    if NPC.HasItem(myHero, "item_kaya_and_sange", true) then
+        spell_amplifier = spell_amplifier + 0.16
+    end
+
+    if NPC.HasItem(myHero, "item_trident", false) then
+        spell_amplifier = spell_amplifier + 0.30
+    end
+
     local rubick_arcane_supremacy = NPC.GetAbility(myHero, "rubick_arcane_supremacy")
     if rubick_arcane_supremacy then
         spell_amplifier = spell_amplifier + 0.1 + 0.04 * Ability.GetLevel(rubick_arcane_supremacy)
