@@ -4,11 +4,14 @@ local Lion = {}
 
 local optionAutoHex = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Hex", "Auto hex any enemy in range once lion has level 6")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Lion"}, "Auto KS (upgraded version)", "Auto kill steal using finger of death and/or ethereal blade.")
+local optionKillStealCounter = Menu.AddOption({"Hero Specific", "Lion"}, "Show KS Counter", "Show how many hits remains to kill steal.")
 local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) being stunned or hexed with proper timing")
 local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain to break (1) linken (or AM's shell); (2) illusion")
 
 local KS_target
 local KS_time
+
+local spell_damage_table = {}
 
 function Lion.OnUpdate()
     if Menu.IsEnabled(optionAutoHex) then
@@ -26,6 +29,38 @@ function Lion.OnUpdate()
 
     if Menu.IsEnabled(optionAutoManaDrain) then
         Lion.AutoManaDrain()
+    end
+end
+
+-- show how many hits left to KS
+function Lion.OnDraw()
+    if not Menu.IsEnabled(optionKillStealCounter) then return end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_lion" then return end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and spell_damage_table[NPC.GetUnitName(enemy)] then
+
+            local oneHitDamage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
+            local hitsLeft = math.ceil((Entity.GetHealth(enemy) - spell_damage_table[NPC.GetUnitName(enemy)]) / oneHitDamage)
+
+            -- draw
+            local pos = Entity.GetAbsOrigin(enemy)
+            local x, y, visible = Renderer.WorldToScreen(pos)
+            local font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
+
+            -- red : can kill; green : cant kill
+            if hitsLeft <= 0 then
+                Renderer.SetDrawColor(255, 0, 0, 255)
+                Renderer.DrawTextCentered(font, x, y, "Kill", 1)
+            else
+                Renderer.SetDrawColor(0, 255, 0, 255)
+                Renderer.DrawTextCentered(font, x, y, hitsLeft, 1)
+            end
+
+        end
     end
 end
 
@@ -68,24 +103,33 @@ function Lion.KillSteal()
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) then
 
             local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
-            if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage) then
+            spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
+
+            if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage)
+                and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
+                and NPC.IsEntityInRange(myHero, enemy, range) then
+
                 Ability.CastTarget(spell, enemy)
                 return
             end
 
             if item and Ability.IsCastable(item, NPC.GetMana(myHero) - Ability.GetManaCost(spell)) then
+
                 true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
-                if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage) then
+                spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
+
+                if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage)
+                    and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
+                    and NPC.IsEntityInRange(myHero, enemy, range) then
 
                     Ability.CastTarget(item, enemy)
 
                     local distance = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
-                    local delay = distance / 1275     -- The projectile of ethereal blade travels at a speed of 1275.
-                    local cast_point = 0.3             -- the cast point of finger of death
+                    local delay = distance / 1275     -- the projectile of ethereal blade travels at a speed of 1275.
+                    local cast_point = 0.3            -- the cast point of finger of death
                     local offset = 0.1
 
                     KS_target = enemy
