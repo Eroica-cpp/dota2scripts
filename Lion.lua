@@ -38,10 +38,12 @@ function Lion.OnDraw()
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_lion" then return end
+    if NPC.GetCurrentLevel(myHero) < 6 then return end
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and spell_damage_table[NPC.GetUnitName(enemy)] then
+        if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and spell_damage_table[NPC.GetUnitName(enemy)] 
+        	and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 
             local oneHitDamage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
             local hitsLeft = math.ceil((Entity.GetHealth(enemy) - spell_damage_table[NPC.GetUnitName(enemy)]) / oneHitDamage)
@@ -70,7 +72,7 @@ function Lion.KillSteal()
     if not myHero or not Lion.IsSuitableToCastSpell(myHero) then return end
 
     local spell = NPC.GetAbility(myHero, "lion_finger_of_death")
-    if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
+    if not spell then return end
     local range = Ability.GetCastRange(spell)
 
     local base_damage = 0
@@ -110,7 +112,7 @@ function Lion.KillSteal()
 
             if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage)
                 and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
-                and NPC.IsEntityInRange(myHero, enemy, range) then
+                and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
 
                 Ability.CastTarget(spell, enemy)
                 return
@@ -123,7 +125,7 @@ function Lion.KillSteal()
 
                 if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage)
                     and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
-                    and NPC.IsEntityInRange(myHero, enemy, range) then
+                    and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
 
                     Ability.CastTarget(item, enemy)
 
