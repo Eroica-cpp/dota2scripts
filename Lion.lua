@@ -5,7 +5,7 @@ local Lion = {}
 local optionAutoHex = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Hex", "Auto hex any enemy in range once lion has level 6")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Lion"}, "Auto KS (upgraded version)", "Auto kill steal using finger of death and/or ethereal blade.")
 local optionKillStealCounter = Menu.AddOption({"Hero Specific", "Lion"}, "Show KS Counter", "Show how many hits remains to kill steal.")
-local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) being stunned or hexed with proper timing")
+local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) stunned/hexed/rooted/taunted with proper timing")
 local optionSpikeRangeHelper = Menu.AddOption({"Hero Specific", "Lion"}, "Spike Range Helper", "Help to cast spike if the target is within spike travel distance but out of cast range")
 local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain to break (1) linken (or AM's shell); (2) illusion")
 
@@ -230,35 +230,50 @@ function Lion.AutoSpike()
 
     local spell = NPC.GetAbility(myHero, "lion_impale")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
+
     local range = Ability.GetCastRange(spell)
+    -- reference: https://dota2.gamepedia.com/Lion
+    -- real range = travel distance + radius
+    local real_range = range + 325 + 125
+
     local damage = 20 + 60 * Ability.GetLevel(spell)
     local speed = 1600
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
+        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, real_range) then
+
+            -- use maximum cast range of spike (consider travel distance and radius)
+            local cast_position
+            if NPC.IsEntityInRange(myHero, enemy, range) then
+                cast_position = Entity.GetAbsOrigin(enemy)
+            else
+                local direction = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized()
+                cast_position = Entity.GetAbsOrigin(myHero) + direction:Scaled(range)
+            end
 
             -- spike the enemy who is channelling a spell or TPing
             if Utility.IsChannellingAbility(enemy) then
-                Ability.CastPosition(spell, Entity.GetAbsOrigin(enemy))
+                Ability.CastPosition(spell, cast_position)
                 return
             end
 
-            -- spike the enemy who is being stunned or hexed with proper timing
+            -- spike the enemy who is hexed/stunned/rooted/taunted with proper timing
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             local delay = 0.3 + dis/speed
+            local offset = 0.5
 
-            if (Utility.GetHexTimeLeft(enemy) - 0.1 < delay and delay < Utility.GetHexTimeLeft(enemy) + 0.1)
-            or (Utility.GetStunTimeLeft(enemy) - 0.1 < delay and delay < Utility.GetStunTimeLeft(enemy) + 0.1) then
-                Ability.CastPosition(spell, Utility.GetPredictedPosition(enemy, delay))
+            if (Utility.GetHexTimeLeft(enemy) - offset <= delay and Utility.GetHexTimeLeft(enemy) > 0)
+            or (Utility.GetFixTimeLeft(enemy) - offset <= delay and Utility.GetFixTimeLeft(enemy) > 0) then
+                Ability.CastPosition(spell, cast_position)
                 return
             end
 
             -- spike the enemy who is in low HP (for kill steal)
-            local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
-            if true_damage >= Entity.GetHealth(enemy) then
-                Ability.CastPosition(spell, Utility.GetPredictedPosition(enemy, delay))
+            local true_damage = Utility.GetRealDamage(myHero, enemy, damage)
+            if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*delay then
+                Ability.CastPosition(spell, cast_position)
                 return
             end
         end
