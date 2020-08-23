@@ -6,6 +6,7 @@ local optionAutoHex = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Hex", "Aut
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Lion"}, "Auto KS (upgraded version)", "Auto kill steal using finger of death and/or ethereal blade.")
 local optionKillStealCounter = Menu.AddOption({"Hero Specific", "Lion"}, "Show KS Counter", "Show how many hits remains to kill steal.")
 local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) being stunned or hexed with proper timing")
+local optionSpikeRangeHelper = Menu.AddOption({"Hero Specific", "Lion"}, "Spike Range Helper", "Help to cast spike if the target is within spike travel distance but out of cast range")
 local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain to break (1) linken (or AM's shell); (2) illusion")
 
 local KS_target
@@ -33,6 +34,45 @@ function Lion.OnUpdate()
     end
 end
 
+function Lion.OnPrepareUnitOrders(orders)
+    if not Menu.IsEnabled(optionSpikeRangeHelper) then return true end
+
+    local myHero = Heroes.GetLocal()
+    if not myHero then return true end
+
+    if not orders or not orders.ability then return true end
+    if orders.order == Enum.UnitOrder.DOTA_UNIT_ORDER_TRAIN_ABILITY then return true end
+
+    if not Entity.IsAbility(orders.ability) then return true end
+    if Ability.GetName(orders.ability) ~= "lion_impale" then return true end
+
+    local range = Ability.GetCastRange(orders.ability)
+    if not orders.target and not orders.position then return true end
+    if orders.target and NPC.IsEntityInRange(myHero, orders.target, range) then return true end
+    if orders.position and NPC.IsPositionInRange(myHero, orders.position, range) then return true end
+
+    -- reference: https://dota2.gamepedia.com/Lion
+    -- real range = travel distance + radius
+    local real_range = range + 325 + 125
+    local target_position
+    if orders.target and Entity.IsNPC(orders.target) then
+        target_position = Entity.GetAbsOrigin(orders.target)
+    else
+        target_position = orders.position
+    end
+
+    local direction = (target_position - Entity.GetAbsOrigin(myHero)):Normalized()
+    local cast_position
+    if NPC.IsPositionInRange(myHero, target_position, real_range) then
+        cast_position = Entity.GetAbsOrigin(myHero) + direction:Scaled(range)
+    else
+        cast_position = Entity.GetAbsOrigin(myHero) + direction:Scaled(range + (target_position-Entity.GetAbsOrigin(myHero)):Length() - real_range)
+    end
+
+    Ability.CastPosition(orders.ability, cast_position)
+    return false
+end
+
 -- show how many hits left to KS
 function Lion.OnDraw()
     if not Menu.IsEnabled(optionKillStealCounter) then return end
@@ -44,7 +84,7 @@ function Lion.OnDraw()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and spell_damage_table[NPC.GetUnitName(enemy)] 
-        	and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
+            and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 
             local oneHitDamage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
             local hitsLeft = math.ceil((Entity.GetHealth(enemy) - spell_damage_table[NPC.GetUnitName(enemy)]) / oneHitDamage)
