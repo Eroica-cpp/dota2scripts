@@ -10,6 +10,7 @@ local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana
 
 local KS_target
 local KS_time
+local cast_point = 0.3 -- the cast point of finger of death
 
 local spell_damage_table = {}
 
@@ -110,7 +111,7 @@ function Lion.KillSteal()
             local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
             spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
 
-            if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage)
+            if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)
                 and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
                 and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
 
@@ -123,7 +124,7 @@ function Lion.KillSteal()
                 true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
                 spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
 
-                if true_damage >= Entity.GetHealth(enemy) and Utility.IsSafeToCast(myHero, enemy, true_damage)
+                if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)
                     and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
                     and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
 
@@ -131,7 +132,6 @@ function Lion.KillSteal()
 
                     local distance = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
                     local delay = distance / 1275     -- the projectile of ethereal blade travels at a speed of 1275.
-                    local cast_point = 0.3            -- the cast point of finger of death
                     local offset = 0.1
 
                     KS_target = enemy
