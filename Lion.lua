@@ -211,8 +211,8 @@ function Lion.AutoHex()
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
-        and not Utility.IsDisabled(enemy) and not Utility.IsLinkensProtected(enemy)
-        and not Utility.IsLotusProtected(enemy) then
+        and (Utility.GetFixTimeLeft(enemy) <= 0.3 or not Utility.IsDisabled(enemy))
+        and not Utility.IsLinkensProtected(enemy) and not Utility.IsLotusProtected(enemy) then
 
             if NPC.GetCurrentLevel(myHero) < 30 then
                 Ability.CastTarget(spell, enemy)
@@ -264,8 +264,8 @@ function Lion.AutoSpike()
             local delay = 0.3 + dis/speed
             local offset = 0.5
 
-            if (Utility.GetHexTimeLeft(enemy) - offset <= delay and Utility.GetHexTimeLeft(enemy) > 0)
-            or (Utility.GetFixTimeLeft(enemy) - offset <= delay and Utility.GetFixTimeLeft(enemy) > 0) then
+            if (Utility.GetHexTimeLeft(enemy) - offset <= delay and Utility.GetHexTimeLeft(enemy) > delay)
+            or (Utility.GetFixTimeLeft(enemy) - offset <= delay and Utility.GetFixTimeLeft(enemy) > delay) then
                 Ability.CastPosition(spell, cast_position)
                 return
             end
