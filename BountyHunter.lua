@@ -39,22 +39,26 @@ function BountyHunter.KillSteal()
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        local real_damage = NPC.GetMagicalArmorDamageMultiplier(enemy) * damage
+        local real_damage = Utility.GetRealDamage(myHero, enemy, damage)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy)
         and (real_damage >= Entity.GetHealth(enemy) or NPC.HasModifier(enemy, "modifier_teleporting") or NPC.IsChannellingAbility(enemy)) then
 
+        	-- if the enemy is within cast range, hit directly.
         	if NPC.IsEntityInRange(myHero, enemy, range) then
         		 Ability.CastTarget(spell, enemy)
         		 return
         	end
 
-	        for i, npc in ipairs(Entity.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY, true)) do
-	        	if NPC.IsEntityInRange(npc, enemy, 1200) and Utility.CanCastSpellOn(npc) then
-	        		Ability.CastTarget(spell, npc)
-	        		return
-	        	end
-	        end
+        	-- if the enemy is out of the cast range but being tracked, then hit a third unit to bound to the enemy.
+        	if NPC.HasModifier(enemy, "modifier_bounty_hunter_track") then
+		        for i, npc in ipairs(Entity.GetUnitsInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY, true)) do
+		        	if NPC.IsEntityInRange(npc, enemy, 1200) and Utility.CanCastSpellOn(npc) then
+		        		Ability.CastTarget(spell, npc)
+		        		return
+		        	end
+		        end
+		    end
         end
     end
 end
