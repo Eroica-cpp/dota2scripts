@@ -23,7 +23,6 @@ function Lina.OnDraw()
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_lina" then return end
-    if NPC.GetCurrentLevel(myHero) < 6 then return end
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
