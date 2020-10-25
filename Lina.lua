@@ -4,7 +4,7 @@ local Lina = {}
 
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Lina"}, "Auto KS (upgraded version)", "Auto kill steal using dragon slave and/or laguana blade.")
 local optionKillStealCounter = Menu.AddOption({"Hero Specific", "Lina"}, "Show KS Counter", "Show how many hits remains to kill steal.")
-local optionAutoLightStrikeArray = Menu.AddOption({"Hero Specific", "Lina"}, "Auto Light Strike Array", "Auto cast Light Strike Array if enemy is (1) TPing; (2) channelling; or (3) stunned/hexed/rooted/taunted with proper timing")
+local optionAutoLightStrikeArray = Menu.AddOption({"Hero Specific", "Lina"}, "Auto Light Strike Array", "Auto cast Light Strike Array if enemy is (1) TPing; (2) channelling; (3) slowed; or (4) stunned/hexed/rooted/taunted with proper timing")
 
 local KS_target
 local KS_time
@@ -71,13 +71,19 @@ function Lina.AutoLightStrikeArray()
 
             local cast_position = Entity.GetAbsOrigin(enemy)
 
-            -- spike the enemy who is channelling a spell or TPing
+            -- lina_light_strike_array the enemy who is channelling a spell or TPing
             if Utility.IsChannellingAbility(enemy) then
                 Ability.CastPosition(spell, cast_position)
                 return
             end
 
-            -- spike the enemy who is hexed/stunned/rooted/taunted with proper timing
+            -- lina_light_strike_array the enemy who is slowed
+            if Utility.GetMoveSpeed(enemy) < 200 then
+                Ability.CastPosition(spell, cast_position)
+                return
+            end
+
+            -- lina_light_strike_array the enemy who is hexed/stunned/rooted/taunted with proper timing
             local delay = 0.5 + cast_point
             if Utility.GetHexTimeLeft(enemy) > delay or Utility.GetFixTimeLeft(enemy) > delay then
                 Ability.CastPosition(spell, cast_position)

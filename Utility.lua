@@ -131,6 +131,8 @@ function Utility.GetMoveSpeed(npc)
     -- when affected by ice wall, assume move speed as 100 for convenience
     if NPC.HasModifier(npc, "modifier_invoker_ice_wall_slow_debuff") then return 100 end
 
+    if NPC.HasModifier(npc, "modifier_item_diffusal_blade_slow") then return 100 end
+
     -- when get hexed,  move speed = 140/100 + bonus_speed
     if Utility.GetHexTimeLeft(npc) > 0 then return 140 + bonus_speed end
 
