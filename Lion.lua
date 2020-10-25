@@ -5,7 +5,7 @@ local Lion = {}
 local optionAutoHex = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Hex", "Auto hex any enemy in range once lion has level 6")
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Lion"}, "Auto KS (upgraded version)", "Auto kill steal using finger of death and/or ethereal blade.")
 local optionKillStealCounter = Menu.AddOption({"Hero Specific", "Lion"}, "Show KS Counter", "Show how many hits remains to kill steal.")
-local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) in low HP (kill steal); (2) TPing; (3) channelling; or (4) stunned/hexed/rooted/taunted with proper timing")
+local optionAutoSpike = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Spike", "Auto spike if enemy is (1) TPing; (2) channelling; or (3) stunned/hexed/rooted/taunted with proper timing")
 local optionSpikeRangeHelper = Menu.AddOption({"Hero Specific", "Lion"}, "Spike Range Helper", "Help to cast spike if the target is within spike travel distance but out of cast range")
 local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana Drain", "Auto mana drain to break (1) linken (or AM's shell); (2) illusion")
 
@@ -79,7 +79,6 @@ function Lion.OnDraw()
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_lion" then return end
-    if NPC.GetCurrentLevel(myHero) < 6 then return end
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
@@ -87,7 +86,13 @@ function Lion.OnDraw()
             and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 
             local oneHitDamage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
-            local hitsLeft = math.ceil((Entity.GetHealth(enemy) - spell_damage_table[NPC.GetUnitName(enemy)]) / oneHitDamage)
+
+            local hitsLeft = -1
+            if NPC.GetCurrentLevel(myHero) >= 6 then
+                hitsLeft = math.ceil((Entity.GetHealth(enemy) - spell_damage_table[NPC.GetUnitName(enemy)]) / oneHitDamage)
+            else
+                hitsLeft = math.ceil(Entity.GetHealth(enemy) / oneHitDamage)
+            end
 
             -- draw
             local pos = Entity.GetAbsOrigin(enemy)
@@ -270,12 +275,12 @@ function Lion.AutoSpike()
                 return
             end
 
-            -- spike the enemy who is in low HP (for kill steal)
-            local true_damage = Utility.GetRealDamage(myHero, enemy, damage)
-            if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*delay then
-                Ability.CastPosition(spell, cast_position)
-                return
-            end
+            -- -- spike the enemy who is in low HP (for kill steal)
+            -- local true_damage = Utility.GetRealDamage(myHero, enemy, damage)
+            -- if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*delay then
+            --     Ability.CastPosition(spell, cast_position)
+            --     return
+            -- end
         end
     end
 end
