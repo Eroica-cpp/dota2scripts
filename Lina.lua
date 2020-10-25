@@ -34,7 +34,7 @@ function Lina.OnDraw()
         if not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and spell_damage_table[NPC.GetUnitName(enemy)] 
             and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 
-            local oneHitDamage = NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
+            local oneHitDamage = Utility.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
             local hitsLeft = math.ceil((Entity.GetHealth(enemy) - spell_damage_table[NPC.GetUnitName(enemy)]) / oneHitDamage)
 
             -- draw

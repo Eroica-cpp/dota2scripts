@@ -69,7 +69,7 @@ function Void.OnDraw()
             and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy) then
 
             local oneHitMagicalDamage = expectation * Utility.GetRealDamage(myHero, enemy, magicalDamage)
-            local oneHitPhysicalDamage = (1 + expectation) * NPC.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
+            local oneHitPhysicalDamage = (1 + expectation) * Utility.GetTrueDamage(myHero) * NPC.GetArmorDamageMultiplier(enemy)
             local oneHitDamage = oneHitMagicalDamage + oneHitPhysicalDamage
             local hitsLeft = math.ceil(Entity.GetHealth(enemy) / oneHitDamage)
 

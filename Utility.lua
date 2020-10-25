@@ -556,4 +556,16 @@ function Utility.GetSafeDirection(myHero)
     return (pos + pos - mid):Normalized()
 end
 
+-- Get true physical damage
+function  Utility.GetTrueDamage(myHero)
+
+    local damage = NPC.GetTrueDamage(myHero)
+
+    if NPC.HasItem(myHero, "item_diffusal_blade", true) then
+        damage = damage + 40 * 0.8
+    end
+
+    return damage
+end
+
 return Utility
