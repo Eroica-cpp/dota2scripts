@@ -2,6 +2,39 @@ local Utility = require("Utility")
 
 local Void = {}
 local optionKillStealCounter = Menu.AddOption({"Hero Specific", "Void"}, "Show KS Counter", "Show how many hits remains to kill.")
+local optionAutoTimeDilation = Menu.AddOption({"Hero Specific", "Void"}, "Auto Time Dilation", "Auto cast time dilation when enemy is around")
+
+function Void.OnUpdate()
+    if Menu.IsEnabled(optionAutoTimeDilation) then
+        Void.AutoTimeDilation()
+    end
+end
+
+function Void.AutoTimeDilation()
+    local myHero = Heroes.GetLocal()
+    if not myHero or not Utility.IsSuitableToCastSpell(myHero) then return end
+
+    local spell = NPC.GetAbility(myHero, "faceless_void_time_dilation")
+    if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero) - 200) then return end
+    local radius = 775
+
+    -- only auto cast time dilation when chrono is on cool down
+    local chrono = NPC.GetAbility(myHero, "faceless_void_chronosphere")
+    if chrono and Ability.IsCastable(chrono, NPC.GetMana(myHero)) then
+    	return
+    end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
+        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, radius)
+        and (Utility.GetFixTimeLeft(enemy) <= 0.3 or not Utility.IsDisabled(enemy)) then
+
+            Ability.CastNoTarget(spell)
+            return
+        end
+    end
+end
 
 -- show how many hits left to KS
 function Void.OnDraw()
