@@ -247,7 +247,8 @@ function Lion.AutoSpike()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, real_range) then
+        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, real_range)
+        and not Utility.IsLinkensProtected(enemy) and not Utility.IsLotusProtected(enemy) then
 
             -- use maximum cast range of spike (consider travel distance and radius)
             local cast_position
