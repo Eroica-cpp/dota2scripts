@@ -298,7 +298,15 @@ function Lion.AutoManaDrain()
         if enemy and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
-            if Utility.IsLinkensProtected(enemy) or NPC.IsIllusion(enemy) then
+            if Utility.IsLinkensProtected(enemy) then
+                Ability.CastTarget(spell, enemy)
+                return
+            end
+
+            if NPC.IsIllusion(enemy)
+                and NPC.GetUnitName(enemy) ~= "npc_dota_hero_arc_warden"
+                and NPC.GetUnitName(enemy) ~= "npc_dota_hero_vengefulspirit" then
+
                 Ability.CastTarget(spell, enemy)
                 return
             end
