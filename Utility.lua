@@ -169,7 +169,7 @@ end
 -- return true if can cast spell on this npc, return false otherwise
 function Utility.CanCastSpellOn(npc)
 	if Entity.IsDormant(npc) or not Entity.IsAlive(npc) then return false end
-	if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
+	if NPC.IsStructure(npc) then return false end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
 
