@@ -264,6 +264,12 @@ function Lion.AutoSpike()
                 return
             end
 
+            -- spike the enemy who is very close
+            if NPC.IsEntityInRange(myHero, enemy, 300) and not Utility.IsDisabled(enemy) then
+                Ability.CastPosition(spell, cast_position)
+                return
+            end
+
             -- spike the enemy who is hexed/stunned/rooted/taunted with proper timing
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             local delay = 0.3 + dis/speed
