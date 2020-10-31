@@ -22,6 +22,7 @@ AutoUseItems.optionLotus = Menu.AddOption({"Item Specific"}, "Lotus Orb", "(For 
 AutoUseItems.optionCrest = Menu.AddOption({"Item Specific"}, "Medallion & Crest", "Auto use medallion & crest to save ally")
 AutoUseItems.optionGlimmerCape = Menu.AddOption({"Item Specific"}, "Glimmer Cape", "Auto use Glimmer Cape when channeling spells or ally in danger")
 AutoUseItems.optionGhost = Menu.AddOption({"Item Specific"}, "Ghost Scepter", "Auto use ghost scepter to avoid damage from physical cores")
+AutoUseItems.optionSatanic = Menu.AddOption({"Item Specific"}, "Satanic", "Auto use Satanic when (i) legion or axe is around; or (ii) hp is low and my hero is attacking.")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -68,6 +69,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionGhost) then
         AutoUseItems.item_ghost(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionSatanic) then
+        AutoUseItems.item_satanic(myHero)
     end
 
     -- ========================
@@ -533,6 +538,30 @@ function AutoUseItems.item_ghost(myHero)
                 Ability.CastTarget(item2, myHero)
                 return
             end
+        end
+    end
+end
+
+-- Auto use Satanic when (i) legion or axe is around; or (ii) hp is low and my hero is attacking.
+function AutoUseItems.item_satanic(myHero)
+    local item = NPC.GetItem(myHero, "item_satanic", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    -- when hp is low and myHero is attacking
+    if Entity.GetHealth(myHero) <= 0.5 * Entity.GetMaxHealth(myHero) and NPC.IsAttacking(myHero) then
+        Ability.CastNoTarget(item)
+        return
+    end
+
+    -- when legion or axe is around
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
+        and not Utility.IsDisabled(enemy) and Utility.IsAxeOrLegion[NPC.GetUnitName(enemy)]
+        and NPC.IsEntityInRange(myHero, enemy, 300) then
+
+            Ability.CastNoTarget(item)
+            return
         end
     end
 end

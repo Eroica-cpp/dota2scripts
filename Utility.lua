@@ -20,6 +20,10 @@ Utility.AncientCreepNameList = {
     "npc_dota_roshan"
 }
 
+Utility.IsAxeOrLegion = {}
+Utility.IsAxeOrLegion["npc_dota_hero_legion_commander"] = true
+Utility.IsAxeOrLegion["npc_dota_hero_axe"] = true
+
 Utility.PhysicalCoreHeroes = {}
 Utility.PhysicalCoreHeroes["npc_dota_hero_abaddon"]            = true
 Utility.PhysicalCoreHeroes["npc_dota_hero_alchemist"]          = true
