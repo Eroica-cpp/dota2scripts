@@ -312,6 +312,7 @@ function Lion.AutoManaDrain()
 
             if NPC.IsIllusion(enemy)
                 and NPC.GetUnitName(enemy) ~= "npc_dota_hero_arc_warden"
+                and NPC.GetUnitName(enemy) ~= "npc_dota_hero_chaos_knight"
                 and NPC.GetUnitName(enemy) ~= "npc_dota_hero_vengefulspirit" then
 
                 Ability.CastTarget(spell, enemy)
