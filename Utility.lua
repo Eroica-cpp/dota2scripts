@@ -560,8 +560,26 @@ function Utility.GetSafeDirection(myHero)
     return (pos + pos - mid):Normalized()
 end
 
+function Utility.IsKillable(npc)
+
+    -- Abaddon's ultimate
+    if NPC.HasModifier(npc, "modifier_abaddon_borrowed_time") then return false end
+
+    -- Dazzle's save
+    if NPC.HasModifier(npc, "modifier_dazzle_shallow_grave") then return false end
+
+    -- Oracle's save
+    if NPC.HasModifier(npc, "modifier_oracle_false_promise") then return false end
+
+    -- WW's ultimate
+    if NPC.HasModifier(npc, "modifier_winter_wyvern_winters_curse") then return false end
+    if NPC.HasModifier(npc, "modifier_winter_wyvern_winters_curse_aura") then return false end
+
+    return true
+end
+
 -- Get true physical damage
-function  Utility.GetTrueDamage(myHero)
+function Utility.GetTrueDamage(myHero)
 
     local damage = NPC.GetTrueDamage(myHero)
 

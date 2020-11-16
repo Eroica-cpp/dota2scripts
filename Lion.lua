@@ -151,7 +151,7 @@ function Lion.KillSteal()
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
-        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) then
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and Utility.IsKillable(enemy) then
 
             local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
             spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
