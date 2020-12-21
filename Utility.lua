@@ -590,11 +590,11 @@ function Utility.GetTrueDamage(myHero)
     return damage
 end
 
-function Utility.GeHeroIndicestOrderedByLevel()
+function Utility.GetHeroIndicesOrderedByLevel()
 
     local levels = {}
     for i = 1, Heroes.Count() do
-        npc = Heroes.Get(i)
+        local npc = Heroes.Get(i)
         table.insert(levels, {i, NPC.GetCurrentLevel(npc)})
     end
 
@@ -602,6 +602,28 @@ function Utility.GeHeroIndicestOrderedByLevel()
 
     local indices = {}
     for k,v in ipairs(levels) do
+       indices[k] = v[1]
+    end
+
+    return indices
+end
+
+function Utility.GetHeroIndicesOrderedByDistance()
+
+    local myHero = Heroes.GetLocal()
+    local pos1 = Entity.GetAbsOrigin(myHero)
+
+    local distances = {}
+    for i = 1, Heroes.Count() do
+        local npc = Heroes.Get(i)
+        local pos2 = Entity.GetAbsOrigin(npc)
+        table.insert(distances, {i, (pos1 - pos2):Length()})
+    end
+
+    table.sort(distances, function (a, b) return a[2] < b[2] end)
+
+    local indices = {}
+    for k,v in ipairs(distances) do
        indices[k] = v[1]
     end
 

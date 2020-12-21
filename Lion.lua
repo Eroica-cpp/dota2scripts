@@ -149,11 +149,9 @@ function Lion.KillSteal()
         ethereal_amplified_damage = 0.4 * total_damage
     end 
 
-    local indices = Utility.GeHeroIndicestOrderedByLevel()
+    local indices = Utility.GetHeroIndicesOrderedByLevel()
     for k, v in ipairs(indices) do
         local enemy = Heroes.Get(v)
-    -- for i = 1, Heroes.Count() do
-    --     local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy) and Utility.IsKillable(enemy) then
 
             local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
@@ -215,9 +213,7 @@ function Lion.AutoHex()
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
     local range = Ability.GetCastRange(spell)
 
-    -- for i = 1, Heroes.Count() do
-    --     local enemy = Heroes.Get(i)
-    local indices = Utility.GeHeroIndicestOrderedByLevel()
+    local indices = Utility.GetHeroIndicesOrderedByDistance()
     for k, v in ipairs(indices) do
         local enemy = Heroes.Get(v)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
@@ -306,8 +302,9 @@ function Lion.AutoManaDrain()
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
     local range = Ability.GetCastRange(spell)
 
-    for i = 1, Heroes.Count() do
-        local enemy = Heroes.Get(i)
+    local indices = Utility.GetHeroIndicesOrderedByDistance()
+    for k, v in ipairs(indices) do
+        local enemy = Heroes.Get(v)
         if enemy and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
