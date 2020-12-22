@@ -159,7 +159,8 @@ function Lion.KillSteal()
 
             if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)
                 and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
-                and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
+                and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero))
+                and (not KS_time or GameRules.GetGameTime() - KS_time > 1) then
 
                 Ability.CastTarget(spell, enemy)
                 return
