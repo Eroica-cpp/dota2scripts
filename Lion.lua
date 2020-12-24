@@ -247,6 +247,8 @@ function Lion.AutoSpike()
     local damage = 20 + 60 * Ability.GetLevel(spell)
     local speed = 1600
 
+    local directions = {}
+
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
@@ -291,6 +293,16 @@ function Lion.AutoSpike()
             --     Ability.CastPosition(spell, cast_position)
             --     return
             -- end
+
+            -- spike if two or more enemies are on the same line
+            local dir = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized()
+            for k, v in pairs(directions) do
+                if k ~= NPC.GetUnitName(enemy) and (v - dir):Length() < 0.01 then
+                    Ability.CastPosition(spell, cast_position)
+                    return
+                end
+            end
+            directions[NPC.GetUnitName(enemy)] = dir
         end
     end
 end
