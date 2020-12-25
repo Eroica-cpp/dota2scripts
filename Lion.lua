@@ -149,6 +149,7 @@ function Lion.KillSteal()
             additional_damage = 40 * kill_counter
         end
     end
+    local finger_damage = base_damage + additional_damage
 
     local dagon, dagon_level
     local dagon1 = NPC.GetItem(myHero, "item_dagon", true)
@@ -163,12 +164,12 @@ function Lion.KillSteal()
     if dagon5 and Ability.IsCastable(dagon5, NPC.GetMana(myHero)) then dagon = dagon5; dagon_level = 5 end
 
     local dagon_damage = 0
-    if dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero) - 200) then
+    if dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero)) then
         dagon_damage = 400 + 100 * (dagon_level - 1)
         range = math.min(range, Ability.GetCastRange(dagon))
     end
 
-    local total_damage = base_damage + additional_damage + dagon_damage
+    local total_damage = finger_damage + dagon_damage
 
     local ethereal_base_damage = 0
     local ethereal_amplified_damage = 0
@@ -187,24 +188,49 @@ function Lion.KillSteal()
             local true_damage = Utility.GetRealDamage(myHero, enemy, total_damage)
             spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
 
-            if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)
-                and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) and not Utility.IsDiskProtected(enemy)
-                and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero))
-                and (not KS_time or GameRules.GetGameTime() - KS_time > 1) then
+            -- if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)
+            if Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) and not Utility.IsDiskProtected(enemy)
+                -- and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero))
+                and (not KS_target or NPC.GetUnitName(KS_target) == NPC.GetUnitName(enemy)) then
 
-                Ability.CastTarget(spell, enemy)
-                if dagon_damage > 0 then Ability.CastTarget(dagon, enemy) end
-                return
+                local dagon_true_damage = Utility.GetRealDamage(myHero, enemy, dagon_damage)
+                if Entity.GetHealth(enemy) < dagon_true_damage and Utility.IsSafeToCast(myHero, enemy, dagon_true_damage)
+                    and NPC.IsEntityInRange(myHero, enemy, Ability.GetCastRange(dagon))
+                    and Ability.IsCastable(dagon, NPC.GetMana(myHero)) then
+                    Ability.CastTarget(dagon, enemy)
+                    return
+                end
+
+                local finger_true_damage = Utility.GetRealDamage(myHero, enemy, finger_damage)
+                if Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point < finger_true_damage
+                    and Utility.IsSafeToCast(myHero, enemy, finger_true_damage)
+                    and NPC.IsEntityInRange(myHero, enemy, Ability.GetCastRange(spell))
+                    and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
+                    Ability.CastTarget(spell, enemy)
+                    return
+                end
+
+                if Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point < true_damage
+                    and Utility.IsSafeToCast(myHero, enemy, true_damage)
+                    and NPC.IsEntityInRange(myHero, enemy, range)
+                    and Ability.IsCastable(dagon, NPC.GetMana(myHero) - Ability.GetManaCost(spell))
+                    and Ability.IsCastable(spell, NPC.GetMana(myHero) - Ability.GetManaCost(dagon)) then
+                    Ability.CastTarget(dagon, enemy)
+                    Ability.CastTarget(spell, enemy)
+                    return
+                end
             end
 
-            if item and Ability.IsCastable(item, NPC.GetMana(myHero) - Ability.GetManaCost(spell)) then
+            if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
 
                 true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
                 spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
 
                 if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)
                     and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) and not Utility.IsDiskProtected(enemy)
-                    and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
+                    and NPC.IsEntityInRange(myHero, enemy, range)
+                    and ((spell and Ability.IsCastable(spell, NPC.GetMana(myHero) - Ability.GetManaCost(item)))
+                        or (dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero) - Ability.GetManaCost(item)))) then
 
                     Ability.CastTarget(item, enemy)
 
@@ -235,6 +261,7 @@ function Lion.KillStealHelper()
     and not Utility.IsDiskProtected(KS_target)
     and NPC.IsEntityInRange(myHero, KS_target, range) then
         Ability.CastTarget(spell, KS_target)
+        KS_target = nil
     end
 end
 
