@@ -101,21 +101,21 @@ function Lion.OnDraw()
 
             -- red : can kill; green : cant kill
             if not Utility.IsDiskProtected(enemy) then
-	            if hitsLeft <= 0 then
-	                Renderer.SetDrawColor(255, 0, 0, 255)
-	                Renderer.DrawTextCentered(font, x, y, "Kill", 1)
-	            else
+                if hitsLeft <= 0 then
+                    Renderer.SetDrawColor(255, 0, 0, 255)
+                    Renderer.DrawTextCentered(font, x, y, "Kill", 1)
+                else
                     Renderer.SetDrawColor(0, 255, 0, 255)
-	                Renderer.DrawTextCentered(font, x, y, hitsLeft, 1)
-	            end
+                    Renderer.DrawTextCentered(font, x, y, hitsLeft, 1)
+                end
             else
-	            if hitsLeft <= 0 then
-	                Renderer.SetDrawColor(0, 255, 0, 255)
-	                Renderer.DrawTextCentered(font, x, y, "Kill (Disk)", 1)
-	            else
+                if hitsLeft <= 0 then
                     Renderer.SetDrawColor(0, 255, 0, 255)
-	                Renderer.DrawTextCentered(font, x, y, hitsLeft .. " (Disk)", 1)
-	            end
+                    Renderer.DrawTextCentered(font, x, y, "Kill (Disk)", 1)
+                else
+                    Renderer.SetDrawColor(0, 255, 0, 255)
+                    Renderer.DrawTextCentered(font, x, y, hitsLeft .. " (Disk)", 1)
+                end
             end
         end
     end
@@ -131,15 +131,17 @@ function Lion.KillSteal()
     local range = Ability.GetCastRange(spell)
 
     local base_damage = 0
-    if NPC.HasItem(myHero, "item_ultimate_scepter", true) or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
-        base_damage = 725 + 150 * (Ability.GetLevel(spell) - 1)
-    else
-        base_damage = 600 + 125 * (Ability.GetLevel(spell) - 1)
+    if Ability.IsCastable(spell, NPC.GetMana(myHero)) then
+        if NPC.HasItem(myHero, "item_ultimate_scepter", true) or NPC.HasModifier(myHero, "modifier_item_ultimate_scepter_consumed") then
+            base_damage = 725 + 150 * (Ability.GetLevel(spell) - 1)
+        else
+            base_damage = 600 + 125 * (Ability.GetLevel(spell) - 1)
+        end
     end
 
     local additional_damage = 0
     local mod = NPC.GetModifier(myHero, "modifier_lion_finger_of_death_kill_counter")
-    if mod then
+    if mod and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
         kill_counter = Modifier.GetStackCount(mod)
         if NPC.GetCurrentLevel(myHero) >= 20 then
             additional_damage = 60 * kill_counter
