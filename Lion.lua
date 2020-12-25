@@ -100,14 +100,23 @@ function Lion.OnDraw()
             local font = Renderer.LoadFont("Tahoma", 30, Enum.FontWeight.EXTRABOLD)
 
             -- red : can kill; green : cant kill
-            if hitsLeft <= 0 then
-                Renderer.SetDrawColor(255, 0, 0, 255)
-                Renderer.DrawTextCentered(font, x, y, "Kill", 1)
+            if not Utility.IsDiskProtected(enemy) then
+	            if hitsLeft <= 0 then
+	                Renderer.SetDrawColor(255, 0, 0, 255)
+	                Renderer.DrawTextCentered(font, x, y, "Kill", 1)
+	            else
+                    Renderer.SetDrawColor(0, 255, 0, 255)
+	                Renderer.DrawTextCentered(font, x, y, hitsLeft, 1)
+	            end
             else
-                Renderer.SetDrawColor(0, 255, 0, 255)
-                Renderer.DrawTextCentered(font, x, y, hitsLeft, 1)
+	            if hitsLeft <= 0 then
+	                Renderer.SetDrawColor(0, 255, 0, 255)
+	                Renderer.DrawTextCentered(font, x, y, "Kill (Disk)", 1)
+	            else
+                    Renderer.SetDrawColor(0, 255, 0, 255)
+	                Renderer.DrawTextCentered(font, x, y, hitsLeft .. " (Disk)", 1)
+	            end
             end
-
         end
     end
 end
@@ -158,7 +167,7 @@ function Lion.KillSteal()
             spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
 
             if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)
-                and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
+                and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) and not Utility.IsDiskProtected(enemy)
                 and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero))
                 and (not KS_time or GameRules.GetGameTime() - KS_time > 1) then
 
@@ -172,7 +181,7 @@ function Lion.KillSteal()
                 spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
 
                 if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)
-                    and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
+                    and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy) and not Utility.IsDiskProtected(enemy)
                     and NPC.IsEntityInRange(myHero, enemy, range) and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
 
                     Ability.CastTarget(item, enemy)
@@ -200,7 +209,9 @@ function Lion.KillStealHelper()
     local range = Ability.GetCastRange(spell)
 
     if GameRules.GetGameTime() - 0.05 <= KS_time and KS_time <= GameRules.GetGameTime() + 0.05 
-    and Utility.CanCastSpellOn(KS_target) and not Utility.IsLinkensProtected(KS_target) and NPC.IsEntityInRange(myHero, KS_target, range) then
+    and Utility.CanCastSpellOn(KS_target) and not Utility.IsLinkensProtected(KS_target)
+    and not Utility.IsDiskProtected(KS_target)
+    and NPC.IsEntityInRange(myHero, KS_target, range) then
         Ability.CastTarget(spell, KS_target)
     end
 end

@@ -151,8 +151,20 @@ function Utility.IsLotusProtected(npc)
 	return false
 end
 
--- extend NPC.IsLinkensProtected(), check AM's aghs case
--- Update (July 14, 2020): remove AM aghs check, update for new version
+-- return true if protected by Aeon Disk
+function Utility.IsDiskProtected(npc)
+    local disk = NPC.GetItem(npc, "item_aeon_disk", true)
+    if disk and (Ability.GetCooldown(disk) <= 0.5 or Ability.SecondsSinceLastUse(disk) <= 0.5) then
+        return true
+    end
+
+    if NPC.HasModifier(npc, "modifier_item_aeon_disk_buff") then
+        return true
+    end
+
+    return false
+end
+
 function Utility.IsLinkensProtected(npc)
     if NPC.HasModifier(npc, "modifier_antimage_counterspell") then
         return true
