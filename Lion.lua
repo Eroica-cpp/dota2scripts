@@ -148,7 +148,25 @@ function Lion.KillSteal()
         end
     end
 
-    local total_damage = base_damage + additional_damage
+    local dagon, dagon_level
+    local dagon1 = NPC.GetItem(myHero, "item_dagon", true)
+    local dagon2 = NPC.GetItem(myHero, "item_dagon_2", true)
+    local dagon3 = NPC.GetItem(myHero, "item_dagon_3", true)
+    local dagon4 = NPC.GetItem(myHero, "item_dagon_4", true)
+    local dagon5 = NPC.GetItem(myHero, "item_dagon_5", true)
+    if dagon1 and Ability.IsCastable(dagon1, NPC.GetMana(myHero)) then dagon = dagon1; dagon_level = 1 end
+    if dagon2 and Ability.IsCastable(dagon2, NPC.GetMana(myHero)) then dagon = dagon2; dagon_level = 2 end
+    if dagon3 and Ability.IsCastable(dagon3, NPC.GetMana(myHero)) then dagon = dagon3; dagon_level = 3 end
+    if dagon4 and Ability.IsCastable(dagon4, NPC.GetMana(myHero)) then dagon = dagon4; dagon_level = 4 end
+    if dagon5 and Ability.IsCastable(dagon5, NPC.GetMana(myHero)) then dagon = dagon5; dagon_level = 5 end
+
+    local dagon_damage = 0
+    if dagon and Ability.IsCastable(dagon, NPC.GetMana(myHero) - 200) then
+        dagon_damage = 400 + 100 * (dagon_level - 1)
+        range = math.min(range, Ability.GetCastRange(dagon))
+    end
+
+    local total_damage = base_damage + additional_damage + dagon_damage
 
     local ethereal_base_damage = 0
     local ethereal_amplified_damage = 0
@@ -156,6 +174,7 @@ function Lion.KillSteal()
     if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
         ethereal_base_damage = 125 + 1.5 * Hero.GetIntellectTotal(myHero)
         ethereal_amplified_damage = 0.4 * total_damage
+        range = math.min(range, Ability.GetCastRange(item))
     end 
 
     local indices = Utility.GetHeroIndicesOrderedByLevel()
@@ -172,6 +191,7 @@ function Lion.KillSteal()
                 and (not KS_time or GameRules.GetGameTime() - KS_time > 1) then
 
                 Ability.CastTarget(spell, enemy)
+                if dagon_damage > 0 then Ability.CastTarget(dagon, enemy) end
                 return
             end
 
