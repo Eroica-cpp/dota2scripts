@@ -643,4 +643,14 @@ function Utility.GetHeroIndicesOrderedByDistance()
     return indices
 end
 
+-- return true if npc1 is facing towards npc2
+function Utility.IsFacingTowards(npc1, npc2)
+
+    if Entity.IsTurning(npc1) then
+        return false
+    end
+
+    return NPC.GetTimeToFacePosition(npc1, Entity.GetAbsOrigin(npc2)) < 0.05
+end
+
 return Utility

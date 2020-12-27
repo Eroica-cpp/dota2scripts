@@ -344,7 +344,8 @@ function Lion.AutoSpike()
             end
 
             -- spike the enemy who is very close
-            if NPC.IsEntityInRange(myHero, enemy, 300) and not Utility.IsDisabled(enemy) then
+            if NPC.IsEntityInRange(myHero, enemy, 300) and not Utility.IsDisabled(enemy)
+                and (not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero)) then
                 Ability.CastPosition(spell, cast_position)
                 return
             end
@@ -378,7 +379,7 @@ function Lion.AutoSpike()
             -- directions[NPC.GetUnitName(enemy)] = dir
 
             -- dual spike
-            if not NPC.IsRunning(enemy) then
+            if not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero) then
                 for k, v in pairs(positions) do
                     local mid = (v + Entity.GetAbsOrigin(enemy)):Scaled(0.5)
                     local vec1 = Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)
