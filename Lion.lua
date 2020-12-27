@@ -307,7 +307,7 @@ function Lion.AutoSpike()
     local damage = 20 + 60 * Ability.GetLevel(spell)
     local speed = 1600
 
-    local directions = {}
+    local positions = {}
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
@@ -354,17 +354,45 @@ function Lion.AutoSpike()
             --     return
             -- end
 
-            -- spike if two or more enemies are on the same line
-            local dir = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized()
-            for k, v in pairs(directions) do
-                if k ~= NPC.GetUnitName(enemy) and (v - dir):Length() < 0.01 then
-                    Ability.CastPosition(spell, cast_position)
-                    return
+            -- -- spike if two or more enemies are on the same line
+            -- local dir = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized()
+            -- for k, v in pairs(directions) do
+            --     if k ~= NPC.GetUnitName(enemy) and (v - dir):Length() < 0.01 then
+            --         Ability.CastPosition(spell, cast_position)
+            --         return
+            --     end
+            -- end
+            -- directions[NPC.GetUnitName(enemy)] = dir
+
+            -- dual spike
+            if not NPC.IsRunning(enemy) then
+                for k, v in pairs(positions) do
+                    local mid = (v + Entity.GetAbsOrigin(enemy)):Scaled(0.5)
+                    local vec1 = Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)
+                    local vec2 = v - Entity.GetAbsOrigin(myHero)
+                    local vec_mid = mid - Entity.GetAbsOrigin(myHero)
+
+                    local cos_theta_1 = vec1:Dot(vec_mid) / (vec1:Length() * vec_mid:Length())
+                    local sin_theta_1 = math.sqrt(1 - cos_theta_1 * cos_theta_1)
+                    local dis1 = vec1:Length() * sin_theta_1
+
+                    local cos_theta_2 = vec2:Dot(vec_mid) / (vec2:Length() * vec_mid:Length())
+                    local sin_theta_2 = math.sqrt(1 - cos_theta_2 * cos_theta_2)
+                    local dis2 = vec2:Length() * sin_theta_2
+
+                    if dis1 < 125 and dis2 < 125 then
+                        local dir = (mid - Entity.GetAbsOrigin(myHero)):Normalized()
+                        cast_position = Entity.GetAbsOrigin(myHero) + dir:Scaled(range)
+                        Ability.CastPosition(spell, cast_position)
+                        return
+                    end
                 end
+                positions[NPC.GetUnitName(enemy)] = Entity.GetAbsOrigin(enemy)
             end
-            directions[NPC.GetUnitName(enemy)] = dir
         end
     end
+
+    positions = nil
 end
 
 function Lion.AutoManaDrain()
