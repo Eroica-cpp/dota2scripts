@@ -344,8 +344,11 @@ function Lion.AutoSpike()
             end
 
             -- spike the enemy who is very close
+		    local hex = NPC.GetAbility(myHero, "lion_voodoo")
             if NPC.IsEntityInRange(myHero, enemy, 300) and not Utility.IsDisabled(enemy)
-                and (not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero)) then
+                and (not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero))
+                and (not hex or not Ability.IsCastable(hex, NPC.GetMana(myHero))) then
+
                 Ability.CastPosition(spell, cast_position)
                 return
             end
