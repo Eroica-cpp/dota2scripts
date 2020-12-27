@@ -143,7 +143,8 @@ function Lion.KillSteal()
     local mod = NPC.GetModifier(myHero, "modifier_lion_finger_of_death_kill_counter")
     if mod and Ability.IsCastable(spell, NPC.GetMana(myHero)) then
         kill_counter = Modifier.GetStackCount(mod)
-        if NPC.GetCurrentLevel(myHero) >= 20 then
+        -- special_bonus_unique_lion_8 is the 20 bonus damage talent
+        if Ability.GetLevel(NPC.GetAbility(myHero, "special_bonus_unique_lion_8")) > 0 then
             additional_damage = 60 * kill_counter
         else
             additional_damage = 40 * kill_counter
@@ -300,9 +301,21 @@ function Lion.AutoSpike()
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
 
     local range = Ability.GetCastRange(spell)
+    -- special_bonus_unique_lion_2 is the talent of extra 800 spike distance
+    if Ability.GetLevel(NPC.GetAbility(myHero, "special_bonus_unique_lion_2")) > 0 then
+        range = range + 800
+    end
     -- reference: https://dota2.gamepedia.com/Lion
     -- real range = travel distance + radius
-    local real_range = range + 325 + 125
+    local real_range = range + 250 + 125
+
+    -- Log.Write(tostring(Ability.GetLevel(NPC.GetAbility(myHero, "special_bonus_unique_lion_2"))))
+    -- for i = 0, 30 do
+    -- 	local tmp = NPC.GetAbilityByIndex(myHero, i)
+    -- 	if tmp then
+    -- 		Log.Write(Ability.GetName(tmp))
+    -- 	end
+    -- end
 
     local damage = 20 + 60 * Ability.GetLevel(spell)
     local speed = 1600
