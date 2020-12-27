@@ -147,6 +147,7 @@ end
 function Utility.IsLotusProtected(npc)
 	if NPC.HasModifier(npc, "modifier_item_lotus_orb_active") then return true end
     if NPC.HasModifier(npc, "modifier_antimage_counterspell") then return true end
+    if NPC.HasModifier(npc, "modifier_item_mirror_shield") then return true end
 
 	return false
 end
