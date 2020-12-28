@@ -526,8 +526,9 @@ function AutoUseItems.item_ghost(myHero)
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and not Utility.IsDisabled(enemy) and Utility.PhysicalCoreHeroes[NPC.GetUnitName(enemy)]
-        and NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(enemy)) and not NPC.IsRanged(enemy) then
+            and not Entity.IsDormant(enemy) and Entity.IsAlive(enemy)
+            and not Utility.IsDisabled(enemy) and Utility.PhysicalCoreHeroes[NPC.GetUnitName(enemy)]
+            and NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(enemy)) and not NPC.IsRanged(enemy) then
 
             if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then
                 Ability.CastNoTarget(item1)
