@@ -311,10 +311,10 @@ function Lion.AutoSpike()
 
     -- Log.Write(tostring(Ability.GetLevel(NPC.GetAbility(myHero, "special_bonus_unique_lion_2"))))
     -- for i = 0, 30 do
-    -- 	local tmp = NPC.GetAbilityByIndex(myHero, i)
-    -- 	if tmp then
-    -- 		Log.Write(Ability.GetName(tmp))
-    -- 	end
+    --     local tmp = NPC.GetAbilityByIndex(myHero, i)
+    --     if tmp then
+    --         Log.Write(Ability.GetName(tmp))
+    --     end
     -- end
 
     local damage = 20 + 60 * Ability.GetLevel(spell)
@@ -335,33 +335,6 @@ function Lion.AutoSpike()
             else
                 local direction = (Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)):Normalized()
                 cast_position = Entity.GetAbsOrigin(myHero) + direction:Scaled(range)
-            end
-
-            -- spike the enemy who is channelling a spell or TPing
-            if Utility.IsChannellingAbility(enemy) then
-                Ability.CastPosition(spell, cast_position)
-                return
-            end
-
-            -- spike the enemy who is very close
-		    local hex = NPC.GetAbility(myHero, "lion_voodoo")
-            if NPC.IsEntityInRange(myHero, enemy, 300) and not Utility.IsDisabled(enemy)
-                and (not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero))
-                and (not hex or not Ability.IsCastable(hex, NPC.GetMana(myHero))) then
-
-                Ability.CastPosition(spell, cast_position)
-                return
-            end
-
-            -- spike the enemy who is hexed/stunned/rooted/taunted with proper timing
-            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
-            local delay = 0.3 + dis/speed
-            local offset = 0.5
-
-            if (Utility.GetHexTimeLeft(enemy) - offset <= delay and Utility.GetHexTimeLeft(enemy) > delay)
-            or (Utility.GetFixTimeLeft(enemy) - offset <= delay and Utility.GetFixTimeLeft(enemy) > delay) then
-                Ability.CastPosition(spell, cast_position)
-                return
             end
 
             -- -- spike the enemy who is in low HP (for kill steal)
@@ -397,7 +370,8 @@ function Lion.AutoSpike()
                     local sin_theta_2 = math.sqrt(1 - cos_theta_2 * cos_theta_2)
                     local dis2 = vec2:Length() * sin_theta_2
 
-                    if dis1 < 125 and dis2 < 125 then
+                    -- vec1:Dot(vec2) >= 0 to ensure that both vectors are in the same direction
+                    if dis1 < 125 and dis2 < 125 and vec1:Dot(vec2) >= 0 then
                         local dir = (mid - Entity.GetAbsOrigin(myHero)):Normalized()
                         cast_position = Entity.GetAbsOrigin(myHero) + dir:Scaled(range)
                         Ability.CastPosition(spell, cast_position)
@@ -405,6 +379,33 @@ function Lion.AutoSpike()
                     end
                 end
                 positions[NPC.GetUnitName(enemy)] = Entity.GetAbsOrigin(enemy)
+            end
+
+            -- spike the enemy who is very close
+            local hex = NPC.GetAbility(myHero, "lion_voodoo")
+            if NPC.IsEntityInRange(myHero, enemy, 300) and not Utility.IsDisabled(enemy)
+                and (not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero))
+                and (not hex or not Ability.IsCastable(hex, NPC.GetMana(myHero))) then
+
+                Ability.CastPosition(spell, cast_position)
+                return
+            end
+
+            -- spike the enemy who is channelling a spell or TPing
+            if Utility.IsChannellingAbility(enemy) then
+                Ability.CastPosition(spell, cast_position)
+                return
+            end
+
+            -- spike the enemy who is hexed/stunned/rooted/taunted with proper timing
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            local delay = 0.3 + dis/speed
+            local offset = 0.5
+
+            if (Utility.GetHexTimeLeft(enemy) - offset <= delay and Utility.GetHexTimeLeft(enemy) > delay)
+            or (Utility.GetFixTimeLeft(enemy) - offset <= delay and Utility.GetFixTimeLeft(enemy) > delay) then
+                Ability.CastPosition(spell, cast_position)
+                return
             end
         end
     end
