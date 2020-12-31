@@ -224,6 +224,7 @@ function Lion.KillSteal()
                 if Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point < true_damage
                     and Utility.IsSafeToCast(myHero, enemy, true_damage)
                     and NPC.IsEntityInRange(myHero, enemy, range)
+                    and spell and dagon
                     and Ability.IsCastable(dagon, NPC.GetMana(myHero) - Ability.GetManaCost(spell))
                     and Ability.IsCastable(spell, NPC.GetMana(myHero) - Ability.GetManaCost(dagon)) then
                     Ability.CastTarget(dagon, enemy)
@@ -234,7 +235,11 @@ function Lion.KillSteal()
 
             if item and Ability.IsCastable(item, NPC.GetMana(myHero)) then
 
-                true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
+                if Utility.IsEthereal(enemy) then
+                    true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage)
+                else
+                    true_damage = Utility.GetRealDamage(myHero, enemy, total_damage + ethereal_base_damage + ethereal_amplified_damage)
+                end
                 spell_damage_table[NPC.GetUnitName(enemy)] = true_damage
 
                 if true_damage >= Entity.GetHealth(enemy)+NPC.GetHealthRegen(enemy)*cast_point and Utility.IsSafeToCast(myHero, enemy, true_damage)

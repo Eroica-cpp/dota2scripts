@@ -653,4 +653,14 @@ function Utility.IsFacingTowards(npc1, npc2)
     return NPC.GetTimeToFacePosition(npc1, Entity.GetAbsOrigin(npc2)) < 0.05
 end
 
+function Utility.IsEthereal(npc)
+
+    if NPC.HasModifier(npc, "modifier_ghost_state") then return true end
+    if NPC.HasModifier(npc, "modifier_item_ethereal_blade_ethereal") then return true end
+    if NPC.HasModifier(npc, "modifier_pugna_decrepify") then return true end
+    if NPC.HasModifier(npc, "modifier_necrolyte_sadist_active") then return true end
+
+    return false
+end
+
 return Utility
