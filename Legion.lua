@@ -39,6 +39,12 @@ function Legion.OnPrepareUnitOrders(orders)
         mana_cost = mana_cost + Ability.GetManaCost(item_blade_mail)
     end
 
+    -- local item_blade_mail = NPC.GetItem(myHero, "item_blade_mail", true)
+    -- if item_blade_mail and Ability.IsCastable(item_blade_mail, NPC.GetMana(myHero) - mana_cost) then
+    --     Ability.CastNoTarget(item_blade_mail)
+    --     mana_cost = mana_cost + Ability.GetManaCost(item_blade_mail)
+    -- end
+
     -- press_the_attack has huge back swing
     -- local press_the_attack = NPC.GetAbility(myHero, "legion_commander_press_the_attack")
     -- if press_the_attack and Ability.IsCastable(press_the_attack, NPC.GetMana(myHero) - mana_cost) then
@@ -47,12 +53,19 @@ function Legion.OnPrepareUnitOrders(orders)
     -- end
 
     local linken_breaker = Utility.GetLinkenBreaker(myHero)
+    local item_nullifier = NPC.GetItem(myHero, "item_nullifier", true)
 
     if NPC.IsEntityInRange(myHero, orders.target, Ability.GetCastRange(duel)) then
 
         if NPC.IsLinkensProtected(orders.target) and linken_breaker
-            and Ability.IsCastable(linken_breaker, NPC.GetMana(myHero)) then
+            and Ability.IsCastable(linken_breaker, NPC.GetMana(myHero) - mana_cost) then
             Ability.CastTarget(linken_breaker, orders.target)
+            mana_cost = mana_cost + Ability.GetManaCost(linken_breaker)
+        end
+
+        if item_nullifier and Ability.IsCastable(item_nullifier, NPC.GetMana(myHero) - mana_cost) then
+            Ability.CastTarget(item_nullifier, orders.target)
+            mana_cost = mana_cost + Ability.GetManaCost(item_nullifier)
         end
 
         Ability.CastTarget(duel, orders.target)
@@ -66,8 +79,14 @@ function Legion.OnPrepareUnitOrders(orders)
         Ability.CastPosition(item_blink, Entity.GetAbsOrigin(orders.target))
 
         if NPC.IsLinkensProtected(orders.target) and linken_breaker
-            and Ability.IsCastable(linken_breaker, NPC.GetMana(myHero)) then
+            and Ability.IsCastable(linken_breaker, NPC.GetMana(myHero) - mana_cost) then
             Ability.CastTarget(linken_breaker, orders.target)
+            mana_cost = mana_cost + Ability.GetManaCost(linken_breaker)
+        end
+
+        if item_nullifier and Ability.IsCastable(item_nullifier, NPC.GetMana(myHero) - mana_cost) then
+            Ability.CastTarget(item_nullifier, orders.target)
+            mana_cost = mana_cost + Ability.GetManaCost(item_nullifier)
         end
 
         Ability.CastTarget(duel, orders.target)
