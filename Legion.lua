@@ -4,6 +4,7 @@ local Legion = {}
 
 Legion.optionOverwhelming = Menu.AddOption({"Hero Specific", "Legion Commander"}, "Overwhelming for KS", "Auto cast overwhelming odds for life steal")
 Legion.optionAutoSave = Menu.AddOption({"Hero Specific", "Legion Commander"}, "Auto Save", "Auto cast 'press the attack' to save needed ally")
+Legion.optionDuel = Menu.AddOption({"Hero Specific", "Legion Commander"}, "Duel Combo (Extended)", "Extended Duel Combo (e.g., auto break linken's")
 
 function Legion.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -17,6 +18,63 @@ function Legion.OnUpdate()
     if Menu.IsEnabled(Legion.optionAutoSave) then
         Legion.PressTheAttack(myHero)
     end
+end
+
+function Legion.OnPrepareUnitOrders(orders)
+    if not Menu.IsEnabled(Legion.optionDuel) then return true end
+    if not orders or not orders.target then return true end
+    if not orders.ability or Ability.GetName(orders.ability) ~= "legion_commander_duel" then return true end
+
+
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_legion_commander" then return true end
+
+    local duel = NPC.GetAbility(myHero, "legion_commander_duel")
+    if not duel or not Ability.IsCastable(duel, NPC.GetMana(myHero)) then return true end
+    local mana_cost = Ability.GetManaCost(duel)
+
+    local item_blade_mail = NPC.GetItem(myHero, "item_blade_mail", true)
+    if item_blade_mail and Ability.IsCastable(item_blade_mail, NPC.GetMana(myHero) - mana_cost) then
+        Ability.CastNoTarget(item_blade_mail)
+        mana_cost = mana_cost + Ability.GetManaCost(item_blade_mail)
+    end
+
+    -- press_the_attack has huge back swing
+    -- local press_the_attack = NPC.GetAbility(myHero, "legion_commander_press_the_attack")
+    -- if press_the_attack and Ability.IsCastable(press_the_attack, NPC.GetMana(myHero) - mana_cost) then
+    --     Ability.CastTarget(press_the_attack, myHero)
+    --     mana_cost = mana_cost + Ability.GetManaCost(press_the_attack)
+    -- end
+
+    local linken_breaker = NPC.GetItem(myHero, "item_heavens_halberd", true)
+
+    if NPC.IsEntityInRange(myHero, orders.target, Ability.GetCastRange(duel)) then
+
+        if NPC.IsLinkensProtected(orders.target) and linken_breaker
+            and Ability.IsCastable(linken_breaker, NPC.GetMana(myHero)) then
+            Ability.CastTarget(linken_breaker, orders.target)
+        end
+
+        Ability.CastTarget(duel, orders.target)
+        return false
+    end
+
+    local item_blink = NPC.GetItem(myHero, "item_blink", true)
+    if item_blink and Ability.IsCastable(item_blink, NPC.GetMana(myHero))
+        and NPC.IsEntityInRange(myHero, orders.target, 1200) then
+
+        Ability.CastPosition(item_blink, Entity.GetAbsOrigin(orders.target))
+
+        if NPC.IsLinkensProtected(orders.target) and linken_breaker
+            and Ability.IsCastable(linken_breaker, NPC.GetMana(myHero)) then
+            Ability.CastTarget(linken_breaker, orders.target)
+        end
+
+        Ability.CastTarget(duel, orders.target)
+        return false
+    end
+
+    return true
 end
 
 -- Auto cast 'press the attack' to save needed ally
