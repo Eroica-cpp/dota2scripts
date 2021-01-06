@@ -666,6 +666,9 @@ end
 -- return linken breaker item if any; otherwise return nil
 function Utility.GetLinkenBreaker(npc)
 
+    local item_nullifier = NPC.GetItem(npc, "item_nullifier", true)
+    if item_nullifier then return item_nullifier end
+
     local item_heavens_halberd = NPC.GetItem(npc, "item_heavens_halberd", true)
     if item_heavens_halberd then return item_heavens_halberd end
 
@@ -707,6 +710,12 @@ function Utility.GetLinkenBreaker(npc)
 
     local item_dagon_5 = NPC.GetItem(npc, "item_dagon_5", true)
     if item_dagon_5 then return item_dagon_5 end
+
+    local item_ethereal_blade = NPC.GetItem(npc, "item_ethereal_blade", true)
+    if item_ethereal_blade then return item_ethereal_blade end
+
+    local item_rod_of_atos = NPC.GetItem(npc, "item_rod_of_atos", true)
+    if item_rod_of_atos then return item_rod_of_atos end
 
     return nil
 end
