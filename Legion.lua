@@ -39,11 +39,23 @@ function Legion.OnPrepareUnitOrders(orders)
         mana_cost = mana_cost + Ability.GetManaCost(item_blade_mail)
     end
 
-    -- local item_blade_mail = NPC.GetItem(myHero, "item_blade_mail", true)
-    -- if item_blade_mail and Ability.IsCastable(item_blade_mail, NPC.GetMana(myHero) - mana_cost) then
-    --     Ability.CastNoTarget(item_blade_mail)
-    --     mana_cost = mana_cost + Ability.GetManaCost(item_blade_mail)
-    -- end
+    local item_lotus_orb = NPC.GetItem(myHero, "item_lotus_orb", true)
+    if item_lotus_orb and Ability.IsCastable(item_lotus_orb, NPC.GetMana(myHero) - mana_cost) then
+        Ability.CastTarget(item_lotus_orb, myHero)
+        mana_cost = mana_cost + Ability.GetManaCost(item_lotus_orb)
+    end
+
+    local item_mjollnir = NPC.GetItem(myHero, "item_mjollnir", true)
+    if item_mjollnir and Ability.IsCastable(item_mjollnir, NPC.GetMana(myHero) - mana_cost) then
+        Ability.CastTarget(item_mjollnir, myHero)
+        mana_cost = mana_cost + Ability.GetManaCost(item_mjollnir)
+    end
+
+    local item_armlet = NPC.GetItem(myHero, "item_armlet", true)
+    if item_armlet and not Ability.GetToggleState(item_armlet) then
+        Ability.Toggle(item_armlet)
+        mana_cost = mana_cost + Ability.GetManaCost(item_armlet)
+    end
 
     -- press_the_attack has huge back swing
     -- local press_the_attack = NPC.GetAbility(myHero, "legion_commander_press_the_attack")
