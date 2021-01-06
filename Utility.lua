@@ -663,4 +663,52 @@ function Utility.IsEthereal(npc)
     return false
 end
 
+-- return linken breaker item if any; otherwise return nil
+function Utility.GetLinkenBreaker(npc)
+
+    local item_heavens_halberd = NPC.GetItem(npc, "item_heavens_halberd", true)
+    if item_heavens_halberd then return item_heavens_halberd end
+
+    local item_abyssal_blade = NPC.GetItem(npc, "item_abyssal_blade", true)
+    if item_abyssal_blade then return item_abyssal_blade end
+
+    local item_force_staff = NPC.GetItem(npc, "item_force_staff", true)
+    if item_force_staff then return item_force_staff end
+
+    local item_hurricane_pike = NPC.GetItem(npc, "item_hurricane_pike", true)
+    if item_hurricane_pike then return item_hurricane_pike end
+
+    local item_cyclone = NPC.GetItem(npc, "item_cyclone", true)
+    if item_cyclone then return item_cyclone end
+
+    local item_diffusal_blade = NPC.GetItem(npc, "item_diffusal_blade", true)
+    if item_diffusal_blade then return item_diffusal_blade end
+
+    local item_sheepstick = NPC.GetItem(npc, "item_sheepstick", true)
+    if item_sheepstick then return item_sheepstick end
+
+    local item_orchid = NPC.GetItem(npc, "item_orchid", true)
+    if item_orchid then return item_orchid end
+
+    local item_bloodthorn = NPC.GetItem(npc, "item_bloodthorn", true)
+    if item_bloodthorn then return item_bloodthorn end
+
+    local item_dagon = NPC.GetItem(npc, "item_dagon", true)
+    if item_dagon then return item_dagon end
+
+    local item_dagon_2 = NPC.GetItem(npc, "item_dagon_2", true)
+    if item_dagon_2 then return item_dagon_2 end
+
+    local item_dagon_3 = NPC.GetItem(npc, "item_dagon_3", true)
+    if item_dagon_3 then return item_dagon_3 end
+
+    local item_dagon_4 = NPC.GetItem(npc, "item_dagon_4", true)
+    if item_dagon_4 then return item_dagon_4 end
+
+    local item_dagon_5 = NPC.GetItem(npc, "item_dagon_5", true)
+    if item_dagon_5 then return item_dagon_5 end
+
+    return nil
+end
+
 return Utility

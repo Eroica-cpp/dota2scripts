@@ -322,7 +322,8 @@ function AutoUseItems.item_orchid(myHero)
     local target = nil
     for i, enemy in ipairs(enemyAround) do
         if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
-            and Utility.CanCastSpellOn(enemy) and not NPC.IsSilenced(enemy) and not Utility.IsLotusProtected(enemy) then
+            and Utility.CanCastSpellOn(enemy) and not NPC.IsSilenced(enemy)
+            and not Utility.IsLotusProtected(enemy) and not Utility.IsLinkensProtected(enemy) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
                 minDistance = dis

@@ -46,7 +46,7 @@ function Legion.OnPrepareUnitOrders(orders)
     --     mana_cost = mana_cost + Ability.GetManaCost(press_the_attack)
     -- end
 
-    local linken_breaker = NPC.GetItem(myHero, "item_heavens_halberd", true)
+    local linken_breaker = Utility.GetLinkenBreaker(myHero)
 
     if NPC.IsEntityInRange(myHero, orders.target, Ability.GetCastRange(duel)) then
 
