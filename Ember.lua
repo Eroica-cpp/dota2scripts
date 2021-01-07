@@ -49,7 +49,7 @@ function Ember.LifeSteal(myHero)
 	if not fist or not Ability.IsCastable(fist, NPC.GetMana(myHero)) then return end
 
 	local level = Ability.GetLevel(fist)
-	local bonus_damage = 20 * level
+	local bonus_damage = 40 * level
 	local cast_range = 700
 	local radius = cast_range + 250 + 100*(level-1)
 
