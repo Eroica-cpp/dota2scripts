@@ -597,6 +597,9 @@ function Utility.IsKillable(npc)
     if NPC.HasModifier(npc, "modifier_winter_wyvern_winters_curse") then return false end
     if NPC.HasModifier(npc, "modifier_winter_wyvern_winters_curse_aura") then return false end
 
+    -- Troll's ultimate
+    if NPC.HasModifier(npc, "modifier_troll_warlord_battle_trance") then return false end
+
     return true
 end
 
