@@ -515,6 +515,15 @@ function Utility.GetCastRange(myHero, ability)
 end
 
 function Utility.GetRealDamage(myHero, enemy, damage)
+
+    if NPC.HasModifier(enemy, "modifier_templar_assassin_refraction_damage") then
+        damage = 0
+    end
+
+    if NPC.HasModifier(enemy, "modifier_ember_spirit_flame_guard") then
+        damage = math.max(0, damage - 780)
+    end
+
     local spell_amplifier = 1
 
     if NPC.HasModifier(enemy, "modifier_item_veil_of_discord_debuff") then
