@@ -12,6 +12,7 @@ local optionAutoManaDrain = Menu.AddOption({"Hero Specific", "Lion"}, "Auto Mana
 local KS_target
 local KS_time
 local cast_point = 0.3 -- the cast point of finger of death
+local spike_target
 
 local spell_damage_table = {}
 
@@ -292,12 +293,20 @@ function Lion.AutoHex()
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
     local range = Ability.GetCastRange(spell)
 
+    -- handle duplicated hex and spike
+    local spike = NPC.GetAbility(myHero, "lion_impale")
+
     local indices = Utility.GetHeroIndicesOrderedByDistance()
     for k, v in ipairs(indices) do
+
         local enemy = Heroes.Get(v)
+        local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+        local spike_delay = 0.3 + dis/1600 + NPC.GetTimeToFacePosition(myHero, Entity.GetAbsOrigin(enemy))
+
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
-        and (Utility.GetFixTimeLeft(enemy) <= 0.3 or not Utility.IsDisabled(enemy))
+        and (not spike_target or NPC.GetUnitName(spike_target) ~= NPC.GetUnitName(enemy) or not spike or Ability.SecondsSinceLastUse(spike) > spike_delay or Ability.SecondsSinceLastUse(spike) <= -1)
+        and (Utility.GetDisabledTimeLeft(enemy) <= NPC.GetTimeToFacePosition(myHero, Entity.GetAbsOrigin(enemy))+0.3 or not Utility.IsDisabled(enemy))
         and not Utility.IsLinkensProtected(enemy) and not Utility.IsLotusProtected(enemy) then
 
             if NPC.GetCurrentLevel(myHero) < 30 then
@@ -416,12 +425,12 @@ function Lion.AutoSpike()
 
             -- spike the enemy who is hexed/stunned/rooted/taunted with proper timing
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
-            local delay = 0.3 + dis/speed
+            local delay = 0.3 + dis/speed + NPC.GetTimeToFacePosition(myHero, Entity.GetAbsOrigin(enemy))
             local offset = 0.5
 
-            if (Utility.GetHexTimeLeft(enemy) - offset <= delay and Utility.GetHexTimeLeft(enemy) > delay)
-            or (Utility.GetFixTimeLeft(enemy) - offset <= delay and Utility.GetFixTimeLeft(enemy) > delay) then
+            if Utility.GetDisabledTimeLeft(enemy) - offset <= delay and Utility.GetDisabledTimeLeft(enemy) > delay then
                 Ability.CastPosition(spell, cast_position)
+                spike_target = enemy
                 return
             end
         end

@@ -321,6 +321,7 @@ end
 Utility.StunModifiers = {
     "modifier_stunned",
     "modifier_bashed",
+    "modifier_lion_impale",
     "modifier_bane_fiends_grip",
     "modifier_rattletrap_hookshot",
     "modifier_winter_wyvern_winters_curse_aura",
@@ -402,6 +403,10 @@ function Utility.GetHexTimeLeft(npc)
 
     if not mod then return 0 end
     return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0)
+end
+
+function Utility.GetDisabledTimeLeft(npc)
+    return math.max(Utility.GetHexTimeLeft(npc), Utility.GetFixTimeLeft(npc))
 end
 
 -- return false for conditions that are not suitable to cast spell (like TPing, being invisible)
