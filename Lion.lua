@@ -171,8 +171,6 @@ function Lion.KillSteal()
         range = math.min(range, Ability.GetCastRange(dagon))
     end
 
-    local total_damage = finger_damage + dagon_damage
-
     local finger_mana_cost = 0
     if spell then finger_mana_cost = Ability.GetManaCost(spell) end
     local dagon_mana_cost = 0
@@ -182,8 +180,11 @@ function Lion.KillSteal()
     local item_refresher_shard = NPC.GetItem(myHero, "item_refresher_shard", true)
     if (item_refresher and Ability.IsCastable(item_refresher, NPC.GetMana(myHero)-2*(finger_mana_cost+dagon_mana_cost)))
         or (item_refresher_shard and Ability.IsCastable(item_refresher_shard, NPC.GetMana(myHero)-2*(finger_mana_cost+dagon_mana_cost))) then
-        total_damage = total_damage * 2
+        finger_damage = finger_damage * 2
+        dagon_damage = dagon_damage * 2
     end
+
+    local total_damage = finger_damage + dagon_damage
 
     local ethereal_base_damage = 0
     local ethereal_amplified_damage = 0
