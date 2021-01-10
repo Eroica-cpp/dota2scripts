@@ -23,8 +23,7 @@ end
 function Legion.OnPrepareUnitOrders(orders)
     if not Menu.IsEnabled(Legion.optionDuel) then return true end
     if not orders or not orders.target then return true end
-    if not orders.ability or Ability.GetName(orders.ability) ~= "legion_commander_duel" then return true end
-
+    if not orders.ability or not Entity.IsAbility(orders.ability) or Ability.GetName(orders.ability) ~= "legion_commander_duel" then return true end
 
     local myHero = Heroes.GetLocal()
     if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_legion_commander" then return true end
