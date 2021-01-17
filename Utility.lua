@@ -527,6 +527,10 @@ function Utility.GetRealDamage(myHero, enemy, damage)
         spell_amplifier = spell_amplifier + 0.18
     end
 
+    if NPC.HasModifier(myHero, "modifier_item_mage_slayer_debuff") then
+        spell_amplifier = spell_amplifier - 0.35
+    end
+
     if NPC.HasItem(myHero, "item_kaya", true) then
         spell_amplifier = spell_amplifier + 0.08
     end
