@@ -521,14 +521,6 @@ end
 
 function Utility.GetRealDamage(myHero, enemy, damage)
 
-    if NPC.HasModifier(enemy, "modifier_templar_assassin_refraction_damage") then
-        damage = 0
-    end
-
-    if NPC.HasModifier(enemy, "modifier_ember_spirit_flame_guard") then
-        damage = math.max(0, damage - 780)
-    end
-
     local spell_amplifier = 1
 
     if NPC.HasModifier(enemy, "modifier_item_veil_of_discord_debuff") then
@@ -569,6 +561,31 @@ function Utility.GetRealDamage(myHero, enemy, damage)
     end
 
     real_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy) * spell_amplifier
+
+    if NPC.HasModifier(enemy, "modifier_templar_assassin_refraction_damage") then
+        real_damage = 0
+    end
+
+    if NPC.HasModifier(enemy, "modifier_ember_spirit_flame_guard") then
+        real_damage = math.max(0, real_damage - 780)
+    end
+
+    if NPC.HasModifier(enemy, "modifier_ursa_enrage") then
+        real_damage = real_damage * 0.2
+    end
+
+    if NPC.HasModifier(enemy, "modifier_item_hood_of_defiance_barrier") then
+        real_damage = real_damage - 325
+    end
+
+    if NPC.HasModifier(enemy, "modifier_item_eternal_shroud_barrier") then
+        real_damage = real_damage - 400
+    end
+
+    if NPC.HasModifier(enemy, "modifier_item_pipe_barrier") then
+        real_damage = real_damage - 400
+    end
+
     return real_damage
 end
 
