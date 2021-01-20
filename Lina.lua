@@ -20,6 +20,8 @@ function Lina.OnUpdate()
     if Menu.IsEnabled(optionAutoLightStrikeArray) then
         Lina.AutoLightStrikeArray()
     end
+
+    Lina.item_cyclone()
 end
 
 -- show how many hits left to KS
@@ -141,6 +143,8 @@ function Lina.KillSteal()
                 and Ability.IsCastable(lina_dragon_slave, NPC.GetMana(myHero)) then
 
                 Ability.CastTarget(lina_dragon_slave, enemy)
+                KS_target = enemy
+                KS_time = GameRules.GetGameTime()
                 return
             end
 
@@ -153,6 +157,8 @@ function Lina.KillSteal()
                 and Ability.IsCastable(lina_laguna_blade, NPC.GetMana(myHero)) then
 
                 Ability.CastTarget(lina_laguna_blade, enemy)
+                KS_target = enemy
+                KS_time = GameRules.GetGameTime()
                 return
             end
 
@@ -166,10 +172,47 @@ function Lina.KillSteal()
 
                 Ability.CastTarget(lina_dragon_slave, enemy)
                 Ability.CastTarget(lina_laguna_blade, enemy)
+                KS_target = enemy
+                KS_time = GameRules.GetGameTime()
                 return
             end
         end
     end
+end
+
+-- Auto use item_cyclone on enemy hero once available (specific version for Lina)
+-- Doesn't use on enemy who is lotus orb protected or AM with aghs.
+function Lina.item_cyclone()
+    local myHero = Heroes.GetLocal()
+    if not myHero or NPC.GetUnitName(myHero) ~= "npc_dota_hero_lina" then return end
+    if not Utility.IsSuitableToUseItem(myHero) then return end
+
+    local item = NPC.GetItem(myHero, "item_cyclone", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    local range = Utility.GetCastRange(myHero, item) -- 800
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+    local minDistance = 99999
+    local target = nil
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
+            and Utility.GetFixTimeLeft(enemy) <= 0
+            and not NPC.IsSilenced(enemy)
+            and (not KS_target or NPC.GetUnitName(enemy) ~= NPC.GetUnitName(KS_target)
+                or GameRules.GetGameTime() - KS_time >= 1)
+            and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
+            and not Utility.IsLotusProtected(enemy) then
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            if dis < minDistance then
+                minDistance = dis
+                target = enemy
+            end
+        end
+    end
+
+    -- cast item_cyclone on nearest enemy in range
+    if target then Ability.CastTarget(item, target) end
 end
 
 return Lina
