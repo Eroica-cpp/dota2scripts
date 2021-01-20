@@ -420,6 +420,17 @@ function Utility.IsSuitableToCastSpell(myHero)
     return true
 end
 
+-- return false for conditions that are not suitable to use item (like TPing, being invisible)
+-- return true otherwise
+function Utility.IsSuitableToUseItem(myHero)
+    if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return false end
+    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
+    if NPC.HasModifier(myHero, "modifier_teleporting") then return false end
+    if NPC.IsChannellingAbility(myHero) then return false end
+
+    return true
+end
+
 function Utility.IsSuitableToUseItem(myHero)
     if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return false end
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
