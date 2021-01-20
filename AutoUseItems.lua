@@ -15,6 +15,7 @@ AutoUseItems.optionDiffusal = Menu.AddOption({"Item Specific"}, "Diffusal Blade"
 AutoUseItems.optionHeavens = Menu.AddOption({"Item Specific"}, "Heavens", "Auto use heavens on selected enemy hero (e.g., PA, AM) once available")
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
+AutoUseItems.optionGungir = Menu.AddOption({"Item Specific"}, "Gungir (Gleipnir)", "Auto use Gungir on enemy hero once available")
 AutoUseItems.optionShivas = Menu.AddOption({"Item Specific"}, "Shiva's Guard", "Auto use Shivas once enemy is within range")
 AutoUseItems.optionAbyssal = Menu.AddOption({"Item Specific"}, "Abyssal Blade", "Auto use abyssal blade on enemy hero once available")
 AutoUseItems.optionDagon = Menu.AddOption({"Item Specific"}, "Dagon", "Auto use dagon to KS or break linkens")
@@ -101,6 +102,10 @@ function AutoUseItems.OnUpdate()
 
     if Menu.IsEnabled(AutoUseItems.optionAtos) and NPC.IsVisible(myHero) then
         AutoUseItems.item_rod_of_atos(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionGungir) and NPC.IsVisible(myHero) then
+        AutoUseItems.item_gungir(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionShivas) and NPC.IsVisible(myHero) then
@@ -396,6 +401,51 @@ function AutoUseItems.item_rod_of_atos(myHero)
 
     -- cast rod of atos on nearest enemy in range
     if target then Ability.CastTarget(item, target) end
+end
+
+-- Auto use rod of atos on enemy hero once available
+-- Doesn't use on enemy who is lotus orb protected or AM with aghs.
+function AutoUseItems.item_gungir(myHero)
+    local item = NPC.GetItem(myHero, "item_gungir", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    local range = Utility.GetCastRange(myHero, item)
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+    -- check all the mid points first
+    local num_in_radius = 0
+    local radius = 450
+    local pos = nil
+    for i = 1, #enemyAround do
+        for j = i+1, #enemyAround do
+            local mid = (Entity.GetAbsOrigin(enemyAround[i])+Entity.GetAbsOrigin(enemyAround[j])):Scaled(0.5)
+            local num = #Heroes.InRadius(mid, radius, Entity.GetTeamNum(myHero), Enum.TeamType.TEAM_ENEMY)
+            if num >= 2 and num >= num_in_radius then
+                pos = mid
+                num_in_radius = num
+            end
+        end
+    end
+
+    if pos then Ability.CastPosition(item, pos); return end
+
+    local minDistance = 99999
+    -- local pos = nil
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
+            and Utility.CanCastSpellOn(enemy)
+            and not NPC.HasState(enemy, Enum.ModifierState.MODIFIER_STATE_ROOTED) then
+
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            if dis < minDistance then
+                minDistance = dis
+                pos = Entity.GetAbsOrigin(enemy)
+            end
+        end
+    end
+
+    -- cast on nearest enemy in range
+    if pos then Ability.CastPosition(item, pos) end
 end
 
 -- Auto use Shiva's Guard once enemy is within range
