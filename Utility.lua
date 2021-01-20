@@ -344,6 +344,7 @@ Utility.RootModifiers = {
     "modifier_naga_siren_ensnare",
     "modifier_oracle_fortunes_end_purge",
     "modifier_rod_of_atos_debuff",
+    "modifier_gungnir_debuff",
     "modifier_lone_druid_spirit_bear_entangle_effect",
     "modifier_techies_stasis_trap_stunned",
     "modifier_treant_natures_guise_root",
@@ -422,15 +423,6 @@ end
 
 -- return false for conditions that are not suitable to use item (like TPing, being invisible)
 -- return true otherwise
-function Utility.IsSuitableToUseItem(myHero)
-    if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return false end
-    if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
-    if NPC.HasModifier(myHero, "modifier_teleporting") then return false end
-    if NPC.IsChannellingAbility(myHero) then return false end
-
-    return true
-end
-
 function Utility.IsSuitableToUseItem(myHero)
     if NPC.IsStunned(myHero) or not Entity.IsAlive(myHero) then return false end
     if NPC.HasState(myHero, Enum.ModifierState.MODIFIER_STATE_INVISIBLE) then return false end
