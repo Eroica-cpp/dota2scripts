@@ -581,6 +581,14 @@ function Utility.GetRealDamage(myHero, enemy, damage)
         real_damage = real_damage * 0.2
     end
 
+    if NPC.GetUnitName(enemy) == "npc_dota_hero_spectre" then
+        real_damage = 0.75 * real_damage
+    end
+
+    if NPC.GetUnitName(enemy) == "npc_dota_hero_bristleback" then
+        real_damage = 0.60 * real_damage
+    end
+
     if NPC.HasModifier(enemy, "modifier_item_hood_of_defiance_barrier") then
         real_damage = real_damage - 325
     end
