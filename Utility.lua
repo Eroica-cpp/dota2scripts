@@ -185,7 +185,7 @@ end
 
 -- return true if can cast spell on this npc, return false otherwise
 function Utility.CanCastSpellOn(npc)
-	if Entity.IsDormant(npc) or not Entity.IsAlive(npc) then return false end
+	if not Entity.IsAlive(npc) then return false end
 	if NPC.IsStructure(npc) then return false end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
@@ -360,7 +360,7 @@ Utility.TauntModifiers = {
 }
 
 -- TODO phoenix and ember
-Utility.Invulnerableodifiers = {
+Utility.InvulnerableModifiers = {
     "modifier_eul_cyclone",
     "modifier_wind_waker",
     "modifier_invoker_tornado",
@@ -405,7 +405,7 @@ function Utility.GetFixTimeLeft(npc)
 end
 
 function Utility.GetInvulnerableTimeLeft(npc)
-    for i, val in ipairs(Utility.Invulnerableodifiers) do
+    for i, val in ipairs(Utility.InvulnerableModifiers) do
         local mod = NPC.GetModifier(npc, val)
         if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
     end
