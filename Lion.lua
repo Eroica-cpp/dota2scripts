@@ -370,7 +370,7 @@ function Lion.AutoSpike()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, real_range)
+        and NPC.IsEntityInRange(myHero, enemy, real_range)
         and not Utility.IsLinkensProtected(enemy) and not Utility.IsLotusProtected(enemy) then
 
             -- use maximum cast range of spike (consider travel distance and radius)
@@ -400,7 +400,8 @@ function Lion.AutoSpike()
             -- directions[NPC.GetUnitName(enemy)] = dir
 
             -- dual spike
-            if not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero) then
+            if not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero)
+                and Utility.CanCastSpellOn(enemy) then
                 for k, v in pairs(positions) do
                     local mid = (v + Entity.GetAbsOrigin(enemy)):Scaled(0.5)
                     local vec1 = Entity.GetAbsOrigin(enemy) - Entity.GetAbsOrigin(myHero)
@@ -430,14 +431,15 @@ function Lion.AutoSpike()
             local hex = NPC.GetAbility(myHero, "lion_voodoo")
             if NPC.IsEntityInRange(myHero, enemy, 300) and not Utility.IsDisabled(enemy)
                 and (not NPC.IsRunning(enemy) or Utility.IsFacingTowards(enemy, myHero))
-                and (not hex or not Ability.IsCastable(hex, NPC.GetMana(myHero))) then
+                and (not hex or not Ability.IsCastable(hex, NPC.GetMana(myHero)))
+                and Utility.CanCastSpellOn(enemy) then
 
                 Ability.CastPosition(spell, cast_position)
                 return
             end
 
             -- spike the enemy who is channelling a spell or TPing
-            if Utility.IsChannellingAbility(enemy) then
+            if Utility.IsChannellingAbility(enemy) and Utility.CanCastSpellOn(enemy) then
                 Ability.CastPosition(spell, cast_position)
                 return
             end
@@ -447,7 +449,20 @@ function Lion.AutoSpike()
             local delay = 0.3 + dis/speed + NPC.GetTimeToFacePosition(myHero, Entity.GetAbsOrigin(enemy))
             local offset = 0.5
 
-            if Utility.GetDisabledTimeLeft(enemy) - offset <= delay and Utility.GetDisabledTimeLeft(enemy) > delay then
+            if Utility.GetDisabledTimeLeft(enemy) - offset <= delay and Utility.GetDisabledTimeLeft(enemy) > delay
+                and Utility.CanCastSpellOn(enemy) then
+                Ability.CastPosition(spell, cast_position)
+                spike_target = enemy
+                return
+            end
+
+            -- local mods = NPC.GetModifiers(enemy)
+            -- for k = 1, #mods do
+            --     Log.Write(Modifier.GetName(mods[k]))
+            -- end
+
+            -- spike the enemy who was invulnerable (e.g., cyclone) with proper timing
+            if Utility.GetInvulnerableTimeLeft(enemy) < delay + 0.05 and Utility.GetInvulnerableTimeLeft(enemy) > delay then
                 Ability.CastPosition(spell, cast_position)
                 spike_target = enemy
                 return

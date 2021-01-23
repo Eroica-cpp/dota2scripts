@@ -359,6 +359,19 @@ Utility.TauntModifiers = {
     "modifier_winter_wyvern_winters_curse"
 }
 
+-- TODO phoenix and ember
+Utility.Invulnerableodifiers = {
+    "modifier_eul_cyclone",
+    "modifier_wind_waker",
+    "modifier_invoker_tornado",
+    "modifier_obsidian_destroyer_astral_imprisonment_prison",
+    "modifier_phoenix_supernova_hiding",
+    "modifier_puck_phase_shift",
+    "modifier_shadow_demon_disruption",
+    "modifier_riki_tricks_of_the_trade_phase",
+    "modifier_ember_spirit_sleight_of_fist_caster"
+}
+
 -- only able to get stun modifier. no specific modifier for root or hex.
 function Utility.GetStunTimeLeft(npc)
     local mod = NPC.GetModifier(npc, "modifier_stunned")
@@ -384,6 +397,15 @@ function Utility.GetFixTimeLeft(npc)
     end
 
     for i, val in ipairs(Utility.TauntModifiers) do
+        local mod = NPC.GetModifier(npc, val)
+        if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
+    end
+
+    return 0
+end
+
+function Utility.GetInvulnerableTimeLeft(npc)
+    for i, val in ipairs(Utility.Invulnerableodifiers) do
         local mod = NPC.GetModifier(npc, val)
         if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
     end
