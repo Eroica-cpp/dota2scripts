@@ -4,10 +4,12 @@ local Lina = {}
 
 local optionKillSteal = Menu.AddOption({"Hero Specific", "Lina"}, "Auto KS (upgraded version)", "Auto kill steal using dragon slave and/or laguana blade.")
 local optionKillStealCounter = Menu.AddOption({"Hero Specific", "Lina"}, "Show KS Counter", "Show how many hits remains to kill steal.")
-local optionAutoLightStrikeArray = Menu.AddOption({"Hero Specific", "Lina"}, "Auto Light Strike Array", "Auto cast Light Strike Array if enemy is (1) TPing; (2) channelling; (3) slowed; or (4) stunned/hexed/rooted/taunted with proper timing")
+local optionAutoLightStrikeArray = Menu.AddOption({"Hero Specific", "Lina"}, "Auto Light Strike Array", "Auto cast Light Strike Array if enemy is (1) TPing; (2) channelling; (3) slowed; (4) stunned/hexed/rooted/taunted with proper timing; or (5) eul combo")
 
 local KS_target
 local KS_time
+local array_target
+local array_time
 local cast_point = 0.45 -- the cast point for both dragon slave and laguana blade.
 
 local spell_damage_table = {}
@@ -69,26 +71,40 @@ function Lina.AutoLightStrikeArray()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
+        and NPC.IsEntityInRange(myHero, enemy, range) then
 
             local cast_position = Entity.GetAbsOrigin(enemy)
 
             -- lina_light_strike_array the enemy who is channelling a spell or TPing
-            if Utility.IsChannellingAbility(enemy) then
+            if Utility.IsChannellingAbility(enemy) and Utility.CanCastSpellOn(enemy) then
                 Ability.CastPosition(spell, cast_position)
+                array_target = enemy
+                array_time = GameRules.GetGameTime()
                 return
             end
 
             -- lina_light_strike_array the enemy who is slowed
-            if Utility.GetMoveSpeed(enemy) < 200 then
+            if Utility.GetMoveSpeed(enemy) < 200 and Utility.CanCastSpellOn(enemy) then
                 Ability.CastPosition(spell, cast_position)
+                array_target = enemy
+                array_time = GameRules.GetGameTime()
                 return
             end
 
             -- lina_light_strike_array the enemy who is hexed/stunned/rooted/taunted with proper timing
-            local delay = 0.5 + cast_point
-            if Utility.GetHexTimeLeft(enemy) > delay or Utility.GetFixTimeLeft(enemy) > delay then
+            local delay = 0.5 + cast_point + NPC.GetTimeToFacePosition(myHero, Entity.GetAbsOrigin(enemy))
+            if Utility.GetHexTimeLeft(enemy) > delay or Utility.GetFixTimeLeft(enemy) > delay and Utility.CanCastSpellOn(enemy)  then
                 Ability.CastPosition(spell, cast_position)
+                array_target = enemy
+                array_time = GameRules.GetGameTime()
+                return
+            end
+
+            -- lina_light_strike_array the enemy who was invulnerable (e.g., cyclone) with proper timing
+            if Utility.GetInvulnerableTimeLeft(enemy) < delay + 0.05 and Utility.GetInvulnerableTimeLeft(enemy) > delay then
+                Ability.CastPosition(spell, cast_position)
+                array_target = enemy
+                array_time = GameRules.GetGameTime()
                 return
             end
         end
@@ -201,6 +217,8 @@ function Lina.item_cyclone()
             and not NPC.IsSilenced(enemy)
             and (not KS_target or NPC.GetUnitName(enemy) ~= NPC.GetUnitName(KS_target)
                 or GameRules.GetGameTime() - KS_time >= 1)
+            and (not array_target or NPC.GetUnitName(enemy) ~= NPC.GetUnitName(array_target)
+                or GameRules.GetGameTime() - array_time >= 1.5)
             and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
             and not Utility.IsLotusProtected(enemy) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
