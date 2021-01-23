@@ -467,6 +467,14 @@ function Lion.AutoSpike()
                 spike_target = enemy
                 return
             end
+
+            -- spike the enemy whose spell immunity is just over
+            if (NPC.IsAttacking(enemy) or not NPC.IsRunning(enemy))
+                and Utility.GetSpellImmunityTimeLeft(enemy) < delay + 0.05 and Utility.GetSpellImmunityTimeLeft(enemy) > delay then
+                Ability.CastPosition(spell, cast_position)
+                spike_target = enemy
+                return
+            end
         end
     end
 

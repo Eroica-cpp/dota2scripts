@@ -372,6 +372,13 @@ Utility.InvulnerableModifiers = {
     "modifier_ember_spirit_sleight_of_fist_caster"
 }
 
+Utility.SpellImmunityModifiers = {
+    "modifier_black_king_bar_immune",
+    "modifier_juggernaut_blade_fury",
+    "modifier_life_stealer_rage",
+    "modifier_minotaur_horn_immune"
+}
+
 -- only able to get stun modifier. no specific modifier for root or hex.
 function Utility.GetStunTimeLeft(npc)
     local mod = NPC.GetModifier(npc, "modifier_stunned")
@@ -406,6 +413,15 @@ end
 
 function Utility.GetInvulnerableTimeLeft(npc)
     for i, val in ipairs(Utility.InvulnerableModifiers) do
+        local mod = NPC.GetModifier(npc, val)
+        if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
+    end
+
+    return 0
+end
+
+function Utility.GetSpellImmunityTimeLeft(npc)
+    for i, val in ipairs(Utility.SpellImmunityModifiers) do
         local mod = NPC.GetModifier(npc, val)
         if mod then return math.max(Modifier.GetDieTime(mod) - GameRules.GetGameTime(), 0) end
     end

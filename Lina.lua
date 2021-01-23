@@ -107,6 +107,15 @@ function Lina.AutoLightStrikeArray()
                 array_time = GameRules.GetGameTime()
                 return
             end
+
+            -- lina_light_strike_array the enemy whose spell immunity is just over
+            if (NPC.IsAttacking(enemy) or not NPC.IsRunning(enemy))
+                and Utility.GetSpellImmunityTimeLeft(enemy) < delay + 0.05 and Utility.GetSpellImmunityTimeLeft(enemy) > delay then
+                Ability.CastPosition(spell, cast_position)
+                array_target = enemy
+                array_time = GameRules.GetGameTime()
+                return
+            end
         end
     end
 end
