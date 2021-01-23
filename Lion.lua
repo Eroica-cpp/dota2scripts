@@ -291,8 +291,10 @@ function Lion.AutoHex()
     -- if NPC.GetCurrentLevel(myHero) < 6 then return end
 
     local spell = NPC.GetAbility(myHero, "lion_voodoo")
-    if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
-    local range = Ability.GetCastRange(spell)
+    if not spell then return end
+    -- local range = Ability.GetCastRange(spell)
+
+    local eul = NPC.GetItem(myHero, "item_cyclone", true)
 
     -- handle duplicated hex and spike
     local spike = NPC.GetAbility(myHero, "lion_impale")
@@ -305,17 +307,33 @@ function Lion.AutoHex()
         local spike_delay = 0.3 + dis/1600 + NPC.GetTimeToFacePosition(myHero, Entity.GetAbsOrigin(enemy))
 
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
+        and Utility.CanCastSpellOn(enemy)
+        -- and NPC.IsEntityInRange(myHero, enemy, range)
         and (not spike_target or NPC.GetUnitName(spike_target) ~= NPC.GetUnitName(enemy) or not spike or Ability.SecondsSinceLastUse(spike) > spike_delay or Ability.SecondsSinceLastUse(spike) <= -1)
         and (Utility.GetDisabledTimeLeft(enemy) <= NPC.GetTimeToFacePosition(myHero, Entity.GetAbsOrigin(enemy))+0.3 or not Utility.IsDisabled(enemy))
         and not Utility.IsLinkensProtected(enemy) and not Utility.IsLotusProtected(enemy) then
 
-            if NPC.GetCurrentLevel(myHero) < 30 then
-                Ability.CastTarget(spell, enemy)
-            else
-                Ability.CastPosition(spell, Entity.GetAbsOrigin(enemy))
+            if Ability.IsCastable(spell, NPC.GetMana(myHero))
+                and NPC.IsEntityInRange(myHero, enemy, Ability.GetCastRange(spell)) then
+
+                if NPC.GetCurrentLevel(myHero) < 30 then
+                    Ability.CastTarget(spell, enemy)
+                else
+                    Ability.CastPosition(spell, Entity.GetAbsOrigin(enemy))
+                end
+                return
             end
-            return
+
+            if eul and Ability.IsCastable(eul, NPC.GetMana(myHero))
+                and NPC.IsEntityInRange(myHero, enemy, Ability.GetCastRange(eul))
+                and Utility.GetFixTimeLeft(enemy) <= 0
+                and not NPC.IsSilenced(enemy)
+                and (not KS_target or NPC.GetUnitName(enemy) ~= NPC.GetUnitName(KS_target)
+                    or GameRules.GetGameTime() - KS_time >= 1) then
+
+                Ability.CastTarget(eul, enemy)
+                return
+            end
         end
     end
 end
