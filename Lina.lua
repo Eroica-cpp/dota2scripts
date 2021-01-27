@@ -101,7 +101,8 @@ function Lina.AutoLightStrikeArray()
             end
 
             -- lina_light_strike_array the enemy who was invulnerable (e.g., cyclone) with proper timing
-            if Utility.GetInvulnerableTimeLeft(enemy) < delay + 0.05 and Utility.GetInvulnerableTimeLeft(enemy) > delay then
+            if Utility.GetInvulnerableTimeLeft(enemy) < delay + 0.05 and Utility.GetInvulnerableTimeLeft(enemy) > delay
+                and Entity.IsAlive(enemy) then
                 Ability.CastPosition(spell, cast_position)
                 array_target = enemy
                 array_time = GameRules.GetGameTime()
@@ -110,6 +111,7 @@ function Lina.AutoLightStrikeArray()
 
             -- lina_light_strike_array the enemy whose spell immunity is just over
             if (NPC.IsAttacking(enemy) or not NPC.IsRunning(enemy))
+                and Entity.IsAlive(enemy)
                 and Utility.GetSpellImmunityTimeLeft(enemy) < delay + 0.05 and Utility.GetSpellImmunityTimeLeft(enemy) > delay then
                 Ability.CastPosition(spell, cast_position)
                 array_target = enemy
