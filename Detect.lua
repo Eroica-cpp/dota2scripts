@@ -34,6 +34,7 @@ local spellName2heroName = {}
 -- Entity.GetAbsOrigin(particle.entity) is not correct. It just shows last seen position.
 -- NPC.GetUnitName(particle.entity) can be useful, like know blink start position, smoke position, etc
 function Detect.OnParticleCreate(particle)
+    if not Menu.IsEnabled(option) then return end
     if not particle or not particle.index then return end
 
     -- Log.Write("1. OnParticleCreate: " .. tostring(particle.index) .. " " .. particle.name .. " " .. NPC.GetUnitName(particle.entity))
@@ -47,6 +48,7 @@ end
 
 -- know particle's index, position
 function Detect.OnParticleUpdate(particle)
+    if not Menu.IsEnabled(option) then return end
     if not particle or not particle.index then return end
     if not particle.position or not Map.IsValidPos(particle.position) then return end
 
@@ -67,6 +69,7 @@ end
 
 -- know particle's index, position, entity
 function Detect.OnParticleUpdateEntity(particle)
+    if not Menu.IsEnabled(option) then return end
     if not particle then return end
     if not particle.entity or not NPC.IsHero(particle.entity) then return end
     if not particle.position or not Map.IsValidPos(particle.position) then return end

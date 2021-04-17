@@ -10,6 +10,7 @@ AutoUseItems.optionDeward = Menu.AddOption({"Item Specific"}, "Deward", "Auto us
 AutoUseItems.optionIronTalon = Menu.AddOption({"Item Specific"}, "Iron Talon", "Auto use iron talen to remove creep's HP")
 AutoUseItems.optionHeal = Menu.AddOption({"Item Specific"}, "Heal", "Auto use magic wand(stick) or faerie fire if HP is low")
 AutoUseItems.optionSheepstick = Menu.AddOption({"Item Specific"}, "Sheepstick", "Auto use sheepstick on enemy hero once available")
+AutoUseItems.optionDiffusal = Menu.AddOption({"Item Specific"}, "Diffusal Blade", "Auto use diffusal blade once enemy is within range")
 AutoUseItems.optionHeavens = Menu.AddOption({"Item Specific"}, "Heavens", "Auto use heavens on selected enemy hero (e.g., PA, AM) once available")
 AutoUseItems.optionOrchid = Menu.AddOption({"Item Specific"}, "Orchid & Bloodthorn", "Auto use orchid or bloodthorn on enemy hero once available")
 AutoUseItems.optionAtos = Menu.AddOption({"Item Specific"}, "Rod of Atos", "Auto use atos on enemy hero once available")
@@ -20,6 +21,8 @@ AutoUseItems.optionVeil = Menu.AddOption({"Item Specific"}, "Veil of Discord", "
 AutoUseItems.optionLotus = Menu.AddOption({"Item Specific"}, "Lotus Orb", "(For tinker) auto use lotus orb on self or allies once available")
 AutoUseItems.optionCrest = Menu.AddOption({"Item Specific"}, "Medallion & Crest", "Auto use medallion & crest to save ally")
 AutoUseItems.optionGlimmerCape = Menu.AddOption({"Item Specific"}, "Glimmer Cape", "Auto use Glimmer Cape when channeling spells or ally in danger")
+AutoUseItems.optionGhost = Menu.AddOption({"Item Specific"}, "Ghost Scepter", "Auto use ghost scepter to avoid damage from physical cores")
+AutoUseItems.optionSatanic = Menu.AddOption({"Item Specific"}, "Satanic", "Auto use Satanic when (i) legion or axe is around; or (ii) hp is low and my hero is attacking.")
 
 function AutoUseItems.OnUpdate()
     local myHero = Heroes.GetLocal()
@@ -64,11 +67,23 @@ function AutoUseItems.OnUpdate()
         AutoUseItems.item_solar_crest(myHero)
     end
 
+    if Menu.IsEnabled(AutoUseItems.optionGhost) then
+        AutoUseItems.item_ghost(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionSatanic) then
+        AutoUseItems.item_satanic(myHero)
+    end
+
     -- ========================
     -- Aggressive items
     -- ========================
     if Menu.IsEnabled(AutoUseItems.optionSheepstick) and NPC.IsVisible(myHero) then
         AutoUseItems.item_sheepstick(myHero)
+    end
+
+    if Menu.IsEnabled(AutoUseItems.optionDiffusal) and NPC.IsVisible(myHero) then
+        AutoUseItems.item_diffusal_blade(myHero)
     end
 
     if Menu.IsEnabled(AutoUseItems.optionHeavens) and NPC.IsVisible(myHero) then
@@ -238,6 +253,33 @@ end
 
 -- Auto use sheepstick on enemy hero once available
 -- Doesn't use on enemy who is lotus orb protected or AM with aghs.
+function AutoUseItems.item_diffusal_blade(myHero)
+    local item = NPC.GetItem(myHero, "item_diffusal_blade", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    local range = Utility.GetCastRange(myHero, item) -- 600
+    local enemyAround = NPC.GetHeroesInRadius(myHero, range, Enum.TeamType.TEAM_ENEMY)
+
+    local minDistance = 99999
+    local target = nil
+    for i, enemy in ipairs(enemyAround) do
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
+            and Utility.CanCastSpellOn(enemy) and not Utility.IsLinkensProtected(enemy)
+            and not Utility.IsLotusProtected(enemy) then
+            local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
+            if dis < minDistance then
+                minDistance = dis
+                target = enemy
+            end
+        end
+    end
+
+    -- cast sheepstick on nearest enemy in range
+    if target then Ability.CastTarget(item, target) end
+end
+
+-- Auto use sheepstick on enemy hero once available
+-- Doesn't use on enemy who is lotus orb protected or AM with aghs.
 function AutoUseItems.item_heavens_halberd(myHero)
     local item = NPC.GetItem(myHero, "item_heavens_halberd", true)
     if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
@@ -248,8 +290,8 @@ function AutoUseItems.item_heavens_halberd(myHero)
     local minDistance = 99999
     local target = nil
     for i, enemy in ipairs(enemyAround) do
-        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy)
-            and Utility.CanCastSpellOn(enemy) and Utility.PhysicalCoreHeroes[NPC.GetUnitName(enemy)] then
+        if not NPC.IsIllusion(enemy) and not Utility.IsDisabled(enemy) and Utility.CanCastSpellOn(enemy)
+        	and (Utility.PhysicalCoreHeroes[NPC.GetUnitName(enemy)] or NPC.IsLinkensProtected(enemy)) then
             local dis = (Entity.GetAbsOrigin(myHero) - Entity.GetAbsOrigin(enemy)):Length()
             if dis < minDistance then
                 minDistance = dis
@@ -467,6 +509,58 @@ function AutoUseItems.item_solar_crest(myHero)
     for i, ally in ipairs(allyAround) do
         if Utility.NeedToBeSaved(ally) and Utility.CanCastSpellOn(ally) then
             Ability.CastTarget(item, ally)
+            return
+        end
+    end
+end
+
+-- Auto use ghost scepter to avoid damage from physical cores
+function AutoUseItems.item_ghost(myHero)
+    local item1 = NPC.GetItem(myHero, "item_ghost", true)
+    local item2 = NPC.GetItem(myHero, "item_ethereal_blade", true)
+
+    if (not item1 or not Ability.IsCastable(item1, NPC.GetMana(myHero)))
+    and (not item2 or not Ability.IsCastable(item2, NPC.GetMana(myHero)))
+    then return end
+
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
+        and not Utility.IsDisabled(enemy) and Utility.PhysicalCoreHeroes[NPC.GetUnitName(enemy)]
+        and NPC.IsEntityInRange(myHero, enemy, NPC.GetAttackRange(enemy)) and not NPC.IsRanged(enemy) then
+
+            if item1 and Ability.IsCastable(item1, NPC.GetMana(myHero)) then
+                Ability.CastNoTarget(item1)
+                return
+            end
+            
+            if item2 and Ability.IsCastable(item2, NPC.GetMana(myHero)) then
+                Ability.CastTarget(item2, myHero)
+                return
+            end
+        end
+    end
+end
+
+-- Auto use Satanic when (i) legion or axe is around; or (ii) hp is low and my hero is attacking.
+function AutoUseItems.item_satanic(myHero)
+    local item = NPC.GetItem(myHero, "item_satanic", true)
+    if not item or not Ability.IsCastable(item, NPC.GetMana(myHero)) then return end
+
+    -- when hp is low and myHero is attacking
+    if Entity.GetHealth(myHero) <= 0.5 * Entity.GetMaxHealth(myHero) and NPC.IsAttacking(myHero) then
+        Ability.CastNoTarget(item)
+        return
+    end
+
+    -- when legion or axe is around
+    for i = 1, Heroes.Count() do
+        local enemy = Heroes.Get(i)
+        if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
+        and not Utility.IsDisabled(enemy) and Utility.IsAxeOrLegion[NPC.GetUnitName(enemy)]
+        and NPC.IsEntityInRange(myHero, enemy, 300) then
+
+            Ability.CastNoTarget(item)
             return
         end
     end

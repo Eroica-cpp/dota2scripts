@@ -20,6 +20,7 @@ StealTable["alchemist_chemical_rage"] = true
 StealTable["ancient_apparition_cold_feet"] = true
 StealTable["ancient_apparition_ice_blast"] = true
 StealTable["antimage_blink"] = true
+StealTable["antimage_spell_shield"] = true
 StealTable["antimage_mana_void"] = true
 StealTable["axe_berserkers_call"] = true
 StealTable["bane_nightmare"] = true
@@ -104,7 +105,7 @@ StealTable["leshrac_diabolic_edict"] = true
 StealTable["lich_chain_frost"] = true
 StealTable["life_stealer_rage"] = true
 StealTable["life_stealer_open_wounds"] = true
-StealTable["life_stealer_infest"] = true
+-- StealTable["life_stealer_infest"] = true
 StealTable["lina_light_strike_array"] = true
 StealTable["lina_laguna_blade"] = true
 StealTable["lion_impale"] = true
@@ -163,7 +164,8 @@ StealTable["pugna_nether_ward"] = true
 StealTable["pugna_life_drain"] = true
 StealTable["queenofpain_blink"] = true
 StealTable["queenofpain_sonic_wave"] = true
-StealTable["rattletrap_battery_assault"] = true
+StealTable["rattletrap_power_cogs"] = true
+StealTable["rattletrap_rocket_flare"] = true
 StealTable["rattletrap_hookshot"] = true
 StealTable["razor_static_link"] = true
 StealTable["razor_eye_of_the_storm"] = true
@@ -204,7 +206,7 @@ StealTable["techies_stasis_trap"] = true
 StealTable["techies_suicide"] = true
 StealTable["techies_remote_mines"] = true
 StealTable["templar_assassin_refraction"] = true
-StealTable["templar_assassin_meld"] = true
+-- StealTable["templar_assassin_meld"] = true
 StealTable["templar_assassin_trap"] = true
 StealTable["terrorblade_sunder"] = true
 StealTable["tidehunter_ravage"] = true
@@ -361,21 +363,16 @@ function Rubick.KillSteal()
     local spell = NPC.GetAbility(myHero, "rubick_fade_bolt")
     if not spell or not Ability.IsCastable(spell, NPC.GetMana(myHero)) then return end
 
-    local damage_amplifier = 1
-    local aura = NPC.GetAbilityByIndex(myHero, 2)
-    if aura and Ability.GetLevel(aura) >= 1 then
-        damage_amplifier = 1 + 0.1 + 0.04 * Ability.GetLevel(aura)
-    end
-
     local range = Utility.GetCastRange(myHero, spell)
-    local damage = damage_amplifier * (25 + 75 * Ability.GetLevel(spell)) -- damage update in version 7.27b
+    local damage = 25 + 75 * Ability.GetLevel(spell) -- damage update in version 7.27b
 
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range) then
 
-            local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            -- local true_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy)
+            local true_damage = Utility.GetRealDamage(myHero, enemy, damage)
             if (true_damage >= Entity.GetHealth(enemy) or Utility.IsLinkensProtected(enemy))
                 and Utility.IsSafeToCast(myHero, enemy, true_damage) then
                 Ability.CastTarget(spell, enemy)
@@ -398,12 +395,24 @@ function Rubick.AutoTelekinesis()
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
         and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
-        and not Utility.IsDisabled(enemy) and not Utility.IsLinkensProtected(enemy) then
+        and not Utility.IsDisabled(enemy) and not Utility.IsLinkensProtected(enemy)
+        and not Utility.IsLotusProtected(enemy) then
 
             Ability.CastTarget(spell, enemy)
             return
         end
     end
+end
+
+-- return true if can cast spell on this npc, return false otherwise
+-- Rubick version of CanCastSpellOn() is able to steal skill from BKB
+function Rubick.CanCastSpellOn(npc)
+    if Entity.IsDormant(npc) or not Entity.IsAlive(npc) then return false end
+    if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
+    -- if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
+    -- if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
+
+    return true
 end
 
 function Rubick.AutoSpellSteal()
@@ -422,7 +431,7 @@ function Rubick.AutoSpellSteal()
     for i = 1, Heroes.Count() do
         local enemy = Heroes.Get(i)
         if enemy and not NPC.IsIllusion(enemy) and not Entity.IsSameTeam(myHero, enemy)
-        and Utility.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
+        and Rubick.CanCastSpellOn(enemy) and NPC.IsEntityInRange(myHero, enemy, range)
         and not Utility.IsLinkensProtected(enemy) then
 
             local spell = Rubick.GetLastSpell(enemy)

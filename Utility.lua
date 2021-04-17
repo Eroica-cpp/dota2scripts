@@ -20,6 +20,10 @@ Utility.AncientCreepNameList = {
     "npc_dota_roshan"
 }
 
+Utility.IsAxeOrLegion = {}
+Utility.IsAxeOrLegion["npc_dota_hero_legion_commander"] = true
+Utility.IsAxeOrLegion["npc_dota_hero_axe"] = true
+
 Utility.PhysicalCoreHeroes = {}
 Utility.PhysicalCoreHeroes["npc_dota_hero_abaddon"]            = true
 Utility.PhysicalCoreHeroes["npc_dota_hero_alchemist"]          = true
@@ -131,6 +135,8 @@ function Utility.GetMoveSpeed(npc)
     -- when affected by ice wall, assume move speed as 100 for convenience
     if NPC.HasModifier(npc, "modifier_invoker_ice_wall_slow_debuff") then return 100 end
 
+    if NPC.HasModifier(npc, "modifier_item_diffusal_blade_slow") then return 100 end
+
     -- when get hexed,  move speed = 140/100 + bonus_speed
     if Utility.GetHexTimeLeft(npc) > 0 then return 140 + bonus_speed end
 
@@ -140,19 +146,27 @@ end
 -- return true if is protected by lotus orb or AM's aghs
 function Utility.IsLotusProtected(npc)
 	if NPC.HasModifier(npc, "modifier_item_lotus_orb_active") then return true end
-
-	local shield = NPC.GetAbility(npc, "antimage_spell_shield")
-	if shield and Ability.IsReady(shield) and NPC.HasItem(npc, "item_ultimate_scepter", true) then
-		return true
-	end
+    if NPC.HasModifier(npc, "modifier_antimage_counterspell") then return true end
 
 	return false
 end
 
--- extend NPC.IsLinkensProtected(), check AM's aghs case
--- Update (July 14, 2020): remove AM aghs check, update for new version
+-- return true if protected by Aeon Disk
+function Utility.IsDiskProtected(npc)
+    local disk = NPC.GetItem(npc, "item_aeon_disk", true)
+    if disk and (Ability.GetCooldown(disk) <= 0.5 or Ability.SecondsSinceLastUse(disk) <= 0.5) then
+        return true
+    end
+
+    if NPC.HasModifier(npc, "modifier_item_aeon_disk_buff") then
+        return true
+    end
+
+    return false
+end
+
 function Utility.IsLinkensProtected(npc)
-    if NPC.HasModifier(npc, "modifier_antimage_spell_shield") then
+    if NPC.HasModifier(npc, "modifier_antimage_counterspell") then
         return true
     end
 
@@ -171,7 +185,7 @@ end
 -- return true if can cast spell on this npc, return false otherwise
 function Utility.CanCastSpellOn(npc)
 	if Entity.IsDormant(npc) or not Entity.IsAlive(npc) then return false end
-	if NPC.IsStructure(npc) or not NPC.IsKillable(npc) then return false end
+	if NPC.IsStructure(npc) then return false end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_MAGIC_IMMUNE) then return false end
 	if NPC.HasState(npc, Enum.ModifierState.MODIFIER_STATE_INVULNERABLE) then return false end
 
@@ -499,6 +513,50 @@ function Utility.GetCastRange(myHero, ability)
     -- return range
 end
 
+function Utility.GetRealDamage(myHero, enemy, damage)
+    local spell_amplifier = 1
+
+    if NPC.HasModifier(enemy, "modifier_item_veil_of_discord_debuff") then
+        spell_amplifier = spell_amplifier + 0.18
+    end
+
+    if NPC.HasItem(myHero, "item_kaya", true) then
+        spell_amplifier = spell_amplifier + 0.08
+    end
+
+    if NPC.HasItem(myHero, "item_bloodstone", true) then
+        spell_amplifier = spell_amplifier + 0.08
+    end
+
+    if NPC.HasItem(myHero, "item_nether_shawl", false) then
+        spell_amplifier = spell_amplifier + 0.08
+    end
+
+    if NPC.HasItem(myHero, "item_timeless_relic", false) then
+        spell_amplifier = spell_amplifier + 0.15
+    end
+
+    if NPC.HasItem(myHero, "item_yasha_and_kaya", true) then
+        spell_amplifier = spell_amplifier + 0.16
+    end
+
+    if NPC.HasItem(myHero, "item_kaya_and_sange", true) then
+        spell_amplifier = spell_amplifier + 0.16
+    end
+
+    if NPC.HasItem(myHero, "item_trident", false) then
+        spell_amplifier = spell_amplifier + 0.30
+    end
+
+    local rubick_arcane_supremacy = NPC.GetAbility(myHero, "rubick_arcane_supremacy")
+    if rubick_arcane_supremacy then
+        spell_amplifier = spell_amplifier + 0.1 + 0.04 * Ability.GetLevel(rubick_arcane_supremacy)
+    end
+
+    real_damage = damage * NPC.GetMagicalArmorDamageMultiplier(enemy) * spell_amplifier
+    return real_damage
+end
+
 function Utility.GetSafeDirection(myHero)
     local mid = Vector()
     local pos = Entity.GetAbsOrigin(myHero)
@@ -512,6 +570,76 @@ function Utility.GetSafeDirection(myHero)
 
     mid:Set(mid:GetX()/Heroes.Count(), mid:GetY()/Heroes.Count(), mid:GetZ()/Heroes.Count())
     return (pos + pos - mid):Normalized()
+end
+
+function Utility.IsKillable(npc)
+
+    -- Abaddon's ultimate
+    if NPC.HasModifier(npc, "modifier_abaddon_borrowed_time") then return false end
+
+    -- Dazzle's save
+    if NPC.HasModifier(npc, "modifier_dazzle_shallow_grave") then return false end
+
+    -- Oracle's save
+    if NPC.HasModifier(npc, "modifier_oracle_false_promise") then return false end
+
+    -- WW's ultimate
+    if NPC.HasModifier(npc, "modifier_winter_wyvern_winters_curse") then return false end
+    if NPC.HasModifier(npc, "modifier_winter_wyvern_winters_curse_aura") then return false end
+
+    return true
+end
+
+-- Get true physical damage
+function Utility.GetTrueDamage(myHero)
+
+    local damage = NPC.GetTrueDamage(myHero)
+
+    if NPC.HasItem(myHero, "item_diffusal_blade", true) then
+        damage = damage + 40 * 0.8
+    end
+
+    return damage
+end
+
+function Utility.GetHeroIndicesOrderedByLevel()
+
+    local levels = {}
+    for i = 1, Heroes.Count() do
+        local npc = Heroes.Get(i)
+        table.insert(levels, {i, NPC.GetCurrentLevel(npc)})
+    end
+
+    table.sort(levels, function (a, b) return a[2] > b[2] end)
+
+    local indices = {}
+    for k,v in ipairs(levels) do
+       indices[k] = v[1]
+    end
+
+    return indices
+end
+
+function Utility.GetHeroIndicesOrderedByDistance()
+
+    local myHero = Heroes.GetLocal()
+    local pos1 = Entity.GetAbsOrigin(myHero)
+
+    local distances = {}
+    for i = 1, Heroes.Count() do
+        local npc = Heroes.Get(i)
+        local pos2 = Entity.GetAbsOrigin(npc)
+        table.insert(distances, {i, (pos1 - pos2):Length()})
+    end
+
+    table.sort(distances, function (a, b) return a[2] < b[2] end)
+
+    local indices = {}
+    for k,v in ipairs(distances) do
+       indices[k] = v[1]
+    end
+
+    return indices
 end
 
 return Utility

@@ -74,6 +74,7 @@ function ItemCooldown.OnDraw()
 end
 
 function ItemCooldown.DrawDisplay(hero)
+	if not Menu.IsEnabled(ItemCooldown.optionEnable) then return end
 
 	local slotNum = 9
 	-- draw para
