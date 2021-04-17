@@ -1,10 +1,3 @@
--- =========================================
--- Author  : Eroica (eroicacmcs@gmail.com)
--- Desc    : Abyssal Blade Helper
--- Date    : 2017.3.14
--- Version : 1.0
--- =========================================
-
 local AbyssalHelper = {}
 
 AbyssalHelper.option = Menu.AddOption({"Utility"}, "Abyssal Blade Helper", "auto use blink dagger, AM's blink, or PA's strike if out of range")

@@ -1,9 +1,4 @@
 -- ===========================================
--- Item Cooldown Display (Version 1.0)
--- Author : Eroica (eroicacmcs@gmail.com)
--- Date : 2017.2.20
--- ===========================================
--- 
 -- Usage:
 -- 1. Place this script to ./scripts/ folder
 -- 2. Navigate in menu : "Awareness" -> "Item Cooldown Display" (On/Off)

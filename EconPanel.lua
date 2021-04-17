@@ -1,9 +1,4 @@
 -- ===========================================
--- Economic Panel (Version 2.0)
--- Author : Eroica (eroicacmcs@gmail.com)
--- Date : 2017.2.22
--- ===========================================
--- 
 -- Usage:
 -- 1. Place this script to ./scripts/ folder
 -- 2. Navigate in menu : "Awareness" -> "Economic Panel" (On/Off)
